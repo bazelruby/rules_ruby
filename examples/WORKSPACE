@@ -1,0 +1,14 @@
+workspace(name = "com_github_yugui_rules_ruby_examples")
+
+local_repository(
+    name = "com_github_yugui_rules_ruby",
+    # path = "/Users/yugui/dev/bazel/rules_ruby",
+    path = "../",
+)
+
+load("@com_github_yugui_rules_ruby//:ruby/ruby_runtime.bzl", "ruby_runtime")
+
+ruby_runtime(
+    name = "org_ruby_lang_system",
+    interpreter_path = "/usr/bin/ruby",
+)
