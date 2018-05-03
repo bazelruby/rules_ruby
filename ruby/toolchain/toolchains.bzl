@@ -21,17 +21,19 @@ def _declare_toolchain_repositories(version):
     # TODO(yugui) support installing the specified version of ruby from source
     fail("TODO(yugui) support non-host interpreters for determinicity")
 
-def _register_tooclhains():
+def _register_toolchains():
   native.register_toolchains(
       "@com_github_yugui_rules_ruby//ruby/toolchain:host",
   )
 
 def ruby_register_toolchains(version="host"):
   _declare_toolchain_repositories(version)
+  _register_toolchains()
 
 def declare_toolchains():
   _ruby_toolchain(
       name = "host",
+      host = "@bazel_tools//platforms:host_platform",
       interpreter = "@org_ruby_lang_ruby_host//:ruby",
       runtime = "@org_ruby_lang_ruby_host//:runtime",
   )

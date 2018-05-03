@@ -10,7 +10,7 @@ _ruby_toolchain = rule(
             mandatory = True,
             allow_files = True,
             executable = True,
-            cfg = "host",
+            cfg = "target",
         ),
         "runtime": attr.label(
             mandatory = True,
@@ -20,8 +20,10 @@ _ruby_toolchain = rule(
     },
 )
 
-def ruby_toolchain(name, interpreter, runtime, **kwargs):
+def ruby_toolchain(name, interpreter, runtime, host, target=None, **kwargs):
   impl_name = name + "-impl"
+  if not target:
+    target = host
 
   _ruby_toolchain(
       name = impl_name,
@@ -33,6 +35,7 @@ def ruby_toolchain(name, interpreter, runtime, **kwargs):
       name = name,
       toolchain_type = "@com_github_yugui_rules_ruby//ruby/toolchain:toolchain",
       toolchain = ":%s" % impl_name,
+      exec_compatible_with = [host],
+      target_compatible_with = [target],
       **kwargs
   )
-
