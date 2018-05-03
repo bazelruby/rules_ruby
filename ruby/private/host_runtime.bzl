@@ -1,5 +1,5 @@
-def _eval_ruby(ctx, script, options=None):
-  arguments = ['env', '-i', ctx.attr.interpreter_path]
+def _eval_ruby(ctx, interpreter, script, options=None):
+  arguments = ['env', '-i', interpreter]
   if options:
     arguments.extend(options)
   arguments.extend(['-e', script])
@@ -9,7 +9,7 @@ def _eval_ruby(ctx, script, options=None):
   result = ctx.execute(arguments, environment=environment)
   if result.return_code:
     message = "Failed to evaluate ruby snippet with {}: {}".format(
-        ctx.attr.interpreter_path, result.stderr)
+        interpreter, result.stderr)
     fail(message)
   return result.stdout
 
@@ -44,14 +44,28 @@ def _is_subpath(path, ancestors):
       return True
   return False
 
-def _system_ruby_runtime_impl(ctx):
-  ruby_path = ctx.attr.interpreter_path
-  if ruby_path.startswith('/'):
-    ruby_path = ruby_path[1:]
-  ctx.symlink(ctx.attr.interpreter_path, ruby_path)
+def _ruby_host_runtime_impl(ctx):
+  # Locates path to the interpreter 
+  if ctx.attr.interpreter_path:
+    interpreter_path = ctx.path(ctx.attr.interpreter_path)
+  else:
+    interpreter_path = ctx.which("ruby")
+  if not interpreter_path:
+    fail(
+        "Command 'ruby' not found. Set $PATH or specify interpreter_path",
+        "interpreter_path",
+    )
+  interpreter_path = str(interpreter_path)
+
+  rel_interpreter_path = str(interpreter_path)
+  if rel_interpreter_path.startswith('/'):
+    rel_interpreter_path = rel_interpreter_path[1:]
+
+  # Places SDK
+  ctx.symlink(interpreter_path, rel_interpreter_path)
   ctx.symlink(ctx.attr._init_loadpath_rb, "init_loadpath.rb")
 
-  paths = _eval_ruby(ctx, 'print $:.join("\\n")')
+  paths = _eval_ruby(ctx, interpreter_path, 'print $:.join("\\n")')
   paths = sorted(paths.split("\n"))
 
   rel_paths = []
@@ -71,28 +85,18 @@ def _system_ruby_runtime_impl(ctx):
   ctx.file("loadpath.lst", "\n".join(rel_paths))
 
   content = BUILDFILE_CONTENT.format(
-      ruby_path = repr(ruby_path),
+      ruby_path = repr(rel_interpreter_path),
   )
   ctx.file("BUILD.bazel", content, executable=False)
 
-_system_ruby_runtime = repository_rule(
-    implementation = _system_ruby_runtime_impl,
+ruby_host_runtime = repository_rule(
+    implementation = _ruby_host_runtime_impl,
     attrs = {
         "interpreter_path": attr.string(),
-        "files": attr.label_list(default=[]),
 
         "_init_loadpath_rb": attr.label(
-            default = ":ruby/tools/init_loadpath.rb",
+            default = "@com_github_yugui_rules_ruby//:ruby/tools/init_loadpath.rb",
             allow_single_file = True,
         ),
     },
 )
-
-def ruby_runtime(name, files=None, interpreter=None, interpreter_path=None):
-  # TODO(yugui) support ruby interpereters in the current repo
-  # TODO(yugui) support installing the specified version of ruby from source
-  _system_ruby_runtime(
-      name = name,
-      files = files,
-      interpreter_path = interpreter_path,
-  )

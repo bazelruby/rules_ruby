@@ -1,0 +1,8 @@
+load(
+    ":system.bzl",
+    "ruby_runtime",
+)
+
+toolchain_type(
+    name = "ruby",
+)
