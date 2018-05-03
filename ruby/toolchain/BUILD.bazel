@@ -3,6 +3,7 @@ load(
     "ruby_runtime",
 )
 
-toolchain_type(
-    name = "ruby",
+alias(
+    name = "ruby_sdk",
+    actual = "@org_ruby_lang_ruby_host",
 )

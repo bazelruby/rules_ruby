@@ -1,15 +1,16 @@
+package(default_visibility = ["//lib:__pkg__"])
+
 load(
     "@com_github_yugui_rules_ruby//ruby:def.bzl",
     "ruby_library",
-    "ruby_binary",
+)
+
+ruby_library(
+    name = "bar",
+    srcs = ["bar.rb"],
 )
 
 ruby_library(
     name = "version",
-    srcs = ["version.rb"],
-)
-
-ruby_binary(
-    name = "show_version",
     srcs = ["version.rb"],
 )

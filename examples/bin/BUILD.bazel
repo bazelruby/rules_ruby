@@ -1,0 +1,12 @@
+load(
+    "@com_github_yugui_rules_ruby//ruby:def.bzl",
+    "ruby_binary",
+)
+
+ruby_binary(
+    name = "show_version",
+    srcs = ["show_version.rb"],
+    deps = [
+        "//lib:foo",
+    ],
+)
