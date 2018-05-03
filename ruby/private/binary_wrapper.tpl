@@ -1,3 +1,3 @@
 #!/bin/sh
 
-{interpreter} {init_flags} -e 'p $:'
+{interpreter} --disable-gems {init_flags} -I./lib {main}

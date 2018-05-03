@@ -1,6 +1,15 @@
 toolchain_root = File.dirname(__FILE__)
-path = File.join(toolchain_root, 'loadpath.lst')
+list_file = File.join(toolchain_root, 'loadpath.lst')
 
-$LOAD_PATH = File.foreach(path).map do |path|
-  File.absolute_path(path, toolchain_root)
+system_paths = {}
+File.foreach(list_file) do |path|
+  system_paths['/' + path.chomp] = true
+end
+
+$LOAD_PATH.map! do |path|
+  if system_paths[path]
+    File.absolute_path(path[1..-1], toolchain_root)
+  else
+    path
+  end
 end

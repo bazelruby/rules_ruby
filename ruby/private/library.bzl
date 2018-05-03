@@ -4,12 +4,15 @@ RubyLibrary = provider(
 
 def _transitive_deps(deps):
   transitive_srcs = depset()
+  data_files = depset()
   for d in deps:
     if RubyLibrary in d:
       transitive_srcs += d[RubyLibrary].transitive_ruby_srcs
+    data_files += d[DefaultInfo].data_runfiles.files
 
   return struct(
-      transitive_srcs = transitive_srcs
+      transitive_srcs = transitive_srcs,
+      data_files = data_files,
    )
 
 def _ruby_library_impl(ctx):
@@ -21,6 +24,7 @@ def _ruby_library_impl(ctx):
   runfiles = ctx.runfiles(
       files = srcs.to_list(),
       collect_default = True,
+      collect_data = True,
   )
   return [
       DefaultInfo(
@@ -54,9 +58,18 @@ ruby_library = rule(
 def _ruby_binary_impl(ctx):
   sdk = ctx.attr.toolchain[platform_common.ToolchainInfo]
   interpreter = sdk.interpreter[DefaultInfo].files_to_run.executable
-  init_files = sdk.init_files
-
+  init_files = [f for t in sdk.init_files for f in t.files]
   init_flags = " ".join(["-r%s" % f.short_path for f in init_files])
+
+  main = ctx.file.main
+  if not main:
+    expected_name = "%s.rb" % ctx.attr.name
+    for f in ctx.attr.srcs:
+      if f.label.name == expected_name:
+        main = f.files.to_list()[0]
+        break
+  if not main:
+    fail("main must be present unless the name of the rule matches to one of the srcs", "main")
 
   executable = ctx.actions.declare_file(ctx.attr.name)
   ctx.actions.expand_template(
@@ -65,20 +78,26 @@ def _ruby_binary_impl(ctx):
       substitutions = {
           "{interpreter}": interpreter.short_path,
           "{init_flags}": init_flags,
+          "{main}": main.short_path,
       },
       is_executable = True,
   )
 
-  deps = _transitive_deps(ctx.attr.deps + [sdk.interpreter])
+  deps = _transitive_deps(ctx.attr.deps + [sdk.interpreter] + sdk.init_files)
   srcs = deps.transitive_srcs + ctx.files.srcs
-  files = srcs + init_files + [interpreter]
+  files = srcs + deps.data_files + init_files + [interpreter, executable]
   runfiles = ctx.runfiles(
       files = files.to_list(),
       collect_default = True,
+      collect_data = True,
+  )
+  data_runfiles = ctx.runfiles(
+      files = deps.data_files.to_list(),
   )
   return [DefaultInfo(
       executable = executable,
-      runfiles = runfiles,
+      default_runfiles = runfiles,
+      data_runfiles = data_runfiles,
   )]
 
 ruby_binary = rule(

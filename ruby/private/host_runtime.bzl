@@ -33,7 +33,7 @@ sh_binary(
 )
 
 # exports_files(["init_loadpath.rb"])
-ruby_library(
+filegroup(
   name = "init_loadpath",
   srcs = ["init_loadpath.rb"],
   data = ["loadpath.lst"],
