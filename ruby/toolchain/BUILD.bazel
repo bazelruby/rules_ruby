@@ -1,9 +1,6 @@
-load(
-    ":system.bzl",
-    "ruby_runtime",
-)
+package(default_visibility = ["//visibility:public"])
 
 alias(
     name = "ruby_sdk",
-    actual = "@org_ruby_lang_ruby_host",
+    actual = "@org_ruby_lang_ruby_host//:ruby",
 )

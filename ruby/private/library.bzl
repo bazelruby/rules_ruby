@@ -73,6 +73,9 @@ ruby_binary = rule(
         "main": attr.label(
             allow_single_file = True,
         ),
+        "toolchain": attr.label(
+            default = "@com_github_yugui_rules_ruby//ruby/toolchain:ruby_sdk",
+        )
     },
     executable = True,
 )
