@@ -5,7 +5,8 @@ RubyLibrary = provider(
 def _transitive_deps(deps):
   transitive_srcs = depset()
   for d in deps:
-    transitive_srcs += d[RubyLibrary].transitive_ruby_srcs
+    if RubyLibrary in d:
+      transitive_srcs += d[RubyLibrary].transitive_ruby_srcs
 
   return struct(
       transitive_srcs = transitive_srcs
@@ -38,6 +39,10 @@ _common_attrs = {
     "deps": attr.label_list(
         providers = [RubyLibrary]
     ),
+    "data": attr.label_list(
+        allow_files = True,
+        cfg = "data",
+    ),
 }
 
 ruby_library = rule(
@@ -47,19 +52,28 @@ ruby_library = rule(
 
 
 def _ruby_binary_impl(ctx):
-  executable = ctx.actions.declare_file(ctx.attr.name)
-  sh = """
-#!/bin/sh -e
-echo "PWD: $PWD",
-echo "\$0: $0",
-find .
-  """
-  ctx.actions.write(executable, sh, is_executable=True)
+  sdk = ctx.attr.toolchain[platform_common.ToolchainInfo]
+  interpreter = sdk.interpreter[DefaultInfo].files_to_run.executable
+  init_files = sdk.init_files
 
-  deps = _transitive_deps(ctx.attr.deps)
+  init_flags = " ".join(["-r%s" % f.short_path for f in init_files])
+
+  executable = ctx.actions.declare_file(ctx.attr.name)
+  ctx.actions.expand_template(
+      template = ctx.file._wrapper_template,
+      output = executable,
+      substitutions = {
+          "{interpreter}": interpreter.short_path,
+          "{init_flags}": init_flags,
+      },
+      is_executable = True,
+  )
+
+  deps = _transitive_deps(ctx.attr.deps + [sdk.interpreter])
   srcs = deps.transitive_srcs + ctx.files.srcs
+  files = srcs + init_files + [interpreter]
   runfiles = ctx.runfiles(
-      files = srcs.to_list(),
+      files = files.to_list(),
       collect_default = True,
   )
   return [DefaultInfo(
@@ -75,7 +89,13 @@ ruby_binary = rule(
         ),
         "toolchain": attr.label(
             default = "@com_github_yugui_rules_ruby//ruby/toolchain:ruby_sdk",
-        )
+            providers = [platform_common.ToolchainInfo],
+        ),
+
+        "_wrapper_template": attr.label(
+          allow_single_file = True,
+          default = "binary_wrapper.tpl",
+        ),
     },
     executable = True,
 )

@@ -7,7 +7,7 @@ load(
 
 alias(
     name = "ruby_sdk",
-    actual = "@org_ruby_lang_ruby_host//:ruby",
+    actual = ":ruby-host-sdk",
 )
 
 declare_toolchains()

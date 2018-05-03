@@ -19,6 +19,11 @@ def _rbconfig(ctx, name):
   _eval_ruby(ctx, script=script, options=options)
 
 BUILDFILE_CONTENT = """
+load(
+  "@com_github_yugui_rules_ruby//ruby:def.bzl",
+  "ruby_library",
+)
+
 package(default_visibility = ["//visibility:public"])
 
 sh_binary(
@@ -27,11 +32,24 @@ sh_binary(
     data = [":runtime"],
 )
 
+# exports_files(["init_loadpath.rb"])
+ruby_library(
+  name = "init_loadpath",
+  srcs = ["init_loadpath.rb"],
+  data = ["loadpath.lst"],
+)
+
 filegroup(
     name = "runtime",
     srcs = glob(
         include = ["**/*"],
-        exclude = ["init_loadpath.rb"],
+        exclude = [
+          {ruby_path},
+          "init_loadpath.rb",
+          "loadpath.lst",
+          "BUILD.bazel",
+          "WORKSPACE",
+        ],
     ),
 )
 """
