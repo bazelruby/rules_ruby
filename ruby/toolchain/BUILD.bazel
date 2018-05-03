@@ -1,8 +1,10 @@
 load(
-    ":system.bzl",
-    "ruby_runtime",
+    ":toolchains.bzl",
+    "declare_toolchains",
 )
 
 toolchain_type(
     name = "ruby",
 )
+
+declare_toolchains()
