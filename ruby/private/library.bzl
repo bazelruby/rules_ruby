@@ -14,7 +14,8 @@ def _ruby_library_impl(ctx):
   deps = _transitive_deps(ctx)
   return [
       DefaultInfo(
-        runfiles = deps.default_files,
+        default_runfiles = deps.default_files,
+        data_runfiles = deps.data_files,
       ),
       RubyLibrary(
           transitive_ruby_srcs = deps.srcs,
