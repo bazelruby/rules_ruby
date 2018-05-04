@@ -1,3 +1,5 @@
+load(":bundler.bzl", "install_bundler")
+
 def _eval_ruby(ctx, interpreter, script, options=None):
   arguments = ['env', '-i', interpreter]
   if options:
@@ -83,6 +85,14 @@ def _ruby_host_runtime_impl(ctx):
   ctx.symlink(interpreter_path, rel_interpreter_path)
   ctx.symlink(ctx.attr._init_loadpath_rb, "init_loadpath.rb")
 
+  install_bundler(
+      ctx,
+      interpreter_path,
+      ctx.path(ctx.attr._install_bundler).realpath,
+      'bundler',
+  )
+
+
   paths = _eval_ruby(ctx, interpreter_path, 'print $:.join("\\n")')
   paths = sorted(paths.split("\n"))
 
@@ -114,6 +124,10 @@ ruby_host_runtime = repository_rule(
 
         "_init_loadpath_rb": attr.label(
             default = "@com_github_yugui_rules_ruby//:ruby/tools/init_loadpath.rb",
+            allow_single_file = True,
+        ),
+        "_install_bundler": attr.label(
+            default = "@com_github_yugui_rules_ruby//ruby/private:install-bundler.rb",
             allow_single_file = True,
         ),
     },
