@@ -11,3 +11,8 @@ ruby_binary(
         "//examples/lib:foo",
     ],
 )
+
+sh_test(
+    name = "show_version_test",
+    srcs = [":show_version"],
+)
