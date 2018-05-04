@@ -28,21 +28,26 @@ def _ruby_binary_impl(ctx):
     )
 
   executable = ctx.actions.declare_file(ctx.attr.name)
+  deps = _transitive_deps(
+      ctx,
+      extra_files = init_files + [interpreter, executable],
+      extra_deps = sdk.init_files + [sdk.interpreter],
+  )
+
+  # incpaths is topologically sorted based on library dependency.
+  # reverse the order to follow Bundler.
+  rubyopt = ["-I%s" % inc for inc in reversed(deps.incpaths.to_list())]
+
   ctx.actions.expand_template(
       template = ctx.file._wrapper_template,
       output = executable,
       substitutions = {
           "{interpreter}": interpreter.short_path,
           "{init_flags}": init_flags,
+          "{rubyopt}": " ".join(rubyopt),
           "{main}": main.short_path,
       },
       is_executable = True,
-  )
-
-  deps = _transitive_deps(
-      ctx,
-      extra_files = init_files + [interpreter, executable],
-      extra_deps = sdk.init_files + [sdk.interpreter],
   )
   return [DefaultInfo(
       executable = executable,
@@ -59,6 +64,7 @@ ruby_binary = rule(
         "deps": attr.label_list(
             providers = [RubyLibrary]
         ),
+        "includes": attr.string_list(),
         "data": attr.label_list(
             allow_files = True,
             cfg = "data",

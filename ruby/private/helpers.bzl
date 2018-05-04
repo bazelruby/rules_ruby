@@ -8,6 +8,9 @@ def _transitive_srcs(deps):
       srcs = [
           d[RubyLibrary].transitive_ruby_srcs for d in deps if RubyLibrary in d
       ],
+      incpaths = [
+          d[RubyLibrary].ruby_incpaths for d in deps if RubyLibrary in d
+      ],
       data_files = [d[DefaultInfo].data_runfiles.files for d in deps],
       default_files = [d[DefaultInfo].default_runfiles.files for d in deps],
    )
@@ -37,10 +40,18 @@ def transitive_deps(ctx, extra_files=[], extra_deps=[]):
       transitive_files = depset(transitive = deps.data_files),
       collect_data = True,
   )
+  includes = [
+      "../%s/%s" % (ctx.workspace_name, inc) for inc in ctx.attr.includes
+  ]
   return struct(
       srcs = depset(
           direct = ctx.files.srcs,
           transitive = deps.srcs,
+      ),
+      incpaths = depset(
+          direct = includes,
+          transitive = deps.incpaths,
+          order = 'topological',
       ),
       default_files = default_files,
       data_files = data_files,
