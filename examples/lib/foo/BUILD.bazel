@@ -1,4 +1,4 @@
-package(default_visibility = ["//lib:__pkg__"])
+package(default_visibility = ["//examples/lib:__pkg__"])
 
 load(
     "@com_github_yugui_rules_ruby//ruby:def.bzl",
