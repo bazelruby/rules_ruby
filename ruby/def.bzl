@@ -12,4 +12,5 @@ load(
 load(
     "@com_github_yugui_rules_ruby//ruby/private:binary.bzl",
     "ruby_binary",
+    "ruby_test",
 )

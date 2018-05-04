@@ -1,10 +1,9 @@
 load(
     "@com_github_yugui_rules_ruby//ruby:def.bzl",
-    "ruby_binary",
+    "ruby_test",
 )
 
-# TODO(yugui) Replace it with ruby_test
-ruby_binary(
+ruby_test(
     name = "version_test",
     srcs = ["version_spec.rb"],
     main = "version_spec.rb",
@@ -13,9 +12,4 @@ ruby_binary(
         "//examples/lib:foo",
         "@bundler_test//:libs",
     ],
-)
-
-sh_test(
-    name = "version_test_test",
-    srcs = [":version_test"],
 )

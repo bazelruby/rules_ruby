@@ -56,33 +56,41 @@ def _ruby_binary_impl(ctx):
       data_runfiles = deps.data_files,
   )]
 
+_ATTRS = {
+    "srcs": attr.label_list(
+        allow_files = True,
+    ),
+    "deps": attr.label_list(
+        providers = [RubyLibrary]
+    ),
+    "includes": attr.string_list(),
+    "rubyopt": attr.string_list(),
+    "data": attr.label_list(
+        allow_files = True,
+        cfg = "data",
+    ),
+    "main": attr.label(
+        allow_single_file = True,
+    ),
+    "toolchain": attr.label(
+        default = "@com_github_yugui_rules_ruby//ruby/toolchain:ruby_sdk",
+        providers = [platform_common.ToolchainInfo],
+    ),
+
+    "_wrapper_template": attr.label(
+      allow_single_file = True,
+      default = "binary_wrapper.tpl",
+    ),
+}
+
 ruby_binary = rule(
     implementation = _ruby_binary_impl,
-    attrs = {
-        "srcs": attr.label_list(
-            allow_files = True,
-        ),
-        "deps": attr.label_list(
-            providers = [RubyLibrary]
-        ),
-        "includes": attr.string_list(),
-        "rubyopt": attr.string_list(),
-        "data": attr.label_list(
-            allow_files = True,
-            cfg = "data",
-        ),
-        "main": attr.label(
-            allow_single_file = True,
-        ),
-        "toolchain": attr.label(
-            default = "@com_github_yugui_rules_ruby//ruby/toolchain:ruby_sdk",
-            providers = [platform_common.ToolchainInfo],
-        ),
-
-        "_wrapper_template": attr.label(
-          allow_single_file = True,
-          default = "binary_wrapper.tpl",
-        ),
-    },
+    attrs = _ATTRS,
     executable = True,
+)
+
+ruby_test = rule(
+    implementation = _ruby_binary_impl,
+    attrs = _ATTRS,
+    test = True,
 )
