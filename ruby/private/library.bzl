@@ -11,19 +11,13 @@ def _ruby_library_impl(ctx):
   if not ctx.attr.srcs and not ctx.attr.deps:
     fail("At least srcs or deps must be present")
 
-  deps = _transitive_deps(ctx.attr.deps)
-  srcs = deps.transitive_srcs + ctx.files.srcs
-  runfiles = ctx.runfiles(
-      files = srcs.to_list(),
-      collect_default = True,
-      collect_data = True,
-  )
+  deps = _transitive_deps(ctx)
   return [
       DefaultInfo(
-        runfiles = runfiles,
+        runfiles = deps.default_files,
       ),
       RubyLibrary(
-          transitive_ruby_srcs = deps.transitive_srcs,
+          transitive_ruby_srcs = deps.srcs,
       ),
   ]
 

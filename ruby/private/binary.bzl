@@ -39,21 +39,15 @@ def _ruby_binary_impl(ctx):
       is_executable = True,
   )
 
-  deps = _transitive_deps(ctx.attr.deps + [sdk.interpreter] + sdk.init_files)
-  srcs = deps.transitive_srcs + ctx.files.srcs
-  files = srcs + deps.data_files + init_files + [interpreter, executable]
-  runfiles = ctx.runfiles(
-      files = files.to_list(),
-      collect_default = True,
-      collect_data = True,
-  )
-  data_runfiles = ctx.runfiles(
-      files = deps.data_files.to_list(),
+  deps = _transitive_deps(
+      ctx,
+      extra_files = init_files + [interpreter, executable],
+      extra_deps = sdk.init_files + [sdk.interpreter],
   )
   return [DefaultInfo(
       executable = executable,
-      default_runfiles = runfiles,
-      data_runfiles = data_runfiles,
+      default_runfiles = deps.default_files,
+      data_runfiles = deps.data_files,
   )]
 
 ruby_binary = rule(
