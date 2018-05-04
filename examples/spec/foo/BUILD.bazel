@@ -1,0 +1,21 @@
+load(
+    "@com_github_yugui_rules_ruby//ruby:def.bzl",
+    "ruby_binary",
+)
+
+# TODO(yugui) Replace it with ruby_test
+ruby_binary(
+    name = "version_test",
+    srcs = ["version_spec.rb"],
+    main = "version_spec.rb",
+    rubyopt = ["-rrspec/autorun"],
+    deps = [
+        "//examples/lib:foo",
+        "@bundler_test//:libs",
+    ],
+)
+
+sh_test(
+    name = "version_test_test",
+    srcs = [":version_test"],
+)
