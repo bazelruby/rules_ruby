@@ -14,6 +14,12 @@ _ruby_toolchain = rule(
             executable = True,
             cfg = "target",
         ),
+        "bundler": attr.label(
+            mandatory = True,
+            allow_files = True,
+            executable = True,
+            cfg = "target",
+        ),
         "init_files": attr.label_list(
             allow_files = True,
             cfg = "target",
@@ -22,11 +28,14 @@ _ruby_toolchain = rule(
             mandatory = True,
             allow_files = True,
             cfg = "target",
-        )
+        ),
+        "rubyopt": attr.string_list(
+            default = [],
+        ),
     },
 )
 
-def ruby_toolchain(name, interpreter, runtime, host, init_files=[], target=None, **kwargs):
+def ruby_toolchain(name, interpreter, bundler, runtime, host, init_files=[], rubyopt=[], target=None, **kwargs):
   impl_name = name + "-sdk"
   if not target:
     target = host
@@ -34,7 +43,9 @@ def ruby_toolchain(name, interpreter, runtime, host, init_files=[], target=None,
   _ruby_toolchain(
       name = impl_name,
       interpreter = interpreter,
+      bundler = bundler,
       init_files = init_files,
+      rubyopt = rubyopt,
       runtime = runtime,
   )
 

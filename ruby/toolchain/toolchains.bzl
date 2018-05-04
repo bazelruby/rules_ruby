@@ -36,9 +36,13 @@ def declare_toolchains():
       # TODO(yugui) Detect the right constraints for the host
       host = None,
       interpreter = "@org_ruby_lang_ruby_host//:ruby",
+      bundler = "@org_ruby_lang_ruby_host//:bundler",
       init_files = [
         #"@org_ruby_lang_ruby_host//:init_loadpath.rb",
         "@org_ruby_lang_ruby_host//:init_loadpath",
+      ],
+      rubyopt = [
+        "-I../org_ruby_lang_ruby_host/bundler/lib",
       ],
       runtime = "@org_ruby_lang_ruby_host//:runtime",
   )

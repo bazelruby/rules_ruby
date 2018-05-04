@@ -11,6 +11,7 @@ def _transitive_srcs(deps):
       incpaths = [
           d[RubyLibrary].ruby_incpaths for d in deps if RubyLibrary in d
       ],
+      rubyopt = [d[RubyLibrary].rubyopt for d in deps if RubyLibrary in d],
       data_files = [d[DefaultInfo].data_runfiles.files for d in deps],
       default_files = [d[DefaultInfo].default_runfiles.files for d in deps],
    )
@@ -51,6 +52,11 @@ def transitive_deps(ctx, extra_files=[], extra_deps=[]):
       incpaths = depset(
           direct = includes,
           transitive = deps.incpaths,
+          order = 'topological',
+      ),
+      rubyopt = depset(
+          direct = ctx.attr.rubyopt,
+          transitive = deps.rubyopt,
           order = 'topological',
       ),
       default_files = default_files,

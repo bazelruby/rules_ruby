@@ -30,8 +30,8 @@ package(default_visibility = ["//visibility:public"])
 
 sh_binary(
     name = "ruby",
-    srcs = [{ruby_path}],
-    data = [":runtime"],
+    srcs = ["ruby.sh"],
+    data = [{ruby_path}, ":runtime"],
 )
 
 # exports_files(["init_loadpath.rb"])
@@ -42,11 +42,18 @@ filegroup(
 )
 
 filegroup(
+  name = "bundler",
+  srcs = ["bundler/exe/bundler"],
+  data = glob(["bundler/**/*.rb"]),
+)
+
+filegroup(
     name = "runtime",
     srcs = glob(
         include = ["**/*"],
         exclude = [
           {ruby_path},
+          "ruby",
           "init_loadpath.rb",
           "loadpath.lst",
           "BUILD.bazel",
@@ -65,7 +72,7 @@ def _is_subpath(path, ancestors):
   return False
 
 def _ruby_host_runtime_impl(ctx):
-  # Locates path to the interpreter 
+  # Locates path to the interpreter
   if ctx.attr.interpreter_path:
     interpreter_path = ctx.path(ctx.attr.interpreter_path)
   else:
@@ -85,13 +92,19 @@ def _ruby_host_runtime_impl(ctx):
   ctx.symlink(interpreter_path, rel_interpreter_path)
   ctx.symlink(ctx.attr._init_loadpath_rb, "init_loadpath.rb")
 
+  interpreter_wrapper = """
+  #!/bin/sh
+  DIR=`dirname $0`
+  exec $DIR/%s $*
+  """
+  ctx.file('ruby.sh', interpreter_wrapper % rel_interpreter_path, executable=True)
+
   install_bundler(
       ctx,
       interpreter_path,
       ctx.path(ctx.attr._install_bundler).realpath,
       'bundler',
   )
-
 
   paths = _eval_ruby(ctx, interpreter_path, 'print $:.join("\\n")')
   paths = sorted(paths.split("\n"))

@@ -20,6 +20,7 @@ def _ruby_library_impl(ctx):
       RubyLibrary(
           transitive_ruby_srcs = deps.srcs,
           ruby_incpaths = deps.incpaths,
+          rubyopt = deps.rubyopt,
       ),
   ]
 
@@ -31,6 +32,7 @@ ruby_library = rule(
             allow_files = True,
         ),
         "includes": attr.string_list(),
+        "rubyopt": attr.string_list(),
         "deps": attr.label_list(
             providers = [RubyLibrary]
         ),
