@@ -15,3 +15,15 @@ RSpec.configure do |config|
   config.order = :random
   Kernel.srand config.seed
 end
+
+# Sets HOME here because:
+# If otherwise, it causes a runtime failure with the following steps.
+# 1. RSpec::Core::ConfigurationOptions.global_options_file raises an exception
+#    because $HOME is not set in the sandbox environment of Bazel
+# 2. the rescue clause calls RSpec::Support.#warning
+# 3. #warning calls #warn_with
+# 4. #warn_with tries to lookup the first caller which is not a part of RSpec.
+#    But all the call stack entires are about RSpec at this time because
+#    it is invoked by rpsec/autorun. So #warn_with raises an exception
+# 5. The process fails with an unhandled exception.
+ENV['HOME'] ||= '/'
