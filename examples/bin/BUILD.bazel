@@ -6,7 +6,6 @@ load(
 ruby_binary(
     name = "show_version",
     srcs = ["show_version.rb"],
-    includes = ["examples/lib"],
     deps = [
         "//examples/lib:foo",
     ],

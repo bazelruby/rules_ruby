@@ -34,9 +34,10 @@ def _ruby_binary_impl(ctx):
       extra_deps = sdk.init_files + [sdk.interpreter],
   )
 
+  rubyopt = reversed(deps.rubyopt.to_list())
   # incpaths is topologically sorted based on library dependency.
   # reverse the order to follow Bundler.
-  rubyopt = ["-I%s" % inc for inc in reversed(deps.incpaths.to_list())]
+  rubyopt += ["-I%s" % inc for inc in reversed(deps.incpaths.to_list())]
 
   ctx.actions.expand_template(
       template = ctx.file._wrapper_template,
@@ -65,6 +66,7 @@ ruby_binary = rule(
             providers = [RubyLibrary]
         ),
         "includes": attr.string_list(),
+        "rubyopt": attr.string_list(),
         "data": attr.label_list(
             allow_files = True,
             cfg = "data",
