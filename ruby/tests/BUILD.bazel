@@ -1,0 +1,19 @@
+load(
+    "//ruby:def.bzl",
+    "ruby_binary",
+)
+
+ruby_binary(
+    name = "args_check",
+    srcs = ["args_check.rb"],
+)
+
+sh_test(
+    name = "args_test",
+    srcs = ["args_check"],
+    args = [
+        "foo",
+        "bar",
+        "baz",
+    ],
+)
