@@ -35,9 +35,7 @@ def _ruby_binary_impl(ctx):
   )
 
   rubyopt = reversed(deps.rubyopt.to_list())
-  # incpaths is topologically sorted based on library dependency.
-  # reverse the order to follow Bundler.
-  rubyopt += ["-I%s" % inc for inc in reversed(deps.incpaths.to_list())]
+  rubyopt += ["-I%s" % inc for inc in deps.incpaths.to_list()]
 
   ctx.actions.expand_template(
       template = ctx.file._wrapper_template,
