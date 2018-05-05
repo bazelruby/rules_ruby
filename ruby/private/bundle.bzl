@@ -1,24 +1,3 @@
-_BUILD_FILE = """
-load(
-  "@com_github_yugui_rules_ruby//ruby:def.bzl",
-  "ruby_library",
-)
-
-package(default_visibility = ["//visibility:public"])
-
-filegroup(
-  name = "binstubs",
-  srcs = glob(["bin/**/*"]),
-  data = [":libs"],
-)
-
-ruby_library(
-  name = "libs",
-  srcs = glob(["lib/**/*"]),
-  rubyopt = ["-r../{}/lib/bundler/setup.rb"],
-)
-"""
-
 def _get_interpreter_label(repository_ctx, ruby_sdk):
   # TODO(yugui) Support windows as rules_nodejs does
   return Label("%s//:ruby.sh" % ruby_sdk)
@@ -54,7 +33,20 @@ def bundle_install_impl(ctx):
   result = ctx.execute(args, quiet=False)
   if result.return_code:
     fail("Failed to install gems: %s%s" % (result.stdout, result.stderr))
-  ctx.file('BUILD.bazel', _BUILD_FILE.format(ctx.name))
+
+  exclude = []
+  for gem, globs in ctx.attr.excludes.items():
+    expanded = ["lib/ruby/*/gems/%s-*/%s" % (gem, glob) for glob in globs]
+    exclude.extend(expanded)
+
+  ctx.template(
+      'BUILD.bazel',
+      ctx.attr._buildfile_template,
+      substitutions = {
+          "{repo_name}": ctx.name,
+          "{exclude}": repr(exclude),
+      },
+  )
 
 
 bundle_install = repository_rule(
@@ -70,6 +62,14 @@ bundle_install = repository_rule(
         "gemfile_lock": attr.label(
             allow_single_file = True,
             cfg = "data",
+        ),
+        "excludes": attr.string_list_dict(
+            doc = "List of glob patterns per gem to be excluded from the library",
+        ),
+
+        "_buildfile_template": attr.label(
+            default = "@com_github_yugui_rules_ruby//ruby/private:bundle_buildfile.tpl",
+            allow_single_file = True,
         ),
     },
 )
