@@ -20,49 +20,6 @@ def _rbconfig(ctx, name):
   script = 'print RbConfig::CONFIG[%s]' % repr(name)
   _eval_ruby(ctx, script=script, options=options)
 
-BUILDFILE_CONTENT = """
-load(
-  "@com_github_yugui_rules_ruby//ruby:def.bzl",
-  "ruby_library",
-)
-
-package(default_visibility = ["//visibility:public"])
-
-sh_binary(
-    name = "ruby",
-    srcs = ["ruby.sh"],
-    data = [{ruby_path}, ":runtime"],
-)
-
-# exports_files(["init_loadpath.rb"])
-filegroup(
-  name = "init_loadpath",
-  srcs = ["init_loadpath.rb"],
-  data = ["loadpath.lst"],
-)
-
-filegroup(
-  name = "bundler",
-  srcs = ["bundler/exe/bundler"],
-  data = glob(["bundler/**/*.rb"]),
-)
-
-filegroup(
-    name = "runtime",
-    srcs = glob(
-        include = ["**/*"],
-        exclude = [
-          {ruby_path},
-          "ruby",
-          "init_loadpath.rb",
-          "loadpath.lst",
-          "BUILD.bazel",
-          "WORKSPACE",
-        ],
-    ),
-)
-"""
-
 def _is_subpath(path, ancestors):
   for ancestor in ancestors:
     if not ancestor.endswith('/'):
@@ -120,10 +77,14 @@ def _ruby_host_runtime_impl(ctx):
 
   ctx.file("loadpath.lst", "\n".join(rel_paths))
 
-  content = BUILDFILE_CONTENT.format(
-      ruby_path = repr(rel_interpreter_path),
+  ctx.template(
+      'BUILD.bazel',
+      ctx.attr._buildfile_template,
+      substitutions = {
+          "{ruby_path}": repr(rel_interpreter_path),
+          "{ruby_basename}": repr(interpreter_name),
+      },
   )
-  ctx.file("BUILD.bazel", content, executable=False)
 
 ruby_host_runtime = repository_rule(
     implementation = _ruby_host_runtime_impl,
@@ -136,6 +97,10 @@ ruby_host_runtime = repository_rule(
         ),
         "_install_bundler": attr.label(
             default = "@com_github_yugui_rules_ruby//ruby/private:install-bundler.rb",
+            allow_single_file = True,
+        ),
+        "_buildfile_template": attr.label(
+            default = "@com_github_yugui_rules_ruby//ruby/private:BUILD.host_runtime.tpl",
             allow_single_file = True,
         ),
     },

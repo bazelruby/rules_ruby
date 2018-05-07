@@ -1,6 +1,6 @@
 def _get_interpreter_label(repository_ctx, ruby_sdk):
   # TODO(yugui) Support windows as rules_nodejs does
-  return Label("%s//:ruby.sh" % ruby_sdk)
+  return Label("%s//:ruby" % ruby_sdk)
 
 def _get_bundler_label(repository_ctx, ruby_sdk):
   # TODO(yugui) Support windows as rules_nodejs does
