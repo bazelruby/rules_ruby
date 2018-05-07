@@ -82,6 +82,7 @@ def _ruby_host_runtime_impl(ctx):
         "Command 'ruby' not found. Set $PATH or specify interpreter_path",
         "interpreter_path",
     )
+  interpreter_name = interpreter_path.basename
   interpreter_path = str(interpreter_path)
 
   rel_interpreter_path = str(interpreter_path)
@@ -89,15 +90,9 @@ def _ruby_host_runtime_impl(ctx):
     rel_interpreter_path = rel_interpreter_path[1:]
 
   # Places SDK
-  ctx.symlink(interpreter_path, rel_interpreter_path)
   ctx.symlink(ctx.attr._init_loadpath_rb, "init_loadpath.rb")
-
-  interpreter_wrapper = """
-  #!/bin/sh
-  DIR=`dirname $0`
-  exec $DIR/%s $*
-  """
-  ctx.file('ruby.sh', interpreter_wrapper % rel_interpreter_path, executable=True)
+  ctx.symlink(interpreter_path, rel_interpreter_path)
+  ctx.symlink(rel_interpreter_path, interpreter_name)
 
   install_bundler(
       ctx,
