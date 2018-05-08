@@ -1,32 +1,44 @@
 load(":bundler.bzl", "install_bundler")
-
-def _eval_ruby(ctx, interpreter, script, options=None):
-  arguments = ['env', '-i', interpreter]
-  if options:
-    arguments.extend(options)
-  arguments.extend(['-e', script])
-
-  environment = {"RUBYOPT": "--disable-gems"}
-
-  result = ctx.execute(arguments, environment=environment)
-  if result.return_code:
-    message = "Failed to evaluate ruby snippet with {}: {}".format(
-        interpreter, result.stderr)
-    fail(message)
-  return result.stdout
-
-def _rbconfig(ctx, name):
-  options = ['-rrbconfig']
-  script = 'print RbConfig::CONFIG[%s]' % repr(name)
-  _eval_ruby(ctx, script=script, options=options)
+load(":repository_context.bzl", "ruby_repository_context")
 
 def _is_subpath(path, ancestors):
+  """Determines if path is a subdirectory of one of the ancestors"""
   for ancestor in ancestors:
     if not ancestor.endswith('/'):
       ancestor += '/'
     if path.startswith(ancestor):
       return True
   return False
+
+def _relativate(path):
+    # Assuming that absolute paths start with "/".
+    # TODO(yugui) support windows
+    if path.startswith('/'):
+      return path[1:]
+    else:
+      return path
+
+def _list_libdirs(ruby):
+  """List the LOAD_PATH of the ruby"""
+  paths = ruby.eval(ruby, 'print $:.join("\\n")')
+  paths = sorted(paths.split("\n"))
+  rel_paths = [_relativate(path) for path in paths]
+  return (paths, rel_paths)
+
+
+def _install_host_ruby(ctx, ruby):
+  # Places SDK
+  ctx.symlink(ctx.attr._init_loadpath_rb, "init_loadpath.rb")
+  ctx.symlink(ruby.interpreter_realpath, ruby.rel_interpreter_path)
+  ctx.symlink(ruby.rel_interpreter_path, ruby.interpreter_name)
+
+  paths, rel_paths = _list_libdirs(ruby)
+  for i, (path, rel_path) in enumerate(zip(paths, rel_paths)):
+    if not _is_subpath(rel_path, rel_paths[:i]):
+      ctx.symlink(path, rel_path)
+
+  ctx.file("loadpath.lst", "\n".join(rel_paths))
+
 
 def _ruby_host_runtime_impl(ctx):
   # Locates path to the interpreter
@@ -39,18 +51,10 @@ def _ruby_host_runtime_impl(ctx):
         "Command 'ruby' not found. Set $PATH or specify interpreter_path",
         "interpreter_path",
     )
-  interpreter_name = interpreter_path.basename
-  interpreter_path = str(interpreter_path)
 
-  rel_interpreter_path = str(interpreter_path)
-  if rel_interpreter_path.startswith('/'):
-    rel_interpreter_path = rel_interpreter_path[1:]
+  ruby = ruby_repository_context(ctx, interpreter_path)
 
-  # Places SDK
-  ctx.symlink(ctx.attr._init_loadpath_rb, "init_loadpath.rb")
-  ctx.symlink(interpreter_path, rel_interpreter_path)
-  ctx.symlink(rel_interpreter_path, interpreter_name)
-
+  _install_host_ruby(ctx, ruby)
   install_bundler(
       ctx,
       interpreter_path,
@@ -58,31 +62,12 @@ def _ruby_host_runtime_impl(ctx):
       'bundler',
   )
 
-  paths = _eval_ruby(ctx, interpreter_path, 'print $:.join("\\n")')
-  paths = sorted(paths.split("\n"))
-
-  rel_paths = []
-  for i, path in enumerate(paths):
-    # Assuming that absolute paths start with "/".
-    # TODO(yugui) support windows
-    if path.startswith('/'):
-      rel_path = path[1:]
-    else:
-      rel_path = path
-
-    if not _is_subpath(rel_path, rel_paths):
-      ctx.symlink(path, rel_path)
-
-    rel_paths.append(rel_path)
-
-  ctx.file("loadpath.lst", "\n".join(rel_paths))
-
   ctx.template(
       'BUILD.bazel',
       ctx.attr._buildfile_template,
       substitutions = {
-          "{ruby_path}": repr(rel_interpreter_path),
-          "{ruby_basename}": repr(interpreter_name),
+          "{ruby_path}": repr(ruby.rel_interpreter_path),
+          "{ruby_basename}": repr(ruby.interpreter_name),
       },
   )
 
