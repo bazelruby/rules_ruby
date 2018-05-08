@@ -35,7 +35,7 @@ def declare_toolchains():
       name = "ruby-host",
       # TODO(yugui) Detect the right constraints for the host
       host = None,
-      interpreter = "@org_ruby_lang_ruby_host//:ruby",
+      interpreter = "@org_ruby_lang_ruby_host//:ruby_bin",
       bundler = "@org_ruby_lang_ruby_host//:bundler",
       init_files = [
         #"@org_ruby_lang_ruby_host//:init_loadpath.rb",

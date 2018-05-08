@@ -25,12 +25,21 @@ def _list_libdirs(ruby):
   rel_paths = [_relativate(path) for path in paths]
   return (paths, rel_paths)
 
+INTERPRETER_WRAPPER = """
+#!/bin/sh
+DIR=`dirname $0`
+exec $DIR/%s $*
+"""
 
 def _install_host_ruby(ctx, ruby):
   # Places SDK
   ctx.symlink(ctx.attr._init_loadpath_rb, "init_loadpath.rb")
   ctx.symlink(ruby.interpreter_realpath, ruby.rel_interpreter_path)
-  ctx.symlink(ruby.rel_interpreter_path, ruby.interpreter_name)
+  ctx.file(
+      ruby.interpreter_name,
+      INTERPRETER_WRAPPER % ruby.rel_interpreter_path,
+      executable = True,
+  )
 
   paths, rel_paths = _list_libdirs(ruby)
   for i, (path, rel_path) in enumerate(zip(paths, rel_paths)):
