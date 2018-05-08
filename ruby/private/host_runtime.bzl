@@ -11,6 +11,8 @@ def _is_subpath(path, ancestors):
   return False
 
 def _relativate(path):
+    if not path:
+      return path
     # Assuming that absolute paths start with "/".
     # TODO(yugui) support windows
     if path.startswith('/'):
@@ -24,6 +26,14 @@ def _list_libdirs(ruby):
   paths = sorted(paths.split("\n"))
   rel_paths = [_relativate(path) for path in paths]
   return (paths, rel_paths)
+
+def _install_dirs(ctx, ruby, *names):
+  paths = sorted([ruby.rbconfig(ruby, name) for name in names])
+  rel_paths = [_relativate(path) for path in paths]
+  for i, (path, rel_path) in enumerate(zip(paths, rel_paths)):
+    if not _is_subpath(path, paths[:i]):
+      ctx.symlink(path, rel_path)
+  return rel_paths
 
 INTERPRETER_WRAPPER = """
 #!/bin/sh
@@ -41,12 +51,32 @@ def _install_host_ruby(ctx, ruby):
       executable = True,
   )
 
+  # Install lib
   paths, rel_paths = _list_libdirs(ruby)
   for i, (path, rel_path) in enumerate(zip(paths, rel_paths)):
     if not _is_subpath(rel_path, rel_paths[:i]):
       ctx.symlink(path, rel_path)
 
+  # Install libruby
+  static_library = ruby.expand_rbconfig(ruby, '${libdir}/${LIBRUBY_A}')
+  if ctx.path(static_library).exists:
+    ctx.symlink(static_library, _relativate(static_library))
+  else:
+    static_library = None
+
+  shared_library = ruby.expand_rbconfig(ruby, '${libdir}/${LIBRUBY_SO}')
+  if ctx.path(shared_library).exists:
+    ctx.symlink(shared_library, _relativate(shared_library))
+  else:
+    shared_library = None
+
   ctx.file("loadpath.lst", "\n".join(rel_paths))
+  return struct(
+      includedirs = _install_dirs(ctx, ruby, "rubyarchhdrdir", "rubyhdrdir"),
+      libdirs = rel_paths,
+      static_library = _relativate(static_library),
+      shared_library = _relativate(shared_library),
+  )
 
 
 def _ruby_host_runtime_impl(ctx):
@@ -63,7 +93,7 @@ def _ruby_host_runtime_impl(ctx):
 
   ruby = ruby_repository_context(ctx, interpreter_path)
 
-  _install_host_ruby(ctx, ruby)
+  installed = _install_host_ruby(ctx, ruby)
   install_bundler(
       ctx,
       interpreter_path,
@@ -77,7 +107,12 @@ def _ruby_host_runtime_impl(ctx):
       substitutions = {
           "{ruby_path}": repr(ruby.rel_interpreter_path),
           "{ruby_basename}": repr(ruby.interpreter_name),
+          "{includes}": repr(installed.includedirs),
+          "{hdrs}": repr(["%s/**/*.h" % path for path in installed.includedirs]),
+          "{static_library}": repr(installed.static_library),
+          "{shared_library}": repr(installed.shared_library),
       },
+      executable = False,
   )
 
 ruby_host_runtime = repository_rule(

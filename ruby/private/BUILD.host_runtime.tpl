@@ -17,6 +17,19 @@ filegroup(
   data = ["loadpath.lst"],
 )
 
+cc_import(
+    name = "libruby",
+    hdrs = glob({hdrs}),
+    static_library = {static_library},
+    shared_library = {shared_library},
+)
+
+cc_library(
+    name = "headers",
+    includes = {includes},
+    hdrs = glob({hdrs}),
+)
+
 filegroup(
   name = "bundler",
   srcs = ["bundler/exe/bundler"],

@@ -26,7 +26,17 @@ def _rbconfig(ruby, name):
       # repr in Python is compatible enough.
       repr(name),
   )
-  _eval_ruby(ruby, script=script, options=options)
+  return _eval_ruby(ruby, script=script, options=options)
+
+
+def _expand_rbconfig(ruby, expr):
+  options = ['-rrbconfig']
+  script = 'print RbConfig.expand({})'.format(
+      # Here we actually needs String#dump in Ruby but
+      # repr in Python is compatible enough.
+      repr(expr),
+  )
+  return _eval_ruby(ruby, script=script, options=options)
 
 
 def ruby_repository_context(repository_ctx, interpreter_path):
@@ -48,6 +58,7 @@ def ruby_repository_context(repository_ctx, interpreter_path):
       # Helper methods
       eval = _eval_ruby,
       rbconfig = _rbconfig,
+      expand_rbconfig = _expand_rbconfig,
 
       _ctx = repository_ctx,
   )
