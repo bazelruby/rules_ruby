@@ -1,16 +1,16 @@
 # Repository rules
 load(
-    "@com_github_yugui_rules_ruby//ruby/toolchain:toolchains.bzl",
+    "@//ruby/toolchain:toolchains.bzl",
     _register_toolchains = "ruby_register_toolchains",
 )
 
 load(
-    "@com_github_yugui_rules_ruby//ruby/private:library.bzl",
+    "@//ruby/private:library.bzl",
     _library = "ruby_library",
 )
 
 load(
-    "@com_github_yugui_rules_ruby//ruby/private:binary.bzl",
+    "@//ruby/private:binary.bzl",
     _binary = "ruby_binary",
     _test = "ruby_test",
 )

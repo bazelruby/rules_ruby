@@ -45,6 +45,7 @@ def bundle_install_impl(ctx):
       substitutions = {
           "{repo_name}": ctx.name,
           "{exclude}": repr(exclude),
+          "{workspace_name}": ctx.attr.rules_ruby_workspace,
       },
   )
 
@@ -63,6 +64,11 @@ bundle_install = repository_rule(
         ),
         "excludes": attr.string_list_dict(
             doc = "List of glob patterns per gem to be excluded from the library",
+        ),
+
+        "rules_ruby_workspace": attr.string(
+            default = "@com_github_yugui_rules_ruby",
+            doc = "The workspace name of rules_ruby. Just a workaround of bazelbuild/bazel#3493",
         ),
 
         "_buildfile_template": attr.label(
