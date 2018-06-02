@@ -3,6 +3,22 @@ load(
     "ruby_binary",
 )
 
+# Tests if :ruby_bin can run in sh_binary
+sh_test(
+    name = "runtime_run_ruby_test",
+    srcs = ["runtime_run_ruby_test.sh"],
+    args = [
+        "$(location args_check.rb)",
+        "foo",
+        "bar",
+        "baz",
+    ],
+    data = [
+        "args_check.rb",
+        "@org_ruby_lang_ruby_host//:ruby_bin",
+    ],
+)
+
 ruby_binary(
     name = "args_check",
     srcs = ["args_check.rb"],
