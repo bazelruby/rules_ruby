@@ -8,7 +8,7 @@ package(default_visibility = ["//visibility:public"])
 sh_binary(
     name = "ruby_bin",
     srcs = [{ruby_basename}],
-    data = [{ruby_path}, ":runtime"],
+    data = [":runtime"],
 )
 
 filegroup(
@@ -28,8 +28,6 @@ filegroup(
     srcs = glob(
         include = ["**/*"],
         exclude = [
-          {ruby_path},
-          "ruby",
           "init_loadpath.rb",
           "loadpath.lst",
           "BUILD.bazel",

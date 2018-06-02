@@ -19,6 +19,29 @@ sh_test(
     ],
 )
 
+# Tests if :ruby_bin can run in genrule
+genrule(
+    name = "generate_genrule_run_ruby_test",
+    outs = ["genrules_run_ruby_test.sh"],
+    cmd = " && ".join([
+        ("external/org_ruby_lang_ruby_host/ruby " +
+         "$(location args_check.rb) foo bar baz"),
+        "echo '#!/bin/sh -e' > $@",
+        "echo true >> $@",
+    ]),
+    output_to_bindir = 1,
+    tools = [
+        "args_check.rb",
+        "@org_ruby_lang_ruby_host//:ruby_bin",
+        "@org_ruby_lang_ruby_host//:runtime",
+    ],
+)
+
+sh_test(
+    name = "genrule_run_ruby_test",
+    srcs = ["genrules_run_ruby_test.sh"],
+)
+
 ruby_binary(
     name = "args_check",
     srcs = ["args_check.rb"],
