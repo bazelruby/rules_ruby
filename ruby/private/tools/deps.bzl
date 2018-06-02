@@ -1,5 +1,5 @@
 load(
-    ":providers.bzl",
+    "//ruby/private:providers.bzl",
     "RubyLibrary",
 )
 

@@ -1,5 +1,5 @@
 load(":bundler.bzl", "install_bundler")
-load(":repository_context.bzl", "ruby_repository_context")
+load("//ruby/private/tools:repository_context.bzl", "ruby_repository_context")
 
 def _is_subpath(path, ancestors):
   """Determines if path is a subdirectory of one of the ancestors"""

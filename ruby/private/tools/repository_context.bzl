@@ -1,3 +1,8 @@
+#
+# Provides access to a Ruby SDK at the loading phase
+# (in a repository rule).
+#
+
 def _eval_ruby(ruby, script, options=None):
   arguments = ['env', '-i', ruby.interpreter_realpath]
   if options:
