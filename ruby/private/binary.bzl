@@ -10,7 +10,7 @@ load(
 def _ruby_binary_impl(ctx):
   sdk = ctx.attr.toolchain[platform_common.ToolchainInfo]
   interpreter = sdk.interpreter[DefaultInfo].files_to_run.executable
-  init_files = [f for t in sdk.init_files for f in t.files]
+  init_files = [f for t in sdk.init_files for f in t.files.to_list()]
   init_flags = " ".join(["-r%s" % f.short_path for f in init_files])
 
   main = ctx.file.main
@@ -65,7 +65,6 @@ _ATTRS = {
     "rubyopt": attr.string_list(),
     "data": attr.label_list(
         allow_files = True,
-        cfg = "data",
     ),
     "main": attr.label(
         allow_single_file = True,

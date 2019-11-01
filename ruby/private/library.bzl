@@ -38,7 +38,6 @@ ruby_library = rule(
         ),
         "data": attr.label_list(
             allow_files = True,
-            cfg = "data",
         ),
     },
 )
