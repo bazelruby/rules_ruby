@@ -1,8 +1,8 @@
 os: linux
-dist: trusty
+dist: bionic
 sudo: false
 language: java
-jdk: oraclejdk8
+jdk: openjdk11
 
 #branches:
 #  only:
@@ -26,7 +26,7 @@ addons:
     - g++
 
 before_install:
-- .travis/install-bazel.sh 0.13.0
+- .travis/install-bazel.sh 1.1.0
 - bazel $BAZEL_OPTS version
 - bazel $BAZEL_OPTS info
 - bazel $BAZEL_OPTS fetch --curses=no -- "//..."
