@@ -3,7 +3,7 @@ load(
     "RubyLibrary",
 )
 load(
-    ":helpers.bzl",
+    "//ruby/private/tools:deps.bzl",
     _transitive_deps = "transitive_deps",
 )
 

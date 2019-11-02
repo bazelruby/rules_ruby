@@ -6,7 +6,7 @@ package(
 )
 
 load(
-    "@com_github_yugui_rules_ruby//ruby:def.bzl",
+    "@//ruby:def.bzl",
     "ruby_library",
 )
 

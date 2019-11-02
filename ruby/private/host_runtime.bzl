@@ -1,75 +1,53 @@
 load(":bundler.bzl", "install_bundler")
-
-def _eval_ruby(ctx, interpreter, script, options=None):
-  arguments = ['env', '-i', interpreter]
-  if options:
-    arguments.extend(options)
-  arguments.extend(['-e', script])
-
-  environment = {"RUBYOPT": "--disable-gems"}
-
-  result = ctx.execute(arguments, environment=environment)
-  if result.return_code:
-    message = "Failed to evaluate ruby snippet with {}: {}".format(
-        interpreter, result.stderr)
-    fail(message)
-  return result.stdout
-
-def _rbconfig(ctx, name):
-  options = ['-rrbconfig']
-  script = 'print RbConfig::CONFIG[%s]' % repr(name)
-  _eval_ruby(ctx, script=script, options=options)
-
-BUILDFILE_CONTENT = """
-load(
-  "@com_github_yugui_rules_ruby//ruby:def.bzl",
-  "ruby_library",
-)
-
-package(default_visibility = ["//visibility:public"])
-
-sh_binary(
-    name = "ruby",
-    srcs = ["ruby.sh"],
-    data = [{ruby_path}, ":runtime"],
-)
-
-# exports_files(["init_loadpath.rb"])
-filegroup(
-  name = "init_loadpath",
-  srcs = ["init_loadpath.rb"],
-  data = ["loadpath.lst"],
-)
-
-filegroup(
-  name = "bundler",
-  srcs = ["bundler/exe/bundler"],
-  data = glob(["bundler/**/*.rb"]),
-)
-
-filegroup(
-    name = "runtime",
-    srcs = glob(
-        include = ["**/*"],
-        exclude = [
-          {ruby_path},
-          "ruby",
-          "init_loadpath.rb",
-          "loadpath.lst",
-          "BUILD.bazel",
-          "WORKSPACE",
-        ],
-    ),
-)
-"""
+load("//ruby/private/tools:repository_context.bzl", "ruby_repository_context")
 
 def _is_subpath(path, ancestors):
+  """Determines if path is a subdirectory of one of the ancestors"""
   for ancestor in ancestors:
     if not ancestor.endswith('/'):
       ancestor += '/'
     if path.startswith(ancestor):
       return True
   return False
+
+def _relativate(path):
+    # Assuming that absolute paths start with "/".
+    # TODO(yugui) support windows
+    if path.startswith('/'):
+      return path[1:]
+    else:
+      return path
+
+def _list_libdirs(ruby):
+  """List the LOAD_PATH of the ruby"""
+  paths = ruby.eval(ruby, 'print $:.join("\\n")')
+  paths = sorted(paths.split("\n"))
+  rel_paths = [_relativate(path) for path in paths]
+  return (paths, rel_paths)
+
+INTERPRETER_WRAPPER = """
+#!/bin/sh
+DIR=`dirname $0`
+exec $DIR/%s $*
+"""
+
+def _install_host_ruby(ctx, ruby):
+  # Places SDK
+  ctx.symlink(ctx.attr._init_loadpath_rb, "init_loadpath.rb")
+  ctx.symlink(ruby.interpreter_realpath, ruby.rel_interpreter_path)
+  ctx.file(
+      ruby.interpreter_name,
+      INTERPRETER_WRAPPER % ruby.rel_interpreter_path,
+      executable = True,
+  )
+
+  paths, rel_paths = _list_libdirs(ruby)
+  for i, (path, rel_path) in enumerate(zip(paths, rel_paths)):
+    if not _is_subpath(rel_path, rel_paths[:i]):
+      ctx.symlink(path, rel_path)
+
+  ctx.file("loadpath.lst", "\n".join(rel_paths))
+
 
 def _ruby_host_runtime_impl(ctx):
   # Locates path to the interpreter
@@ -82,23 +60,10 @@ def _ruby_host_runtime_impl(ctx):
         "Command 'ruby' not found. Set $PATH or specify interpreter_path",
         "interpreter_path",
     )
-  interpreter_path = str(interpreter_path)
 
-  rel_interpreter_path = str(interpreter_path)
-  if rel_interpreter_path.startswith('/'):
-    rel_interpreter_path = rel_interpreter_path[1:]
+  ruby = ruby_repository_context(ctx, interpreter_path)
 
-  # Places SDK
-  ctx.symlink(interpreter_path, rel_interpreter_path)
-  ctx.symlink(ctx.attr._init_loadpath_rb, "init_loadpath.rb")
-
-  interpreter_wrapper = """
-  #!/bin/sh
-  DIR=`dirname $0`
-  exec $DIR/%s $*
-  """
-  ctx.file('ruby.sh', interpreter_wrapper % rel_interpreter_path, executable=True)
-
+  _install_host_ruby(ctx, ruby)
   install_bundler(
       ctx,
       interpreter_path,
@@ -106,29 +71,14 @@ def _ruby_host_runtime_impl(ctx):
       'bundler',
   )
 
-  paths = _eval_ruby(ctx, interpreter_path, 'print $:.join("\\n")')
-  paths = sorted(paths.split("\n"))
-
-  rel_paths = []
-  for i, path in enumerate(paths):
-    # Assuming that absolute paths start with "/".
-    # TODO(yugui) support windows
-    if path.startswith('/'):
-      rel_path = path[1:]
-    else:
-      rel_path = path
-
-    if not _is_subpath(rel_path, rel_paths):
-      ctx.symlink(path, rel_path)
-
-    rel_paths.append(rel_path)
-
-  ctx.file("loadpath.lst", "\n".join(rel_paths))
-
-  content = BUILDFILE_CONTENT.format(
-      ruby_path = repr(rel_interpreter_path),
+  ctx.template(
+      'BUILD.bazel',
+      ctx.attr._buildfile_template,
+      substitutions = {
+          "{ruby_path}": repr(ruby.rel_interpreter_path),
+          "{ruby_basename}": repr(ruby.interpreter_name),
+      },
   )
-  ctx.file("BUILD.bazel", content, executable=False)
 
 ruby_host_runtime = repository_rule(
     implementation = _ruby_host_runtime_impl,
@@ -141,6 +91,10 @@ ruby_host_runtime = repository_rule(
         ),
         "_install_bundler": attr.label(
             default = "@com_github_yugui_rules_ruby//ruby/private:install-bundler.rb",
+            allow_single_file = True,
+        ),
+        "_buildfile_template": attr.label(
+            default = "@com_github_yugui_rules_ruby//ruby/private:BUILD.host_runtime.tpl",
             allow_single_file = True,
         ),
     },
