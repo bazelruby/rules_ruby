@@ -11,7 +11,7 @@ def _ruby_binary_impl(ctx):
   sdk = ctx.attr.toolchain[platform_common.ToolchainInfo]
   interpreter = sdk.interpreter[DefaultInfo].files_to_run.executable
   init_files = [f for t in sdk.init_files for f in t.files.to_list()]
-  init_flags = " ".join(["-r%s" % f.short_path for f in init_files])
+  init_flags = " ".join(["-r${PATH_PREFIX}%s" % f.short_path for f in init_files])
 
   main = ctx.file.main
   if not main:
@@ -35,7 +35,7 @@ def _ruby_binary_impl(ctx):
   )
 
   rubyopt = reversed(deps.rubyopt.to_list())
-  rubyopt += ["-I%s" % inc for inc in deps.incpaths.to_list()]
+  rubyopt += ["-I${PATH_PREFIX}%s" % inc for inc in deps.incpaths.to_list()]
 
   ctx.actions.expand_template(
       template = ctx.file._wrapper_template,
@@ -45,6 +45,7 @@ def _ruby_binary_impl(ctx):
           "{init_flags}": init_flags,
           "{rubyopt}": " ".join(rubyopt),
           "{main}": main.short_path,
+          "{workspace_name}": ctx.label.workspace_name or ctx.workspace_name,
       },
       is_executable = True,
   )

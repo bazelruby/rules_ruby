@@ -14,10 +14,16 @@ Add `ruby_register_toolchains` into your `WORKSPACE` file
 git_repository(
     name = "com_github_yugui_rules_ruby",
     remote = "https://github.com/yugui/rules_ruby.git",
-    commit = "8378a0ba19ab7c6d751c440bc016d9af76da656c",
+    commit = "e791736837e9b880d7984ae949f479c7ce51b5f3",
 )
 
-load("@com_github_yugui_rules_ruby//ruby:def.bzl", "ruby_register_toolchains")
+load(
+    "@com_github_yugui_rules_ruby//ruby:deps.bzl",
+    "ruby_rules_dependencies",
+    "ruby_register_toolchains",
+)
+
+ruby_rules_dependencies()
 
 ruby_register_toolchains()
 ```
@@ -94,7 +100,7 @@ ruby_library(name, deps, srcs, data, compatible_with, deprecation, distribs, fea
         <code>List of strings, optional</code>
         <p>
           List of paths to be added to <code>$LOAD_PATH</code> at runtime.
-          The paths must be relative to the the workspace which this rule belongs to.            
+          The paths must be relative to the the workspace which this rule belongs to.
         </p>
       </td>
     </tr>
