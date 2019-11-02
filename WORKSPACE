@@ -1,8 +1,14 @@
 workspace(name = "com_github_yugui_rules_ruby")
 
-load("@//ruby:def.bzl", "ruby_register_toolchains")
+load("@//ruby:deps.bzl", "ruby_rules_dependencies", "ruby_register_toolchains")
+
+ruby_rules_dependencies()
 
 ruby_register_toolchains()
+
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+
+bazel_skylib_workspace()
 
 load("@//ruby/private:bundle.bzl", "bundle_install")
 

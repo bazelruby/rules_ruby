@@ -1,3 +1,4 @@
+load("@bazel_skylib//lib:paths.bzl", "paths")
 load(
     "//ruby/private:providers.bzl",
     "RubyLibrary",
@@ -42,7 +43,7 @@ def transitive_deps(ctx, extra_files=[], extra_deps=[]):
       collect_data = True,
   )
   includes = [
-      "../%s/%s" % (ctx.workspace_name, inc) for inc in ctx.attr.includes
+      paths.join(ctx.label.workspace_root, inc) for inc in ctx.attr.includes
   ]
   return struct(
       srcs = depset(
