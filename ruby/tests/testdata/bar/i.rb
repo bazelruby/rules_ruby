@@ -1,0 +1,3 @@
+def i
+  :i
+end

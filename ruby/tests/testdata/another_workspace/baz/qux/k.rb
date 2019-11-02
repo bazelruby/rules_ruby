@@ -1,0 +1,3 @@
+def k
+  :k
+end

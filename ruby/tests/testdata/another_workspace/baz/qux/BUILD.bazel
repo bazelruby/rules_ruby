@@ -1,0 +1,15 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@com_github_yugui_rules_ruby//ruby:def.bzl", "ruby_library")
+
+ruby_library(
+    name = "j",
+    srcs = ["j.rb"],
+    includes = ["baz"],
+    deps = [":k"],
+)
+
+ruby_library(
+    name = "k",
+    srcs = ["k.rb"],
+)

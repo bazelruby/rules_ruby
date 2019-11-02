@@ -1,6 +1,7 @@
 load(
     "//ruby:def.bzl",
     "ruby_binary",
+    "ruby_test",
 )
 
 # Tests if :ruby_bin can run in sh_binary
@@ -71,4 +72,14 @@ ruby_binary(
 sh_test(
     name = "include_order_test",
     srcs = ["include_order_check"],
+)
+
+ruby_test(
+    name = "load_path_in_runfiles",
+    srcs = ["load_path_in_runfiles_test.rb"],
+    main = "load_path_in_runfiles_test.rb",
+    deps = [
+        "//ruby/tests/testdata:g",
+        "@com_github_yugui_rules_ruby_ruby_tests_testdata_another_workspace//baz/qux:j",
+    ],
 )

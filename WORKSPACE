@@ -12,3 +12,8 @@ bundle_install(
     gemfile_lock = "//:examples/Gemfile.lock",
     rules_ruby_workspace = "@",
 )
+
+local_repository(
+    name = "com_github_yugui_rules_ruby_ruby_tests_testdata_another_workspace",
+    path = "ruby/tests/testdata/another_workspace",
+)
