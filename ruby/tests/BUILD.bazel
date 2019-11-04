@@ -83,3 +83,60 @@ ruby_test(
         "@com_github_yugui_rules_ruby_ruby_tests_testdata_another_workspace//baz/qux:j",
     ],
 )
+
+cc_binary(
+    name = "example_ext.so",
+    testonly = True,
+    srcs = ["example_ext.c"],
+    linkshared = True,
+    deps = ["@org_ruby_lang_ruby_host//:headers"],
+)
+
+cc_library(
+    name = "example_ext_lib",
+    testonly = True,
+    srcs = ["example_ext.c"],
+    linkstatic = True,
+    tags = ["manual"],
+    deps = ["@org_ruby_lang_ruby_host//:headers"],
+    alwayslink = True,
+)
+
+apple_binary(
+    name = "example_ext",
+    testonly = True,
+    binary_type = "loadable_bundle",
+    linkopts = [
+        "-undefined,dynamic_lookup",
+        "-multiply_defined,suppress",
+    ],
+    platform_type = "macos",
+    tags = ["manual"],
+    deps = [
+        ":example_ext_lib",
+    ],
+)
+
+genrule(
+    name = "gen_exmaple_ext",
+    testonly = True,
+    srcs = [":example_ext"],
+    outs = ["example_ext.bundle"],
+    cmd = "cp $< $@",
+    tags = ["manual"],
+)
+
+config_setting(
+    name = "requires_bundle",
+    constraint_values = ["@platforms//os:osx"],
+)
+
+ruby_test(
+    name = "ext_test",
+    srcs = ["ext_test.rb"],
+    data = select({
+        ":requires_bundle": ["example_ext.bundle"],
+        "//conditions:default": ["example_ext.so"],
+    }),
+    main = "ext_test.rb",
+)
