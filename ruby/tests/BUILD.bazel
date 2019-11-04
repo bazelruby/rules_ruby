@@ -25,7 +25,7 @@ genrule(
     name = "generate_genrule_run_ruby_test",
     outs = ["genrules_run_ruby_test.sh"],
     cmd = " && ".join([
-        ("external/org_ruby_lang_ruby_host/ruby " +
+        ("$(location @org_ruby_lang_ruby_host//:ruby_bin) " +
          "$(location args_check.rb) foo bar baz"),
         "echo '#!/bin/sh -e' > $@",
         "echo true >> $@",

@@ -7,7 +7,7 @@ package(default_visibility = ["//visibility:public"])
 
 sh_binary(
     name = "ruby_bin",
-    srcs = [{ruby_basename}],
+    srcs = ["ruby"],
     data = [":runtime"],
 )
 

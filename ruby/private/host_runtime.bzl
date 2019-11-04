@@ -35,20 +35,20 @@ def _install_dirs(ctx, ruby, *names):
       ctx.symlink(path, rel_path)
   return rel_paths
 
-INTERPRETER_WRAPPER = """
-#!/bin/sh
-DIR=`dirname $0`
-exec $DIR/%s $*
-"""
-
 def _install_host_ruby(ctx, ruby):
   # Places SDK
   ctx.symlink(ctx.attr._init_loadpath_rb, "init_loadpath.rb")
   ctx.symlink(ruby.interpreter_realpath, ruby.rel_interpreter_path)
-  ctx.file(
-      ruby.interpreter_name,
-      INTERPRETER_WRAPPER % ruby.rel_interpreter_path,
-      executable = True,
+
+  # Places the interpreter at a predictable place regardless of the actual binary name
+  # so that bundle_install can depend on it.
+  ctx.template(
+      "ruby",
+      ctx.attr._interpreter_wrapper_template,
+      substitutions = {
+          '{workspace_name}': ctx.name,
+          '{rel_interpreter_path}': ruby.rel_interpreter_path,
+      }
   )
 
   # Install lib
@@ -130,6 +130,10 @@ ruby_host_runtime = repository_rule(
         ),
         "_buildfile_template": attr.label(
             default = "@com_github_yugui_rules_ruby//ruby/private:BUILD.host_runtime.tpl",
+            allow_single_file = True,
+        ),
+        "_interpreter_wrapper_template": attr.label(
+            default = "@com_github_yugui_rules_ruby//ruby/private:interpreter_wrapper.tpl",
             allow_single_file = True,
         ),
     },
