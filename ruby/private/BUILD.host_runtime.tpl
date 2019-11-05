@@ -1,9 +1,25 @@
 load(
-  "@com_github_yugui_rules_ruby//ruby:def.bzl",
-  "ruby_library",
+    "@com_github_yugui_rules_ruby//ruby:def.bzl",
+    "ruby_library",
+    "ruby_toolchain",
 )
 
 package(default_visibility = ["//visibility:public"])
+
+ruby_toolchain(
+    name = "ruby_host",
+    interpreter = "//:ruby_bin",
+    bundler = "//:bundler",
+    init_files = ["//:init_loadpath"],
+    rubyopt = [
+        "-I../org_ruby_lang_ruby_host/bundler/lib",
+    ],
+    runtime = "//:runtime",
+    rules_ruby_workspace = {rules_ruby_workspace},
+    # TODO(yugui) Extract platform info from RbConfig
+    # exec_compatible_with = [],
+    # target_compatible_with = [],
+)
 
 sh_binary(
     name = "ruby_bin",
@@ -12,9 +28,9 @@ sh_binary(
 )
 
 filegroup(
-  name = "init_loadpath",
-  srcs = ["init_loadpath.rb"],
-  data = ["loadpath.lst"],
+    name = "init_loadpath",
+    srcs = ["init_loadpath.rb"],
+    data = ["loadpath.lst"],
 )
 
 cc_import(
@@ -31,9 +47,9 @@ cc_library(
 )
 
 filegroup(
-  name = "bundler",
-  srcs = ["bundler/exe/bundler"],
-  data = glob(["bundler/**/*.rb"]),
+    name = "bundler",
+    srcs = ["bundler/exe/bundler"],
+    data = glob(["bundler/**/*.rb"]),
 )
 
 filegroup(
@@ -41,10 +57,10 @@ filegroup(
     srcs = glob(
         include = ["**/*"],
         exclude = [
-          "init_loadpath.rb",
-          "loadpath.lst",
-          "BUILD.bazel",
-          "WORKSPACE",
+            "init_loadpath.rb",
+            "loadpath.lst",
+            "BUILD.bazel",
+            "WORKSPACE",
         ],
     ),
 )

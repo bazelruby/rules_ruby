@@ -40,4 +40,5 @@ ruby_library = rule(
             allow_files = True,
         ),
     },
+    toolchains = ["//ruby:toolchain_type"],
 )

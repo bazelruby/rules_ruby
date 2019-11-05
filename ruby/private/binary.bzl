@@ -8,7 +8,7 @@ load(
 )
 
 def _ruby_binary_impl(ctx):
-  sdk = ctx.attr.toolchain[platform_common.ToolchainInfo]
+  sdk = ctx.toolchains["//ruby:toolchain_type"].ruby_runtime
   interpreter = sdk.interpreter[DefaultInfo].files_to_run.executable
   init_files = [f for t in sdk.init_files for f in t.files.to_list()]
   init_flags = " ".join(["-r${PATH_PREFIX}%s" % f.short_path for f in init_files])
@@ -70,10 +70,6 @@ _ATTRS = {
     "main": attr.label(
         allow_single_file = True,
     ),
-    "toolchain": attr.label(
-        default = "@com_github_yugui_rules_ruby//ruby/toolchain:ruby_sdk",
-        providers = [platform_common.ToolchainInfo],
-    ),
 
     "_wrapper_template": attr.label(
       allow_single_file = True,
@@ -85,10 +81,12 @@ ruby_binary = rule(
     implementation = _ruby_binary_impl,
     attrs = _ATTRS,
     executable = True,
+    toolchains = ["//ruby:toolchain_type"],
 )
 
 ruby_test = rule(
     implementation = _ruby_binary_impl,
     attrs = _ATTRS,
     test = True,
+    toolchains = ["//ruby:toolchain_type"],
 )

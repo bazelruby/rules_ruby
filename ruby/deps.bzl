@@ -4,7 +4,7 @@ load(
     _rules_dependencies = "ruby_rules_dependencies",
 )
 load(
-    "@//ruby/toolchain:toolchains.bzl",
+    "@//ruby/private:sdk.bzl",
     _register_toolchains = "ruby_register_toolchains",
 )
 

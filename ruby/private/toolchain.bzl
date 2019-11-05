@@ -1,8 +1,23 @@
+RubyRuntimeInfo = provider(
+    doc = "Information about a Ruby interpreter, related commands and libraries", 
+    fields = {
+        "interpreter": "A label which points the Ruby interpreter",
+        "bundler": "A label which points bundler command",
+        "init_files": "A list of labels which points initialization libraries",
+        "runtime": "A list of labels which points runtime libraries",
+        "rubyopt": "A list of strings which should be passed to the interpreter as command line options" ,
+    }
+)
+
 def _ruby_toolchain_impl(ctx):
   return [platform_common.ToolchainInfo(
-      interpreter = ctx.attr.interpreter,
-      runtime = ctx.files.runtime,
-      init_files = ctx.attr.init_files,
+      ruby_runtime = RubyRuntimeInfo(
+          interpreter = ctx.attr.interpreter,
+          bundler = ctx.attr.bundler,
+          init_files = ctx.attr.init_files,
+          runtime = ctx.files.runtime,
+          rubyopt = ctx.attr.rubyopt,
+      ),
   )]
 
 _ruby_toolchain = rule(
@@ -35,11 +50,15 @@ _ruby_toolchain = rule(
     },
 )
 
-def ruby_toolchain(name, interpreter, bundler, runtime, host, init_files=[], rubyopt=[], target=None, **kwargs):
-  impl_name = name + "-sdk"
-  if not target:
-    target = host
-
+def ruby_toolchain(name,
+                   interpreter,
+                   bundler,
+                   runtime,
+                   init_files=[],
+                   rubyopt=[],
+                   rules_ruby_workspace="@com_github_yugui_rules_ruby",
+                   **kwargs):
+  impl_name = name + "_sdk"
   _ruby_toolchain(
       name = impl_name,
       interpreter = interpreter,
@@ -51,9 +70,7 @@ def ruby_toolchain(name, interpreter, bundler, runtime, host, init_files=[], rub
 
   native.toolchain(
       name = name,
-      toolchain_type = "@com_github_yugui_rules_ruby//ruby/toolchain:toolchain",
+      toolchain_type = "%s//ruby:toolchain_type" % rules_ruby_workspace,
       toolchain = ":%s" % impl_name,
-#      exec_compatible_with = [host],
-#      target_compatible_with = [target],
       **kwargs
   )
