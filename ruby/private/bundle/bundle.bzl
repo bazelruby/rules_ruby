@@ -1,3 +1,5 @@
+load("//ruby/private:constants.bzl", "RULES_RUBY_WORKSPACE_NAME")
+
 def _get_interpreter_label(repository_ctx, ruby_sdk):
   # TODO(yugui) Support windows as rules_nodejs does
   return Label("%s//:ruby" % ruby_sdk)
@@ -45,7 +47,7 @@ def bundle_install_impl(ctx):
       substitutions = {
           "{repo_name}": ctx.name,
           "{exclude}": repr(exclude),
-          "{workspace_name}": ctx.attr.rules_ruby_workspace,
+          "{workspace_name}": RULES_RUBY_WORKSPACE_NAME,
       },
   )
 
@@ -66,13 +68,9 @@ bundle_install = repository_rule(
             doc = "List of glob patterns per gem to be excluded from the library",
         ),
 
-        "rules_ruby_workspace": attr.string(
-            default = "@com_github_yugui_rules_ruby",
-            doc = "[INTERNAL USE]The workspace name of rules_ruby. Just a workaround of bazelbuild/bazel#3493. You rarely need to specify this attribute",
-        ),
-
         "_buildfile_template": attr.label(
-            default = "@com_github_yugui_rules_ruby//ruby/private/bundle:BUILD.bundle.tpl",
+            default = "%s//ruby/private/bundle:BUILD.bundle.tpl" % (
+                RULES_RUBY_WORKSPACE_NAME),
             doc = "The template of BUILD files for installed gem bundles",
             allow_single_file = True,
         ),

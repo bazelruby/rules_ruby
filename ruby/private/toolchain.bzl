@@ -1,3 +1,5 @@
+load(":constants.bzl", "RULES_RUBY_WORKSPACE_NAME")
+
 RubyRuntimeInfo = provider(
     doc = "Information about a Ruby interpreter, related commands and libraries", 
     fields = {
@@ -56,7 +58,7 @@ def ruby_toolchain(name,
                    runtime,
                    init_files=[],
                    rubyopt=[],
-                   rules_ruby_workspace="@com_github_yugui_rules_ruby",
+                   rules_ruby_workspace=RULES_RUBY_WORKSPACE_NAME,
                    **kwargs):
   impl_name = name + "_sdk"
   _ruby_toolchain(

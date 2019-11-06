@@ -1,4 +1,5 @@
 load(":bundler.bzl", "install_bundler")
+load("//ruby/private:constants.bzl", "RULES_RUBY_WORKSPACE_NAME")
 load("//ruby/private/tools:repository_context.bzl", "ruby_repository_context")
 
 def _is_subpath(path, ancestors):
@@ -111,7 +112,7 @@ def _ruby_host_runtime_impl(ctx):
           "{hdrs}": repr(["%s/**/*.h" % path for path in installed.includedirs]),
           "{static_library}": repr(installed.static_library),
           "{shared_library}": repr(installed.shared_library),
-          "{rules_ruby_workspace}": repr(ctx.attr.rules_ruby_workspace),
+          "{rules_ruby_workspace}": RULES_RUBY_WORKSPACE_NAME,
       },
       executable = False,
   )
@@ -121,27 +122,24 @@ ruby_host_runtime = repository_rule(
     attrs = {
         "interpreter_path": attr.string(),
 
-        "rules_ruby_workspace": attr.string(
-            default = "@com_github_yugui_rules_ruby",
-            doc = """[INTERNAL USE]The workspace name of rules_ruby.
-
-Just a workaround of bazelbuild/bazel#3493.
-You rarely need to specify this attribute""",
-        ),
         "_init_loadpath_rb": attr.label(
-            default = "@com_github_yugui_rules_ruby//:ruby/tools/init_loadpath.rb",
+            default = "%s//:ruby/tools/init_loadpath.rb" % (
+                RULES_RUBY_WORKSPACE_NAME),
             allow_single_file = True,
         ),
         "_install_bundler": attr.label(
-            default = "@com_github_yugui_rules_ruby//ruby/private:install-bundler.rb",
+            default = "%s//ruby/private:install-bundler.rb" % (
+                RULES_RUBY_WORKSPACE_NAME),
             allow_single_file = True,
         ),
         "_buildfile_template": attr.label(
-            default = "@com_github_yugui_rules_ruby//ruby/private:BUILD.host_runtime.tpl",
+            default = "%s//ruby/private:BUILD.host_runtime.tpl" % (
+                RULES_RUBY_WORKSPACE_NAME),
             allow_single_file = True,
         ),
         "_interpreter_wrapper_template": attr.label(
-            default = "@com_github_yugui_rules_ruby//ruby/private:interpreter_wrapper.tpl",
+            default = "%s//ruby/private:interpreter_wrapper.tpl" % (
+                RULES_RUBY_WORKSPACE_NAME),
             allow_single_file = True,
         ),
     },

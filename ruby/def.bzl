@@ -1,15 +1,15 @@
 load(
-    "@//ruby/private:toolchain.bzl",
+    "@com_github_yugui_rules_ruby//ruby/private:toolchain.bzl",
     _toolchain = "ruby_toolchain",
 )
 
 load(
-    "@//ruby/private:library.bzl",
+    "@com_github_yugui_rules_ruby//ruby/private:library.bzl",
     _library = "ruby_library",
 )
 
 load(
-    "@//ruby/private:binary.bzl",
+    "@com_github_yugui_rules_ruby//ruby/private:binary.bzl",
     _binary = "ruby_binary",
     _test = "ruby_test",
 )

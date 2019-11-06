@@ -1,0 +1,38 @@
+workspace(name = "com_github_yugui_rules_ruby_example")
+
+# Importing rules_ruby from the parent directory for developing
+# rules_ruby itself...
+local_repository(
+    name = "com_github_yugui_rules_ruby",
+    path = "..",
+)
+
+# But you'd usually want to fetch rules_ruby from remote.
+#
+# git_repository(
+#     name = "com_github_yugui_rules_ruby",
+#     remote = "https://github.com/yugui/rules_ruby.git",
+#     tag = "v0.0.1",
+# )
+
+load(
+    "@com_github_yugui_rules_ruby//ruby:deps.bzl",
+    "ruby_register_toolchains",
+    "ruby_rules_dependencies",
+)
+
+ruby_rules_dependencies()
+
+ruby_register_toolchains()
+
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+
+bazel_skylib_workspace()
+
+load("@com_github_yugui_rules_ruby//ruby/private:bundle.bzl", "bundle_install")
+
+bundle_install(
+    name = "bundle",
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+)

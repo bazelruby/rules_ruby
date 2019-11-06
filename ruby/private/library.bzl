@@ -1,7 +1,5 @@
-load(
-    ":providers.bzl",
-    "RubyLibrary",
-)
+load(":constants.bzl", "TOOLCHAIN_TYPE_NAME")
+load(":providers.bzl", "RubyLibrary")
 load(
     "//ruby/private/tools:deps.bzl",
     _transitive_deps = "transitive_deps",
@@ -40,5 +38,5 @@ ruby_library = rule(
             allow_files = True,
         ),
     },
-    toolchains = ["//ruby:toolchain_type"],
+    toolchains = [TOOLCHAIN_TYPE_NAME],
 )

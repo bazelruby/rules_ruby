@@ -1,12 +1,12 @@
 package(
     default_visibility = [
-        "//examples/lib:__pkg__",
-        "//examples/spec/foo:__pkg__",
+        "//lib:__pkg__",
+        "//spec/foo:__pkg__",
     ],
 )
 
 load(
-    "@//ruby:def.bzl",
+    "@com_github_yugui_rules_ruby//ruby:def.bzl",
     "ruby_library",
 )
 

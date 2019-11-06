@@ -1,5 +1,5 @@
 load(
-    "@com_github_yugui_rules_ruby//ruby:def.bzl",
+    "{rules_ruby_workspace}//ruby:def.bzl",
     "ruby_library",
     "ruby_toolchain",
 )
@@ -15,7 +15,7 @@ ruby_toolchain(
         "-I../org_ruby_lang_ruby_host/bundler/lib",
     ],
     runtime = "//:runtime",
-    rules_ruby_workspace = {rules_ruby_workspace},
+    rules_ruby_workspace = "{rules_ruby_workspace}",
     # TODO(yugui) Extract platform info from RbConfig
     # exec_compatible_with = [],
     # target_compatible_with = [],

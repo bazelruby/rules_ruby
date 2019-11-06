@@ -1,16 +1,16 @@
-package(default_visibility = ["//examples:__subpackages__"])
+package(default_visibility = ["//:__subpackages__"])
 
 load(
-    "@//ruby:def.bzl",
+    "@com_github_yugui_rules_ruby//ruby:def.bzl",
     "ruby_library",
 )
 
 ruby_library(
     name = "foo",
     srcs = ["foo.rb"],
-    includes = ["examples/lib"],
+    includes = ["lib"],
     deps = [
-        "//examples/lib/foo:bar",
-        "//examples/lib/foo:version",
+        "//lib/foo:bar",
+        "//lib/foo:version",
     ],
 )

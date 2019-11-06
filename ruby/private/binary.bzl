@@ -1,14 +1,13 @@
-load(
-    ":providers.bzl",
-    "RubyLibrary",
-)
+load(":constants.bzl", "TOOLCHAIN_TYPE_NAME")
+load(":providers.bzl", "RubyLibrary")
 load(
     "//ruby/private/tools:deps.bzl",
     _transitive_deps = "transitive_deps",
 )
 
+
 def _ruby_binary_impl(ctx):
-  sdk = ctx.toolchains["//ruby:toolchain_type"].ruby_runtime
+  sdk = ctx.toolchains[TOOLCHAIN_TYPE_NAME].ruby_runtime
   interpreter = sdk.interpreter[DefaultInfo].files_to_run.executable
   init_files = [f for t in sdk.init_files for f in t.files.to_list()]
   init_flags = " ".join(["-r${PATH_PREFIX}%s" % f.short_path for f in init_files])
@@ -81,12 +80,12 @@ ruby_binary = rule(
     implementation = _ruby_binary_impl,
     attrs = _ATTRS,
     executable = True,
-    toolchains = ["//ruby:toolchain_type"],
+    toolchains = [TOOLCHAIN_TYPE_NAME],
 )
 
 ruby_test = rule(
     implementation = _ruby_binary_impl,
     attrs = _ATTRS,
     test = True,
-    toolchains = ["//ruby:toolchain_type"],
+    toolchains = [TOOLCHAIN_TYPE_NAME],
 )

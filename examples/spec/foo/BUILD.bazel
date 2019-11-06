@@ -1,5 +1,5 @@
 load(
-    "@//ruby:def.bzl",
+    "@com_github_yugui_rules_ruby//ruby:def.bzl",
     "ruby_test",
 )
 
@@ -9,7 +9,7 @@ ruby_test(
     main = "version_spec.rb",
     rubyopt = ["-rrspec/autorun"],
     deps = [
-        "//examples/lib:foo",
-        "@bundler_test//:libs",
+        "//lib:foo",
+        "@bundle//:libs",
     ],
 )
