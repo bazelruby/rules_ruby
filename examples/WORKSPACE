@@ -12,7 +12,7 @@ local_repository(
 # git_repository(
 #     name = "com_github_yugui_rules_ruby",
 #     remote = "https://github.com/yugui/rules_ruby.git",
-#     tag = "v0.0.1",
+#     tag = "v0.1.0",
 # )
 
 load(
@@ -29,7 +29,7 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
 
-load("@com_github_yugui_rules_ruby//ruby/private:bundle.bzl", "bundle_install")
+load("@com_github_yugui_rules_ruby//ruby:def.bzl", "bundle_install")
 
 bundle_install(
     name = "bundle",

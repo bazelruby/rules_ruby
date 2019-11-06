@@ -8,19 +8,20 @@ Proof of Concept
 
 ## How to use
 
-Add `ruby_register_toolchains` into your `WORKSPACE` file
+Add `ruby_rules_dependencies` and `ruby_register_toolchains` into your
+`WORKSPACE` file.
 
 ```python
 git_repository(
     name = "com_github_yugui_rules_ruby",
     remote = "https://github.com/yugui/rules_ruby.git",
-    commit = "e791736837e9b880d7984ae949f479c7ce51b5f3",
+    tag = "v0.1.0",
 )
 
 load(
     "@com_github_yugui_rules_ruby//ruby:deps.bzl",
-    "ruby_rules_dependencies",
     "ruby_register_toolchains",
+    "ruby_rules_dependencies",
 )
 
 ruby_rules_dependencies()
@@ -31,22 +32,29 @@ ruby_register_toolchains()
 Add `ruby_library`, `ruby_binary` or `ruby_test` into your `BUILD.bazel` files.
 
 ```python
+load(
+    "@com_github_yugui_rules_ruby//ruby:def.bzl",
+    "ruby_binary",
+    "ruby_library",
+    "ruby_test",
+)
+
 ruby_library(
-  name = "foo",
-  srcs = ["lib/foo.rb"],
-  includes = ["lib"],
+    name = "foo",
+    srcs = ["lib/foo.rb"],
+    includes = ["lib"],
 )
 
 ruby_binary(
-  name = "bar",
-  srcs = ["bin/bar"],
-  deps = [":foo"],
+    name = "bar",
+    srcs = ["bin/bar"],
+    deps = [":foo"],
 )
 
 ruby_test(
-  name = "foo_test",
-  srcs = ["test/foo_test.rb"],
-  deps = [":foo"],
+    name = "foo_test",
+    srcs = ["test/foo_test.rb"],
+    deps = [":foo"],
 )
 ```
 
@@ -291,21 +299,25 @@ Example: `WORKSPACE`:
 git_repository(
     name = "com_github_yugui_rules_ruby",
     remote = "https://github.com/yugui/rules_ruby.git",
-    commit = "8378a0ba19ab7c6d751c440bc016d9af76da656c",
+    tag = "v0.1.0",
 )
 
 load(
-  "@com_github_yugui_rules_ruby//ruby:def.bzl",
-  "ruby_register_toolchains",
-  "bundle_install"
+    "@com_github_yugui_rules_ruby//ruby:deps.bzl",
+    "ruby_register_toolchains",
+    "ruby_rules_dependencies",
 )
 
 ruby_register_toolchains()
 
+ruby_register_toolchains()
+
+load("@com_github_yugui_rules_ruby//ruby:def.bzl", "bundle_install")
+
 bundle_install(
-  name = "gems",
-  gemfile = "Gemfile",
-  gemfile_lock = "Gemfile.lock",
+    name = "gems",
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
 )
 ```
 
@@ -313,9 +325,9 @@ Example: `lib/BUILD.bazel`:
 
 ```python
 ruby_library(
-  name = "foo",
-  srcs = ["foo.rb"],
-  deps = ["@gems//:libs"],
+    name = "foo",
+    srcs = ["foo.rb"],
+    deps = ["@gems//:libs"],
 )
 ```
 
