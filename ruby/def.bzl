@@ -1,9 +1,4 @@
 load(
-    "@com_github_yugui_rules_ruby//ruby/private:toolchain.bzl",
-    _toolchain = "ruby_toolchain",
-)
-
-load(
     "@com_github_yugui_rules_ruby//ruby/private:library.bzl",
     _library = "ruby_library",
 )
@@ -14,13 +9,14 @@ load(
     _test = "ruby_test",
 )
 
-load(
-    "@com_github_yugui_rules_ruby//ruby/private:bundle.bzl",
-    _bundle_install = "bundle_install",
-)
+def ruby_library(**attrs):
+  print("//ruby:def.bzl was deprecated and will be removed soon. Use //ruby:defs.bzl instead")
+  _library(**attrs)
 
-ruby_toolchain = _toolchain
-ruby_library = _library
-ruby_binary = _binary
-ruby_test = _test
-bundle_install = _bundle_install
+def ruby_binary(**attrs):
+  print("//ruby:def.bzl was deprecated and will be removed soon. Use //ruby:defs.bzl instead")
+  _binary(**attrs)
+
+def ruby_test(**attrs):
+  print("//ruby:def.bzl was deprecated and will be removed soon. Use //ruby:defs.bzl instead")
+  _test(**attrs)

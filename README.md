@@ -33,7 +33,7 @@ Add `ruby_library`, `ruby_binary` or `ruby_test` into your `BUILD.bazel` files.
 
 ```python
 load(
-    "@com_github_yugui_rules_ruby//ruby:def.bzl",
+    "@com_github_yugui_rules_ruby//ruby:defs.bzl",
     "ruby_binary",
     "ruby_library",
     "ruby_test",
@@ -312,7 +312,7 @@ ruby_register_toolchains()
 
 ruby_register_toolchains()
 
-load("@com_github_yugui_rules_ruby//ruby:def.bzl", "bundle_install")
+load("@com_github_yugui_rules_ruby//ruby:defs.bzl", "bundle_install")
 
 bundle_install(
     name = "gems",

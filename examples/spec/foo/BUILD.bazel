@@ -1,5 +1,5 @@
 load(
-    "@com_github_yugui_rules_ruby//ruby:def.bzl",
+    "@com_github_yugui_rules_ruby//ruby:defs.bzl",
     "ruby_test",
 )
 

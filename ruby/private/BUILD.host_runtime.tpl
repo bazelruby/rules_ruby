@@ -1,5 +1,5 @@
 load(
-    "{rules_ruby_workspace}//ruby:def.bzl",
+    "{rules_ruby_workspace}//ruby:defs.bzl",
     "ruby_library",
     "ruby_toolchain",
 )
