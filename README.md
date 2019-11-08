@@ -308,7 +308,7 @@ load(
     "ruby_rules_dependencies",
 )
 
-ruby_register_toolchains()
+ruby_rules_dependencies()
 
 ruby_register_toolchains()
 
