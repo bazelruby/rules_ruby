@@ -1,0 +1,3 @@
+% values.split(',').each do |value|
+<%= value %>
+% end

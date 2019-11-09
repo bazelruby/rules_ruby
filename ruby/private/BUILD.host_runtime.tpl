@@ -32,6 +32,31 @@ sh_binary(
     srcs = ["irb_bin"],
 )
 
+sh_binary(
+    name = "erb",
+    srcs = ["erb_bin"],
+)
+
+sh_binary(
+    name = "rake",
+    srcs = ["rake_bin"],
+)
+
+sh_binary(
+    name = "rdoc",
+    srcs = ["rdoc_bin"],
+)
+
+sh_binary(
+    name = "ri",
+    srcs = ["ri_bin"],
+)
+
+sh_binary(
+    name = "gem",
+    srcs = ["gem_bin"],
+)
+
 cc_import(
     name = "libruby",
     hdrs = glob({hdrs}),
