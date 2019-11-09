@@ -1,0 +1,31 @@
+dist: xenial
+sudo: required
+
+os:
+  - linux
+
+python:
+  - "2.7"
+
+jdk:
+  - oraclejdk8  # Building Bazel requires JDK8.
+
+language: go
+go: 1.10.x
+install: true
+
+services:
+  - docker
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8'
+        key_url: 'https://bazel.build/bazel-release.pub.gpg'
+    packages:
+      - bazel
+
+install:
+  - wget -q https://github.com/bazelruby/ruby_rules
+  - cd ruby_rules && bazel build //...:all
+
