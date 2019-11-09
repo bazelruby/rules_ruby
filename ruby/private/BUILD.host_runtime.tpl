@@ -27,6 +27,11 @@ sh_binary(
     data = [":runtime"],
 )
 
+sh_binary(
+    name = "irb",
+    srcs = ["irb_bin"],
+)
+
 cc_import(
     name = "libruby",
     hdrs = glob({hdrs}),
