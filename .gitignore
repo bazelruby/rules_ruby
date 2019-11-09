@@ -1,0 +1,16 @@
+**/.rakeTasks
+**/.DS_Store
+**/.idea/
+.ruby-version
+/*.enc
+/.bundle/
+/.idea/
+/.yardoc
+**/bazel-*
+/coverage/
+/pkg/
+/spec/coverage/
+/tmp/
+Gemfile.lock
+temp/
+.ijwb/

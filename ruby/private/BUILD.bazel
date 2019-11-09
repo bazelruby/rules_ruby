@@ -1,0 +1,4 @@
+exports_files(
+    ["binary_wrapper.tpl", "bundle_buildfile.tpl"],
+    visibility = ["//visibility:public"],
+)

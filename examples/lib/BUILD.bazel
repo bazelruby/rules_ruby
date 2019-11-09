@@ -1,0 +1,16 @@
+package(default_visibility = ["//examples:__subpackages__"])
+
+load(
+    "@rules_ruby//ruby:def.bzl",
+    "rb_library",
+)
+
+rb_library(
+    name = "foo",
+    srcs = ["foo.rb"],
+    includes = ["examples/lib"],
+    deps = [
+        "//examples/lib/foo:bar",
+        "//examples/lib/foo:version",
+    ],
+)

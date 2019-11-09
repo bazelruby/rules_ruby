@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+#
+# © 2019 Coinbase, Inc.
+# Written by: Konstantin Gredreskoul
+#
+# This is a small BASH wrapper around Bazel that simplifies some tasks.
+#
+
+# We utiilize BashMatic framework for various features.
+
+export BashMatic="${HOME}/.bashmatic"
+
+[[ -s ${BashMatic}/init.sh ]] || {
+  rm -rf "${BashMatic}" 2>/dev/null
+  git clone https://github.com/kigster/bashmatic "${BashMatic}" 2>&1 1>/dev/null
+}
+
+__header() {
+  printf "${bldblu}%s:${clr}\n" "$*"
+}
+
+__usage() {
+  local cmd=$(basename $0)
+  printf "
+$(__header USAGE)
+  ${bldylw}${cmd} [ bazel-subcommand ] [ target-substring ] [ flags ]
+  ${bldylw}${cmd} [ flags ]
+
+$(__header DESCRIPTION)
+  This is a shortcut script that attemps to guess the Bazel Action and the
+  appropriate target, and then invoke those if a match is found.
+
+$(__header FLAGS)
+  -n | --dry-run               ${clr}# Dry run (do not actually run anything)
+  -o | --output                ${clr}# Show bazel command output
+
+$(__header SPECIAL FLAGS)
+  -t | --targets               ${clr}# List targets
+  -c | --commands              ${clr}# List commands
+  -h | --help                  ${clr}# This help screen.
+
+$(__header EXAMPLES)
+  ${bldgrn}${cmd} r :specs         ${clr}# => bazel run //ruby/gems/blah:specs
+  ${bldgrn}${cmd} r :helloworld    ${clr}# => bazel run //ruby/apps/helloworld:helloworld
+  ${bldgrn}${cmd} b                ${clr}# => bazel build //...:all
+
+  "
+}
+
+[[ -z "$1" ]] && { __usage; exit 0; }
+
+source "${BashMatic}/init.sh"
+source $(dirname ${BASH_SOURCE[0]})/lib/bazel.sh
+
+Bazel::LoadCommands
+
+__exec_action() {
+  command=$(Bazel::CommandMatching "${1}")
+  result=$?
+  if [[ ${result} -eq 0 && -n ${command} ]]; then
+    shift
+    Bazel::Do ${command} "$@"
+    echo
+    exit $?
+  fi
+  error "$1 is not a valid argument."
+  exit 1
+}
+
+declare -a cmds=()
+export Baz__FunctionToRun=
+
+# Parse additional flags
+while :; do
+  case $1 in
+    -o|--output)
+      run::set-all show-output-on
+      shift
+      ;;
+    -n|--dry-run)
+      run::set-all dry-run-on
+      shift
+      ;;
+    --commands|-c)
+      shift
+      export Baz__FunctionToRun="Bazel::Commands"
+      ;;
+    --targets|-t)
+      shift
+      export Baz__FunctionToRun="Bazel::Targets"
+      ;;
+    -h|-\?|--help)
+      shift
+      __usage
+      exit 0
+      ;;
+    --) # End of all options; anything after will be passed to the action function
+      shift
+      break
+      ;;
+    -?*)
+      printf 'WARN: Unknown option (ignored): %s\n' "$1" >&2
+      exit 127
+      shift
+      ;;
+    *)
+      [[ -z "$1" ]] && break
+      cmds=("${cmds[@]}" "$1")
+      shift
+      ;;
+  esac
+done
+
+if [[ -n "${Baz__FunctionToRun}" ]]; then
+  ${Baz__FunctionToRun}
+else
+  [[ ${#cmds[@]} -gt 0 ]] && __exec_action "${cmds[@]}"
+fi
+
+
+

@@ -1,0 +1,17 @@
+load(
+    "@rules_ruby//ruby:def.bzl",
+    "rb_binary",
+)
+
+rb_binary(
+    name = "show_version",
+    srcs = ["show_version.rb"],
+    deps = [
+        "//examples/lib:foo",
+    ],
+)
+
+sh_test(
+    name = "show_version_test",
+    srcs = [":show_version"],
+)

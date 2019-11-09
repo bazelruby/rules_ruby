@@ -1,0 +1,21 @@
+package(
+    default_visibility = [
+        "//examples/lib:__pkg__",
+        "//examples/spec/foo:__pkg__",
+    ],
+)
+
+load(
+    "@rules_ruby//ruby:def.bzl",
+    "rb_library",
+)
+
+rb_library(
+    name = "bar",
+    srcs = ["bar.rb"],
+)
+
+rb_library(
+    name = "version",
+    srcs = ["version.rb"],
+)

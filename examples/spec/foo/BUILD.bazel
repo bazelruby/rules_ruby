@@ -1,0 +1,15 @@
+load(
+    "@rules_ruby//ruby:def.bzl",
+    "rb_test",
+)
+
+rb_test(
+    name = "version_test",
+    srcs = ["version_spec.rb"],
+    main = "version_spec.rb",
+    rubyopt = ["-rrspec/autorun"],
+    deps = [
+        "//examples/lib:foo",
+        "@bundler_test//:libs",
+    ],
+)

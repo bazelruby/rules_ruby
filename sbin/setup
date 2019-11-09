@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+[[ -d ~/.bashmatic ]] || git clone https://github.com/kigster/bashmatic.git ~/.bashmatic
+source ~/.bashmatic/init.sh
+
+usage() {
+  printf "%s\n" "
+USAGE:
+  $0 bazel-version
+
+"
+}
+
+DEFAULT_VERSION="0.29.1"
+VERSION=${1:-"${DEFAULT_VERSION}"}
+INSTALLED_VERSION="$(bazel --version 2>/dev/null| sed 's/[^0-9.]//g')"
+
+if [[ "$1" =~ "-h" ]]; then
+  usage
+  exit 0
+fi
+
+INSTALLER=bazel-$VERSION-installer-$(uname -s | tr 'A-Z' 'a-z')-x86_64.sh
+RELEASE_BASE_URI=https://github.com/bazelbuild/bazel/releases/download/$VERSION
+INSTALL_DIR=${HOME}local/bazel-${VERSION}
+
+REQUIRE_INSTALL=true
+
+if [[ ${INSTALLED_VERSION} == ${VERSION} ]]; then
+  success "Bazel version ${VERSION} is already installed."
+  exit 0
+fi
+
+if [[ -f ${INSTALL_DIR}/bin/bazel ]] ; then
+  success "Bazel version ${INSTALLED_VERSION} is already installed."
+  exit 0
+fi
+
+info "Ensuring correct permissions on the Bazel Install folder..."
+info "Please enter your password if asked..."
+
+run "sudo chown ${USER} $(dirname ${INSTALL_DIR})"
+
+if test -x $INSTALL_DIR/$INSTALLER; then
+  cd $INSTALL_DIR
+  if curl $RELEASE_BASE_URI/$INSTALLER.sha256 | sha256sum -c; then
+    REQUIRE_INSTALL=false
+  fi
+fi
+
+if $REQUIRE_INSTALL; then
+  h1 "Installing Bazel version ${VERSION}..."
+
+  run "cd ~/ && rm -rf $INSTALL_DIR"
+  run "mkdir $INSTALL_DIR"
+  run "cd $INSTALL_DIR"
+  run "wget $RELEASE_BASE_URI/$INSTALLER"
+  run "chmod +x $INSTALLER"
+  run::set-next show-output-on
+  run "./$INSTALLER --prefix=$INSTALL_DIR --base=$HOME/.bazel"
+
+  echo
+
+  h2 "Pleasen add ${INSTALL_DIR}/bin to your path, by running:" \
+     "echo 'export PATH=${INSTALL_DIR}/bin:\${PATH}' >> ~/.bash_profile"
+fi

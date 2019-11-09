@@ -1,0 +1,57 @@
+load(
+    "//ruby:def.bzl",
+    "rb_library",
+)
+
+package(default_visibility = ["//ruby/tests:__pkg__"])
+
+#
+# Dependency Graph::
+#
+#  a --+--d--+--e
+#      |     |
+#  b --+     |
+#            |
+#  c---+-----+
+#
+#  f
+
+rb_library(
+    name = "a",
+    srcs = ["a.rb"],
+    includes = ["somewhere/a"],
+    deps = [":d"],
+)
+
+rb_library(
+    name = "b",
+    srcs = ["b.rb"],
+    includes = ["somewhere/b"],
+    deps = [":d"],
+)
+
+rb_library(
+    name = "c",
+    srcs = ["c.rb"],
+    includes = ["somewhere/c"],
+    deps = [":e"],
+)
+
+rb_library(
+    name = "d",
+    srcs = ["d.rb"],
+    includes = ["somewhere/d"],
+    deps = [":e"],
+)
+
+rb_library(
+    name = "e",
+    srcs = ["e.rb"],
+    includes = ["somewhere/e"],
+)
+
+rb_library(
+    name = "f",
+    srcs = ["f.rb"],
+    includes = ["somewhere/f"],
+)

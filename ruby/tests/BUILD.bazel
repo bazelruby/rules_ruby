@@ -1,0 +1,35 @@
+load(
+    "//ruby:def.bzl",
+    "rb_binary",
+)
+
+rb_binary(
+    name = "args_check",
+    srcs = ["args_check.rb"],
+)
+
+sh_test(
+    name = "args_test",
+    srcs = ["args_check"],
+    args = [
+        "foo",
+        "bar",
+        "baz",
+    ],
+)
+
+rb_binary(
+    name = "include_order_check",
+    srcs = ["include_order_check.rb"],
+    deps = [
+        "//ruby/tests/testdata:a",
+        "//ruby/tests/testdata:b",
+        "//ruby/tests/testdata:c",
+        "//ruby/tests/testdata:f",
+    ],
+)
+
+sh_test(
+    name = "include_order_test",
+    srcs = ["include_order_check"],
+)

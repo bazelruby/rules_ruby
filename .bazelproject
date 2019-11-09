@@ -1,0 +1,8 @@
+#	Each directory entry must point to a workspace directory. All files under directories are included in the import. Directories are always recursive.
+#	If you want to exclude directories, prefix the entry with a minus (“-“) sign.
+directories:
+  .
+
+# Automatically includes all relevant targets under the 'directories' above
+derive_targets_from_directories: true
+
