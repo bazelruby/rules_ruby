@@ -13,13 +13,13 @@ Add `ruby_rules_dependencies` and `ruby_register_toolchains` into your
 
 ```python
 git_repository(
-    name = "com_github_yugui_rules_ruby",
+    name = "bazelruby_ruby_rules",
     remote = "https://github.com/yugui/rules_ruby.git",
     tag = "v0.1.0",
 )
 
 load(
-    "@com_github_yugui_rules_ruby//ruby:deps.bzl",
+    "@bazelruby_ruby_rules//ruby:deps.bzl",
     "ruby_register_toolchains",
     "ruby_rules_dependencies",
 )
@@ -33,7 +33,7 @@ Add `ruby_library`, `ruby_binary` or `ruby_test` into your `BUILD.bazel` files.
 
 ```python
 load(
-    "@com_github_yugui_rules_ruby//ruby:defs.bzl",
+    "@bazelruby_ruby_rules//ruby:defs.bzl",
     "ruby_binary",
     "ruby_library",
     "ruby_test",
@@ -297,13 +297,13 @@ Example: `WORKSPACE`:
 
 ```python
 git_repository(
-    name = "com_github_yugui_rules_ruby",
+    name = "bazelruby_ruby_rules",
     remote = "https://github.com/yugui/rules_ruby.git",
     tag = "v0.1.0",
 )
 
 load(
-    "@com_github_yugui_rules_ruby//ruby:deps.bzl",
+    "@bazelruby_ruby_rules//ruby:deps.bzl",
     "ruby_register_toolchains",
     "ruby_rules_dependencies",
 )
@@ -312,7 +312,7 @@ ruby_rules_dependencies()
 
 ruby_register_toolchains()
 
-load("@com_github_yugui_rules_ruby//ruby:defs.bzl", "bundle_install")
+load("@bazelruby_ruby_rules//ruby:defs.bzl", "bundle_install")
 
 bundle_install(
     name = "gems",

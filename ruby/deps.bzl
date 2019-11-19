@@ -1,10 +1,10 @@
 # Repository rules
 load(
-    "@com_github_yugui_rules_ruby//ruby/private:dependencies.bzl",
+    "@bazelruby_ruby_rules//ruby/private:dependencies.bzl",
     _rules_dependencies = "ruby_rules_dependencies",
 )
 load(
-    "@com_github_yugui_rules_ruby//ruby/private:sdk.bzl",
+    "@bazelruby_ruby_rules//ruby/private:sdk.bzl",
     _register_toolchains = "ruby_register_toolchains",
 )
 
