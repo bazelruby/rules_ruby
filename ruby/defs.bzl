@@ -1,21 +1,21 @@
 load(
-    "@com_github_yugui_rules_ruby//ruby/private:toolchain.bzl",
+    "@bazelruby_ruby_rules//ruby/private:toolchain.bzl",
     _toolchain = "ruby_toolchain",
 )
 
 load(
-    "@com_github_yugui_rules_ruby//ruby/private:library.bzl",
+    "@bazelruby_ruby_rules//ruby/private:library.bzl",
     _library = "ruby_library",
 )
 
 load(
-    "@com_github_yugui_rules_ruby//ruby/private:binary.bzl",
+    "@bazelruby_ruby_rules//ruby/private:binary.bzl",
     _binary = "ruby_binary",
     _test = "ruby_test",
 )
 
 load(
-    "@com_github_yugui_rules_ruby//ruby/private:bundle.bzl",
+    "@bazelruby_ruby_rules//ruby/private:bundle.bzl",
     _bundle_install = "bundle_install",
 )
 

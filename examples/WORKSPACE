@@ -1,22 +1,22 @@
-workspace(name = "com_github_yugui_rules_ruby_example")
+workspace(name = "bazelruby_ruby_rules_example")
 
 # Importing rules_ruby from the parent directory for developing
 # rules_ruby itself...
 local_repository(
-    name = "com_github_yugui_rules_ruby",
+    name = "bazelruby_ruby_rules",
     path = "..",
 )
 
 # But you'd usually want to fetch rules_ruby from remote.
 #
 # git_repository(
-#     name = "com_github_yugui_rules_ruby",
+#     name = "bazelruby_ruby_rules",
 #     remote = "https://github.com/yugui/rules_ruby.git",
 #     tag = "v0.1.0",
 # )
 
 load(
-    "@com_github_yugui_rules_ruby//ruby:deps.bzl",
+    "@bazelruby_ruby_rules//ruby:deps.bzl",
     "ruby_register_toolchains",
     "ruby_rules_dependencies",
 )
@@ -29,7 +29,7 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
 
-load("@com_github_yugui_rules_ruby//ruby:defs.bzl", "bundle_install")
+load("@bazelruby_ruby_rules//ruby:defs.bzl", "bundle_install")
 
 bundle_install(
     name = "bundle",

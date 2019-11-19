@@ -80,7 +80,7 @@ ruby_test(
     main = "load_path_in_runfiles_test.rb",
     deps = [
         "//ruby/tests/testdata:g",
-        "@com_github_yugui_rules_ruby_ruby_tests_testdata_another_workspace//baz/qux:j",
+        "@bazelruby_ruby_rules_ruby_tests_testdata_another_workspace//baz/qux:j",
     ],
 )
 

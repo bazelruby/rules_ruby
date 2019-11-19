@@ -1,5 +1,5 @@
-workspace(name = "com_github_yugui_rules_ruby_ruby_tests_testdata_another_workspace")
+workspace(name = "bazelruby_ruby_rules_ruby_tests_testdata_another_workspace")
 
-load("@com_github_yugui_rules_ruby//ruby:defs.bzl", "ruby_register_toolchains")
+load("@bazelruby_ruby_rules//ruby:defs.bzl", "ruby_register_toolchains")
 
 ruby_register_toolchains()
