@@ -1,15 +1,31 @@
-# Rules ruby
-[![Build Status](https://travis-ci.org/yugui/rules_ruby.svg?branch=master)](https://travis-ci.org/yugui/rules_ruby)
+<!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
+
+- [Status](#status)
+- [How to use](#how-to-use)
+- [Rules](#rules)
+	- [`ruby_library`](#rubylibrary)
+	- [`ruby_binary`](#rubybinary)
+	- [ruby_test](#rubytest)
+	- [`bundle_install`](#bundleinstall)
+- [What's coming next](#whats-coming-next)
+- [Copyright](#copyright)
+	- [Warranty](#warranty)
+
+<!-- /TOC -->
+
+# Rules Ruby
+
+[![Build Status](https://travis-ci.org/bazelruby/rules_ruby.svg?branch=master)](https://travis-ci.org/bazelruby/rules_ruby)
 
 Ruby rules for [Bazel](https://bazel.build).
 
 ## Status
-Proof of Concept
+
+Work in progress.
 
 ## How to use
 
-Add `ruby_rules_dependencies` and `ruby_register_toolchains` into your
-`WORKSPACE` file.
+Add `ruby_rules_dependencies` and `ruby_register_toolchains` into your `WORKSPACE` file.
 
 ```python
 git_repository(
@@ -59,10 +75,13 @@ ruby_test(
 ```
 
 ## Rules
-### ruby_library
+
+### `ruby_library`
+
 <pre>
 ruby_library(name, deps, srcs, data, compatible_with, deprecation, distribs, features, licenses, restricted_to, tags, testonly, toolchains, visibility)
 </pre>
+
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
     <col class="col-param" />
@@ -132,10 +151,12 @@ ruby_library(name, deps, srcs, data, compatible_with, deprecation, distribs, fea
   </tbody>  
 </table>
 
-### ruby_binary
+### `ruby_binary`
+
 <pre>
 ruby_binary(name, deps, srcs, data, main, compatible_with, deprecation, distribs, features, licenses, restricted_to, tags, testonly, toolchains, visibility, args, output_licenses)
 </pre>
+
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
     <col class="col-param" />
@@ -290,7 +311,8 @@ ruby_test(name, deps, srcs, data, main, compatible_with, deprecation, distribs, 
   </tbody>  
 </table>
 
-### bundle_install
+### `bundle_install`
+
 Installs gems with Bundler, and make them available as a `ruby_library`.
 
 Example: `WORKSPACE`:
@@ -368,26 +390,25 @@ bundle_install(name, gemfile, gemfile_lock)
           <p>The <code>Gemfile.lock</code> which Bundler runs with.</p>
           <p>NOTE: This rule never updates the <code>Gemfile.lock</code>. It is your responsibility to generate/update <code>Gemfile.lock</code></p>
       </td>
-    </tr> 
+    </tr>
   </tbody>
 </table>
 
 ## What's coming next
+
 1. Building native extensions in gems with Bazel
 2. Using a specified version of Ruby.
 3. Building and releasing your gems with Bazel
 
 ## Copyright
-Copyright 2018 Yuki Yugui Sonoda
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+© 2018-2019 Yuki Yugui Sonoda & BazelRuby Authors
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+### Warranty
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
