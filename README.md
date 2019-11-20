@@ -5,7 +5,7 @@
 - [Rules](#rules)
 	- [`ruby_library`](#rubylibrary)
 	- [`ruby_binary`](#rubybinary)
-	- [ruby_test](#rubytest)
+	- [`ruby_test`](#rubytest)
 	- [`bundle_install`](#bundleinstall)
 - [What's coming next](#whats-coming-next)
 - [Copyright](#copyright)
@@ -232,10 +232,12 @@ ruby_binary(name, deps, srcs, data, main, compatible_with, deprecation, distribs
   </tbody>  
 </table>
 
-### ruby_test
+### `ruby_test`
+
 <pre>
 ruby_test(name, deps, srcs, data, main, compatible_with, deprecation, distribs, features, licenses, restricted_to, tags, testonly, toolchains, visibility, args, size, timeout, flaky, local, shard_count)
 </pre>
+
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
     <col class="col-param" />
