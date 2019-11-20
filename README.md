@@ -14,7 +14,7 @@ Add `ruby_rules_dependencies` and `ruby_register_toolchains` into your
 ```python
 git_repository(
     name = "bazelruby_ruby_rules",
-    remote = "https://github.com/yugui/rules_ruby.git",
+    remote = "https://github.com/bazelruby/rules_ruby.git",
     tag = "v0.1.0",
 )
 
@@ -298,7 +298,7 @@ Example: `WORKSPACE`:
 ```python
 git_repository(
     name = "bazelruby_ruby_rules",
-    remote = "https://github.com/yugui/rules_ruby.git",
+    remote = "https://github.com/bazelruby/rules_ruby.git",
     tag = "v0.1.0",
 )
 
