@@ -12,7 +12,7 @@ local_repository(
 # git_repository(
 #     name = "bazelruby_ruby_rules",
 #     remote = "https://github.com/yugui/rules_ruby.git",
-#     tag = "v0.1.0",
+#     tag = "v0.1.0",`
 # )
 
 load(
@@ -32,7 +32,7 @@ bazel_skylib_workspace()
 load("@bazelruby_ruby_rules//ruby:defs.bzl", "bundle_install")
 
 bundle_install(
-    name = "bundle",
-    gemfile = "//:Gemfile",
-    gemfile_lock = "//:Gemfile.lock",
+    name = "foo-bar-bundle",
+    gemfile = "//apps/foo-bar:Gemfile",
+    gemfile_lock = "//apps/foo-bar:Gemfile.lock",
 )

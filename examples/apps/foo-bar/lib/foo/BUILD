@@ -1,7 +1,7 @@
 package(
     default_visibility = [
-        "//lib:__pkg__",
-        "//spec/foo:__pkg__",
+        "//apps/foo-bar/lib:__pkg__",
+        "//apps/foo-bar/spec/foo:__pkg__",
     ],
 )
 

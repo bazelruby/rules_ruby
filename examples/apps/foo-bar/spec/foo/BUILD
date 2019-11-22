@@ -9,7 +9,7 @@ ruby_test(
     main = "version_spec.rb",
     rubyopt = ["-rrspec/autorun"],
     deps = [
-        "//lib:foo",
-        "@bundle//:libs",
+        "//apps/foo-bar/lib:foo",
+        "@foo-bar-bundle//:libs",
     ],
 )

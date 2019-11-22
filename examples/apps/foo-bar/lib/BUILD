@@ -1,4 +1,4 @@
-package(default_visibility = ["//:__subpackages__"])
+package(default_visibility = ["//apps/foo-bar:__subpackages__"])
 
 load(
     "@bazelruby_ruby_rules//ruby:defs.bzl",
@@ -10,7 +10,7 @@ ruby_library(
     srcs = ["foo.rb"],
     includes = ["lib"],
     deps = [
-        "//lib/foo:bar",
-        "//lib/foo:version",
+        "//apps/foo-bar/lib/foo:bar",
+        "//apps/foo-bar/lib/foo:version",
     ],
 )

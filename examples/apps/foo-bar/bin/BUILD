@@ -7,7 +7,7 @@ ruby_binary(
     name = "show_version",
     srcs = ["show_version.rb"],
     deps = [
-        "//lib:foo",
+        "//apps/foo-bar/lib:foo",
     ],
 )
 
