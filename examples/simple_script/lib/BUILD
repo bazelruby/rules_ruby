@@ -8,9 +8,4 @@ load(
 ruby_library(
     name = "foo",
     srcs = ["foo.rb"],
-    includes = ["lib"],
-    deps = [
-        "//lib/foo:bar",
-        "//lib/foo:version",
-    ],
 )
