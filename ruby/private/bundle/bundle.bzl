@@ -16,6 +16,8 @@ def bundle_install_impl(ctx):
   ctx.symlink(ctx.attr.gemfile, "Gemfile")
   ctx.symlink(ctx.attr.gemfile_lock, "Gemfile.lock")
   ctx.symlink(ctx.attr._create_bundle_build_file, "create_bundle_build_file.rb")
+  if ctx.attr.gemspec:
+    ctx.symlink(ctx.attr.gemspec, ctx.path(ctx.attr.gemspec).basename)
 
   ruby = _get_interpreter_label(ctx, ctx.attr.ruby_sdk)
   bundler = _get_bundler_label(ctx, ctx.attr.ruby_sdk)
@@ -84,6 +86,9 @@ bundle_install = repository_rule(
             allow_single_file = True,
         ),
         "gemfile_lock": attr.label(
+            allow_single_file = True,
+        ),
+        "gemspec": attr.label(
             allow_single_file = True,
         ),
         "excludes": attr.string_list_dict(
