@@ -1,0 +1,11 @@
+# vim: ft=shell
+
+export BashMatic="${HOME}/.bashmatic"
+
+[[ -s ${BashMatic}/init.sh ]] || {
+  rm -rf "${BashMatic}" 2>/dev/null
+  git clone https://github.com/kigster/bashmatic "${BashMatic}" 2>&1 1>/dev/null
+}
+
+source "${BashMatic}/init.sh"
+

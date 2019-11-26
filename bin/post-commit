@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+[[ -x bin/deps ]] && source bin/deps
+[[ -x bin/setup ]] && source bin/setup
+
+[[ -z ${BashMatic} ]] && { 
+  echo "Failed to initialize BASH library."
+  exit 1
+}
+
+set +e
+
+info "Running Rubocop, please wait..."
+rubocop -F -D 
+code=$?
+
+if [[ ${code} -ne 0 ]]; then
+  run::set-next show-output-on
+  run "rubocop -a -D -P"
+  
+  run::set-next abort-on-error
+  run "rubocop -D -P"
+fi
+  
+success "RuboCop ran successfully."

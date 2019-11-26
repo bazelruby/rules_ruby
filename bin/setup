@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+[[ -x bin/deps ]] && source bin/deps
+
+[[ -z ${BashMatic} ]] && { 
+  echo "Failed to initialize BASH library."
+  exit 1
+}
+
+# abort on error
+run::set-all abort-on-error
+
+# install rubocop
+lib::gem::install relaxed-rubocop
+lib::gem::install rubocop
+
+[[ -f .rubocop.yml ]] || {
+  info "Setting up .rubocop.yml file..."
+  echo "
+inherit_gem:
+  relaxed-rubocop: .rubocop.yml
+" > .rubocop.yml
+}
+
+
+

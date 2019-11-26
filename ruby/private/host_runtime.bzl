@@ -128,7 +128,7 @@ ruby_host_runtime = repository_rule(
             allow_single_file = True,
         ),
         "_install_bundler": attr.label(
-            default = "%s//ruby/private:install-bundler.rb" % (
+            default = "%s//ruby/private:install_bundler.rb" % (
                 RULES_RUBY_WORKSPACE_NAME),
             allow_single_file = True,
         ),
