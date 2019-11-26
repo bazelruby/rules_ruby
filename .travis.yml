@@ -31,12 +31,15 @@ before_install:
 - bazel $BAZEL_OPTS info
 - bazel $BAZEL_OPTS fetch --curses=no -- "//ruby/..."
 - (cd examples && bazel $BAZEL_OPTS fetch --curses=no -- "//...")
+- bundle install
 install:
 - bazel $BAZEL_OPTS build $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 -- //...
 - (cd examples && bazel $BAZEL_OPTS build $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 -- //...)
 script:
 - bazel $BAZEL_OPTS test $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 --test_output=streamed -- //...
 - (cd examples && bazel $BAZEL_OPTS test $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 --test_output=streamed -- //...)
+- bazel run :buildifier
+- bundle exec rubocop
 
 env:
   global:
