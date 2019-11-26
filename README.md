@@ -13,6 +13,16 @@
 
 <!-- /TOC -->
 
+# Setup
+
+To get the initial stuff setup required by this repo, please run the script:
+
+```bash
+bin/setup
+```
+
+Whenever you'll commit something, a pre-commit hook will run as well.
+
 # Rules Ruby
 
 [![Build Status](https://travis-ci.org/bazelruby/rules_ruby.svg?branch=master)](https://travis-ci.org/bazelruby/rules_ruby)

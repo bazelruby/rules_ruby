@@ -23,5 +23,5 @@ inherit_gem:
   run "git add .rubocop.yml"
 }
 
-
+[[ -L .git/hooks/pre-commit ]] || run "ln -nfs bin/pre-commit .git/hooks/pre-commit"
 
