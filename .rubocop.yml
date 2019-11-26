@@ -1,2 +1,4 @@
+
 inherit_gem:
   relaxed-rubocop: .rubocop.yml
+

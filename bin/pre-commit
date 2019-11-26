@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export COLUMNS=90
+
 [[ -x bin/deps ]] && source bin/deps
 [[ -x bin/setup ]] && source bin/setup
 

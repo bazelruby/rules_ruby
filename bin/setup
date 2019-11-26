@@ -20,6 +20,7 @@ lib::gem::install rubocop
 inherit_gem:
   relaxed-rubocop: .rubocop.yml
 " > .rubocop.yml
+  run "git add .rubocop.yml"
 }
 
 
