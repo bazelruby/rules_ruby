@@ -1,6 +1,11 @@
 load(
-    ":host_runtime.bzl",
+    "@bazelruby_ruby_rules//ruby/toolchains:host_runtime.bzl",
     _ruby_host_runtime = "ruby_host_runtime",
+)
+
+load(
+    "@bazelruby_ruby_rules//ruby/toolchains:ruby26_runtime.bzl",
+    _ruby_26_runtime = "ruby_26_runtime",
 )
 
 def _register_host_runtime():
@@ -10,6 +15,19 @@ def _register_host_runtime():
         "@org_ruby_lang_ruby_host//:ruby_host",
     )
 
-def ruby_register_toolchains():
+def _register_ruby_26_runtime():
+    ruby_26_runtime(name = "org_ruby_lang_ruby_26")
+
+    native.register_toolchains(
+        "@org_ruby_lang_ruby_26//:ruby_host",
+    )
+
+
+def ruby_register_toolchains(version = "host"):
     """Registersr ruby toolchains in the WORKSPACE file."""
-    _register_host_runtime()
+    if version == "host":
+    	_register_host_runtime()
+    else if version == "2.6":
+    	_register_ruby_26_runtime()
+	  else:
+	  	fail("unknown ruby version in `ruby_register_toolchains`")
