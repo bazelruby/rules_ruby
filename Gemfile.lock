@@ -7,6 +7,7 @@ GEM
     parser (2.6.0.0)
       ast (~> 2.4.0)
     rainbow (3.0.0)
+    relaxed-rubocop (2.4)
     rubocop (0.76.0)
       jaro_winkler (~> 1.5.1)
       parallel (~> 1.10)
@@ -21,7 +22,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  relaxed-rubocop
   rubocop (~> 0.76.0)
 
 BUNDLED WITH
-   1.9
+   1.17.3
