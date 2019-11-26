@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 toolchain_root = File.dirname(__FILE__)
 list_file = File.join(toolchain_root, 'loadpath.lst')
 
