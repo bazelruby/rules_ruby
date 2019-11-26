@@ -1,6 +1,6 @@
 load(":bundler.bzl", "install_bundler")
 load("//ruby/private:constants.bzl", "RULES_RUBY_WORKSPACE_NAME")
-load("//ruby/private/tools:repository_context.bzl", "ruby_repository_context")
+load("//ruby/private/toolchains:repository_context.bzl", "ruby_repository_context")
 
 def _is_subpath(path, ancestors):
     """Determines if path is a subdirectory of one of the ancestors"""
@@ -128,19 +128,19 @@ ruby_host_runtime = repository_rule(
             allow_single_file = True,
         ),
         "_install_bundler": attr.label(
-            default = "%s//ruby/private:install_bundler.rb" % (
+            default = "%s//ruby/private/toolchains:install_bundler.rb" % (
                 RULES_RUBY_WORKSPACE_NAME
             ),
             allow_single_file = True,
         ),
         "_buildfile_template": attr.label(
-            default = "%s//ruby/private:BUILD.host_runtime.tpl" % (
+            default = "%s//ruby/private/toolchains:BUILD.host_runtime.tpl" % (
                 RULES_RUBY_WORKSPACE_NAME
             ),
             allow_single_file = True,
         ),
         "_interpreter_wrapper_template": attr.label(
-            default = "%s//ruby/private:interpreter_wrapper.tpl" % (
+            default = "%s//ruby/private/toolchains:interpreter_wrapper.tpl" % (
                 RULES_RUBY_WORKSPACE_NAME
             ),
             allow_single_file = True,
