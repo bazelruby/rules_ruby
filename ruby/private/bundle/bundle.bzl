@@ -16,6 +16,8 @@ def bundle_install_impl(ctx):
     ctx.symlink(ctx.attr.gemfile, "Gemfile")
     ctx.symlink(ctx.attr.gemfile_lock, "Gemfile.lock")
     ctx.symlink(ctx.attr._create_bundle_build_file, "create_bundle_build_file.rb")
+
+    # TODO(kig) Make Gemspec reference from Gemfile actually work
     if ctx.attr.gemspec:
         ctx.symlink(ctx.attr.gemspec, ctx.path(ctx.attr.gemspec).basename)
 
@@ -28,11 +30,11 @@ def bundle_install_impl(ctx):
         "-i",  # remove all environment variables
         ctx.path(ruby),  # ruby
         "--disable-gems",  # prevent the addition of gem installation directories to the default load path
-        "-I",
-        ctx.path(bundler).dirname.dirname.get_child("lib"),  # Used to tell Ruby where to load the library scripts
-        ctx.path(bundler),  # execute bundler
-        "install",  # install
-        "--deployment",  # In deployment mode, Bundler will 'roll-out' the bundle for production or CI use.
+        "-I",  # Used to tell Ruby where to load the library scripts
+        ctx.path(bundler).dirname.dirname.get_child("lib"),
+        ctx.path(bundler),  # run
+        "install",  #   > bundle install
+        "--deployment",  # In the deployment mode, gems are dumped to --path and frozen; also .bundle/config file is created
         "--standalone",  # Makes a bundle that can work without depending on Rubygems or Bundler at runtime.
         "--frozen",  # Do not allow the Gemfile.lock to be updated after this install.
         "--binstubs=bin",  # Creates a directory and place any executables from the gem there.
@@ -53,14 +55,14 @@ def bundle_install_impl(ctx):
     args = [
         "env",
         "-i",  # remove all environment variables
-        ctx.path(ruby),  # ruby
+        ctx.path(ruby),  # ruby interpreter
         "--disable-gems",  # prevent the addition of gem installation directories to the default load path
-        "-I",
-        ctx.path(bundler).dirname.dirname.get_child("lib"),  # Used to tell Ruby where to load the library scripts
-        "create_bundle_build_file.rb",
-        "BUILD.bazel",
-        "Gemfile.lock",
-        ctx.name,
+        "-I",  # -I lib (adds this folder to $LOAD_PATH where ruby searchesf for things)
+        ctx.path(bundler).dirname.dirname.get_child("lib"),
+        "create_bundle_build_file.rb",  # The template used to created bundle file
+        "BUILD.bazel",  # Bazel build file (can be empty)
+        "Gemfile.lock",  # Gemfile.lock where we list all direct and transitive dependencies
+        ctx.name,  # Name of the target
         repr(exclude),
         RULES_RUBY_WORKSPACE_NAME,
     ]
