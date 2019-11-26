@@ -29,3 +29,11 @@ end
 #    it is invoked by rpsec/autorun. So #warn_with raises an exception
 # 5. The process fails with an unhandled exception.
 ENV['HOME'] ||= '/'
+
+require_relative '../script'
+
+describe OSSRand do
+  it begin
+    expect(oss_rand()).to be String
+  end
+end

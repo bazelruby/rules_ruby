@@ -4,16 +4,8 @@ workspace(name = "bazelruby_ruby_rules_example")
 # rules_ruby itself...
 local_repository(
     name = "bazelruby_ruby_rules",
-    path = "..",
+    path = "../..",
 )
-
-# But you'd usually want to fetch rules_ruby from remote.
-#
-# git_repository(
-#     name = "bazelruby_ruby_rules",
-#     remote = "https://github.com/yugui/rules_ruby.git",
-#     tag = "v0.1.0",
-# )
 
 load(
     "@bazelruby_ruby_rules//ruby:deps.bzl",
