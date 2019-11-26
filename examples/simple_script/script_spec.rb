@@ -34,6 +34,6 @@ require_relative '../script'
 
 describe OSSRand do
   it begin
-    expect(oss_rand()).to be String
+    expect(oss_rand).to be String
   end
 end

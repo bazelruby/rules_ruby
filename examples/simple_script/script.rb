@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require 'openssl'
 require 'lib/foo'
 
-def oss_rand()
-	return "#{OpenSSL::BN.rand(512)}"
+def oss_rand
+  OpenSSL::BN.rand(512).to_s
 end
 
-puts Foo.aha() + " " + oss_rand()
+puts Foo.aha + " " + oss_rand
