@@ -1,16 +1,16 @@
 load("//ruby/private:constants.bzl", "RULES_RUBY_WORKSPACE_NAME")
 
 def _get_interpreter_label(repository_ctx, ruby_sdk):
-  # TODO(yugui) Support windows as rules_nodejs does
-  return Label("%s//:ruby" % ruby_sdk)
+    # TODO(yugui) Support windows as rules_nodejs does
+    return Label("%s//:ruby" % ruby_sdk)
 
 def _get_bundler_label(repository_ctx, ruby_sdk):
-  # TODO(yugui) Support windows as rules_nodejs does
-  return Label("%s//:bundler/exe/bundler" % ruby_sdk)
+    # TODO(yugui) Support windows as rules_nodejs does
+    return Label("%s//:bundler/exe/bundler" % ruby_sdk)
 
 def _get_bundler_lib_label(repository_ctx, ruby_sdk):
-  # TODO(yugui) Support windows as rules_nodejs does
-  return Label("%s//:bundler/lib" % ruby_sdk)
+    # TODO(yugui) Support windows as rules_nodejs does
+    return Label("%s//:bundler/lib" % ruby_sdk)
 
 def bundle_install_impl(ctx):
   ctx.symlink(ctx.attr.gemfile, "Gemfile")
@@ -64,6 +64,15 @@ def bundle_install_impl(ctx):
   if result.return_code:
     fail("Failed to create build file: %s%s" % (result.stdout, result.stderr))
 
+    ctx.template(
+        "BUILD.bazel",
+        ctx.attr._buildfile_template,
+        substitutions = {
+            "{repo_name}": ctx.name,
+            "{exclude}": repr(exclude),
+            "{workspace_name}": RULES_RUBY_WORKSPACE_NAME,
+        },
+    )
 
 bundle_install = repository_rule(
     implementation = bundle_install_impl,
@@ -85,6 +94,7 @@ bundle_install = repository_rule(
             default = "%s//ruby/private/bundle:create_bundle_build_file.rb" % (
                 RULES_RUBY_WORKSPACE_NAME),
             doc = "Creates the BUILD file",
+
             allow_single_file = True,
         ),
     },

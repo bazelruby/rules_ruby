@@ -4,6 +4,6 @@
 require 'foo'
 
 bar = Foo::Bar.new
-
+Foo::Bar.new
 puts Foo::VERSION
 puts bar.inspect
