@@ -1,4 +1,4 @@
 module Foo
-  require 'foo/bar'
-  require 'foo/version'
+  require 'apps/foo-bar/lib/foo/bar'
+  require 'apps/foo-bar/lib/foo/version'
 end

@@ -4,7 +4,6 @@ load(
     "@bazelruby_ruby_rules//ruby:defs.bzl",
     "ruby_library",
 )
-
 ruby_library(
     name = "foo",
     srcs = ["foo.rb"],
@@ -13,4 +12,5 @@ ruby_library(
         "//apps/foo-bar/lib/foo:bar",
         "//apps/foo-bar/lib/foo:version",
     ],
+
 )

@@ -6,8 +6,10 @@ load(
 ruby_binary(
     name = "show_version",
     srcs = ["show_version.rb"],
+    includes = [ "lib" ],
     deps = [
         "//apps/foo-bar/lib:foo",
+        "@foo-bar-bundle//:libs"
     ],
 )
 

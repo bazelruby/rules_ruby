@@ -1,6 +1,6 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
-require 'foo'
+require 'apps/foo-bar/lib/foo'
 
 bar = Foo::Bar.new
 puts Foo::VERSION
