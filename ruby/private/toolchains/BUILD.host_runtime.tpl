@@ -6,6 +6,45 @@ load(
 
 package(default_visibility = ["//visibility:public"])
 
+# init_loadpath file
+filegroup(
+    name = "init_loadpath",
+    srcs = ["init_loadpath.rb"],
+    data = ["loadpath.lst"],
+)
+
+# bundler file and requirements
+filegroup(
+    name = "bundler",
+    srcs = ["bundler/exe/bundler"],
+    data = glob(["bundler/**/*.rb"]),
+)
+
+# all files
+filegroup(
+    name = "runtime",
+    srcs = glob(
+        include = ["**/*"],
+        exclude = [
+            "init_loadpath.rb",
+            "loadpath.lst",
+            "BUILD.bazel",
+            "WORKSPACE",
+        ],
+    ),
+)
+
+# definition of the ruby binary
+sh_binary(
+    name = "ruby_bin",
+    srcs = ["ruby"],
+    data = [":runtime"],
+)
+
+###
+# Toolchain
+###
+
 ruby_toolchain(
     name = "ruby_host",
     interpreter = "//:ruby_bin",
@@ -21,17 +60,9 @@ ruby_toolchain(
     # target_compatible_with = [],
 )
 
-sh_binary(
-    name = "ruby_bin",
-    srcs = ["ruby"],
-    data = [":runtime"],
-)
-
-filegroup(
-    name = "init_loadpath",
-    srcs = ["init_loadpath.rb"],
-    data = ["loadpath.lst"],
-)
+###
+# Not sure what these do here
+###
 
 cc_import(
     name = "libruby",
@@ -45,24 +76,3 @@ cc_library(
     includes = {includes},
     hdrs = glob({hdrs}),
 )
-
-filegroup(
-    name = "bundler",
-    srcs = ["bundler/exe/bundler"],
-    data = glob(["bundler/**/*.rb"]),
-)
-
-filegroup(
-    name = "runtime",
-    srcs = glob(
-        include = ["**/*"],
-        exclude = [
-            "init_loadpath.rb",
-            "loadpath.lst",
-            "BUILD.bazel",
-            "WORKSPACE",
-        ],
-    ),
-)
-
-# vim: set ft=bzl :

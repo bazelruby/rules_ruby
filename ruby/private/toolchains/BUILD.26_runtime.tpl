@@ -1,12 +1,22 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
+load(
+    "{rules_ruby_workspace}//ruby:defs.bzl",
+    "ruby_library",
+    "ruby_toolchain",
+)
+
+
+###
+# Sorbet Ruby
+###
+
 git_repository(
     name = "com_stripe_ruby_typer",
     remote = "https://github.com/sorbet/sorbet",
     commit = "4711cccbfcc59ba3178e3e4dd13c2e6c75c7ecd8",
 )
-
 
 http_archive(
   name = "ruby_2_6_3",
@@ -21,4 +31,24 @@ http_archive(
       "@com_stripe_ruby_typer//third_party/ruby:debug_counter.h.patch",
   ],
   patch_args = ["-p1"],
+)
+
+
+###
+# Toolchain
+###
+
+ruby_toolchain(
+    name = "ruby_host",
+    interpreter = "@ruby_2_6_3//:ruby",
+    bundler = "//:bundler",
+    init_files = ["//:init_loadpath"],
+    rubyopt = [
+        "-I../org_ruby_lang_ruby_host/bundler/lib",
+    ],
+    runtime = "//:runtime",
+    rules_ruby_workspace = "{rules_ruby_workspace}",
+    # TODO(yugui) Extract platform info from RbConfig
+    # exec_compatible_with = [],
+    # target_compatible_with = [],
 )
