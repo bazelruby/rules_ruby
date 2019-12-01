@@ -12,7 +12,7 @@ ruby_toolchain(
     bundler = "//:bundler",
     init_files = ["//:init_loadpath"],
     rubyopt = [
-        "-I../org_ruby_lang_ruby_host/bundler/lib",
+        "-I$(RUNFILES_DIR)/org_ruby_lang_ruby_host/bundler/lib",
     ],
     runtime = "//:runtime",
     rules_ruby_workspace = "{rules_ruby_workspace}",

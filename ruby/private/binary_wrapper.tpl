@@ -107,7 +107,16 @@ def main(args)
 
   main = {main}
   main = File.join(runfiles, main)
-  rubyopt = {rubyopt}
+  rubyopt = {rubyopt}.map do |opt|
+    opt.gsub(/\${(.+?)}/o) do
+      case $1
+      when 'RUNFILES_DIR'
+        runfiles
+      else
+        ENV[$1]
+      end
+    end
+  end
   exec(ruby_program, '--disable-gems', *rubyopt, main, *args)
   # TODO(yugui) Support windows
 end
