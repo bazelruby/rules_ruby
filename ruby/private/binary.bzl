@@ -29,11 +29,18 @@ def _ruby_binary_impl(ctx):
             "main",
         )
 
+    if sdk.is_host:
+        interpreter_file_deps = []
+        interpreter_trans_deps = []
+    else:
+        interpreter_file_deps = [interpreter]
+        interpreter_trans_deps = [sdk.interpreter]
+
     executable = ctx.actions.declare_file(ctx.attr.name)
     deps = _transitive_deps(
         ctx,
-        extra_files = [interpreter, executable],
-        extra_deps = [sdk.interpreter],
+        extra_files = interpreter_file_deps + [executable],
+        extra_deps = interpreter_trans_deps,
     )
 
     rubyopt = reversed(deps.rubyopt.to_list())

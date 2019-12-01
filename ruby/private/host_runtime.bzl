@@ -52,12 +52,6 @@ def _install_host_ruby(ctx, ruby):
         },
     )
 
-    # Install lib
-    paths, rel_paths = _list_libdirs(ruby)
-    for i, (path, rel_path) in enumerate(zip(paths, rel_paths)):
-        if not _is_subpath(rel_path, rel_paths[:i]):
-            ctx.symlink(path, rel_path)
-
     # Install libruby
     static_library = ruby.expand_rbconfig(ruby, "${libdir}/${LIBRUBY_A}")
     if ctx.path(static_library).exists:
@@ -73,7 +67,6 @@ def _install_host_ruby(ctx, ruby):
 
     return struct(
         includedirs = _install_dirs(ctx, ruby, "rubyarchhdrdir", "rubyhdrdir"),
-        libdirs = rel_paths,
         static_library = _relativate(static_library),
         shared_library = _relativate(shared_library),
     )
@@ -104,8 +97,6 @@ def _ruby_host_runtime_impl(ctx):
         "BUILD.bazel",
         ctx.attr._buildfile_template,
         substitutions = {
-            "{ruby_path}": repr(ruby.rel_interpreter_path),
-            "{ruby_basename}": repr(ruby.interpreter_name),
             "{includes}": repr(installed.includedirs),
             "{hdrs}": repr(["%s/**/*.h" % path for path in installed.includedirs]),
             "{static_library}": repr(installed.static_library),

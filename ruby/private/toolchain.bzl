@@ -7,6 +7,7 @@ RubyRuntimeInfo = provider(
         "bundler": "A label which points bundler command",
         "runtime": "A list of labels which points runtime libraries",
         "rubyopt": "A list of strings which should be passed to the interpreter as command line options",
+        "is_host": "True only if the runtime is the host ruby ",
     },
 )
 
@@ -17,6 +18,7 @@ def _ruby_toolchain_impl(ctx):
             bundler = ctx.attr.bundler,
             runtime = ctx.files.runtime,
             rubyopt = ctx.attr.rubyopt,
+            is_host = ctx.attr.is_host,
         ),
     )]
 
@@ -43,6 +45,7 @@ _ruby_toolchain = rule(
         "rubyopt": attr.string_list(
             default = [],
         ),
+        "is_host": attr.bool(default = False),
     },
 )
 
@@ -52,6 +55,7 @@ def ruby_toolchain(
         bundler,
         runtime,
         rubyopt = [],
+        is_host = False,
         rules_ruby_workspace = RULES_RUBY_WORKSPACE_NAME,
         **kwargs):
     impl_name = name + "_sdk"
@@ -59,8 +63,9 @@ def ruby_toolchain(
         name = impl_name,
         interpreter = interpreter,
         bundler = bundler,
-        rubyopt = rubyopt,
         runtime = runtime,
+        rubyopt = rubyopt,
+        is_host = is_host,
     )
 
     native.toolchain(

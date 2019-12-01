@@ -14,6 +14,7 @@ ruby_toolchain(
         "-I$(RUNFILES_DIR)/org_ruby_lang_ruby_host/bundler/lib",
     ],
     runtime = "//:runtime",
+    is_host = True,
     rules_ruby_workspace = "{rules_ruby_workspace}",
     # TODO(yugui) Extract platform info from RbConfig
     # exec_compatible_with = [],
