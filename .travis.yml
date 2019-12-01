@@ -34,10 +34,10 @@ before_install:
 - bundle install
 install:
 - bazel $BAZEL_OPTS build $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 -- //...
-- (cd examples && bazel $BAZEL_OPTS build $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 -- //...)
+- (cd examples/simple_script && bazel $BAZEL_OPTS build $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 -- //...)
 script:
 - bazel $BAZEL_OPTS test $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 --test_output=streamed -- //...
-- (cd examples && bazel $BAZEL_OPTS test $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 --test_output=streamed -- //...)
+- (cd examples/simple_script && bazel $BAZEL_OPTS test $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 --test_output=streamed -- //...)
 # If this fails run `bazel run :buildifier`
 - bazel run :buildifier-check
 # If this fails run `bundle exec rubocop -a`

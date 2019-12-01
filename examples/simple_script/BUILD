@@ -17,9 +17,12 @@ ruby_binary(
 )
 
 ruby_test(
-    name = "default_test",
-    srcs = ["script_spec.rb"],
-    main = "script_spec.rb",
+    name = "script_spec",
+    srcs = [
+        "script.rb",
+        "spec/script_spec.rb",
+    ],
+    main = "spec/script_spec.rb",
     rubyopt = ["-rrspec/autorun"],  # require autorun because it is needed
     deps = [
         "//lib:foo",
