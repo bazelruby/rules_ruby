@@ -11,7 +11,7 @@ RubyRuntimeInfo = provider(
     },
 )
 
-def _ruby_toolchain_impl(ctx):
+def _rb_toolchain_impl(ctx):
     return [platform_common.ToolchainInfo(
         ruby_runtime = RubyRuntimeInfo(
             interpreter = ctx.attr.interpreter,
@@ -22,8 +22,8 @@ def _ruby_toolchain_impl(ctx):
         ),
     )]
 
-_ruby_toolchain = rule(
-    implementation = _ruby_toolchain_impl,
+_rb_toolchain = rule(
+    implementation = _rb_toolchain_impl,
     attrs = {
         "interpreter": attr.label(
             mandatory = True,
@@ -49,7 +49,7 @@ _ruby_toolchain = rule(
     },
 )
 
-def ruby_toolchain(
+def rb_toolchain(
         name,
         interpreter,
         bundler,
@@ -59,7 +59,7 @@ def ruby_toolchain(
         rules_ruby_workspace = RULES_RUBY_WORKSPACE_NAME,
         **kwargs):
     impl_name = name + "_sdk"
-    _ruby_toolchain(
+    _rb_toolchain(
         name = impl_name,
         interpreter = interpreter,
         bundler = bundler,
@@ -72,5 +72,5 @@ def ruby_toolchain(
         name = name,
         toolchain_type = "%s//ruby:toolchain_type" % rules_ruby_workspace,
         toolchain = ":%s" % impl_name,
-        **kwargs
+        **kwargs,
     )

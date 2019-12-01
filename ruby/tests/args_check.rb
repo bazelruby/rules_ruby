@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Checks if args to ruby_binary rules propagate to the actual
+# Checks if args to rb_binary rules propagate to the actual
 # ruby processes
 
 expected = %w[foo bar baz]

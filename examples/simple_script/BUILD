@@ -2,11 +2,11 @@ package(default_visibility = ["//:__subpackages__"])
 
 load(
     "@bazelruby_ruby_rules//ruby:defs.bzl",
-    "ruby_binary",
-    "ruby_test",
+    "rb_binary",
+    "rb_test",
 )
 
-ruby_binary(
+rb_binary(
     name = "default_bin",
     srcs = ["script.rb"],
     main = "script.rb",
@@ -16,7 +16,7 @@ ruby_binary(
     ],
 )
 
-ruby_test(
+rb_test(
     name = "script_spec",
     srcs = [
         "script.rb",

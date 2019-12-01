@@ -1,11 +1,11 @@
 load(
     "@bazelruby_ruby_rules//ruby/private:library.bzl",
-    _library = "ruby_library",
+    _library = "rb_library",
 )
 load(
     "@bazelruby_ruby_rules//ruby/private:binary.bzl",
-    _binary = "ruby_binary",
-    _test = "ruby_test",
+    _binary = "rb_binary",
+    _test = "rb_test",
 )
 
 def ruby_library(**attrs):

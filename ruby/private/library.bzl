@@ -5,7 +5,7 @@ load(
     _transitive_deps = "transitive_deps",
 )
 
-def _ruby_library_impl(ctx):
+def _rb_library_impl(ctx):
     if not ctx.attr.srcs and not ctx.attr.deps:
         fail("At least srcs or deps must be present")
 
@@ -22,8 +22,8 @@ def _ruby_library_impl(ctx):
         ),
     ]
 
-ruby_library = rule(
-    implementation = _ruby_library_impl,
+rb_library = rule(
+    implementation = _rb_library_impl,
     attrs = {
         "srcs": attr.label_list(
             allow_files = True,

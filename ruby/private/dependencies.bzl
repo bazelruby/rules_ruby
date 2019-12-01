@@ -1,6 +1,6 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-def ruby_rules_dependencies():
+def rb_rules_dependencies():
     if "bazel_skylib" not in native.existing_rules():
         http_archive(
             name = "bazel_skylib",

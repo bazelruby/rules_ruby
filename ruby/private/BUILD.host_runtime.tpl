@@ -1,12 +1,12 @@
 load(
     "{rules_ruby_workspace}//ruby:defs.bzl",
-    "ruby_library",
-    "ruby_toolchain",
+    "rb_library",
+    "rb_toolchain",
 )
 
 package(default_visibility = ["//visibility:public"])
 
-ruby_toolchain(
+rb_toolchain(
     name = "ruby_host",
     interpreter = "//:ruby_bin",
     bundler = "//:bundler",

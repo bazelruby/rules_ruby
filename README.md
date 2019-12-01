@@ -3,9 +3,9 @@
 - [Status](#status)
 - [How to use](#how-to-use)
 - [Rules](#rules)
-	- [`ruby_library`](#rubylibrary)
-	- [`ruby_binary`](#rubybinary)
-	- [`ruby_test`](#rubytest)
+	- [`rb_library`](#rblibrary)
+	- [`rb_binary`](#rbbinary)
+	- [`rb_test`](#rbtest)
 	- [`bundle_install`](#bundleinstall)
 - [What's coming next](#whats-coming-next)
 - [Contributing](#contributing)
@@ -26,49 +26,49 @@ Work in progress.
 
 ## How to use
 
-Add `ruby_rules_dependencies` and `ruby_register_toolchains` into your `WORKSPACE` file.
+Add `rb_rules_dependencies` and `rb_register_toolchains` into your `WORKSPACE` file.
 
 ```python
 git_repository(
     name = "bazelruby_ruby_rules",
     remote = "https://github.com/bazelruby/rules_ruby.git",
-    tag = "v0.1.0",
+    tag = "v0.2.0",
 )
 
 load(
     "@bazelruby_ruby_rules//ruby:deps.bzl",
-    "ruby_register_toolchains",
-    "ruby_rules_dependencies",
+    "rb_register_toolchains",
+    "rb_rules_dependencies",
 )
 
-ruby_rules_dependencies()
+rb_rules_dependencies()
 
-ruby_register_toolchains()
+rb_register_toolchains()
 ```
 
-Add `ruby_library`, `ruby_binary` or `ruby_test` into your `BUILD.bazel` files.
+Add `rb_library`, `rb_binary` or `rb_test` into your `BUILD.bazel` files.
 
 ```python
 load(
     "@bazelruby_ruby_rules//ruby:defs.bzl",
-    "ruby_binary",
-    "ruby_library",
-    "ruby_test",
+    "rb_binary",
+    "rb_library",
+    "rb_test",
 )
 
-ruby_library(
+rb_library(
     name = "foo",
     srcs = ["lib/foo.rb"],
     includes = ["lib"],
 )
 
-ruby_binary(
+rb_binary(
     name = "bar",
     srcs = ["bin/bar"],
     deps = [":foo"],
 )
 
-ruby_test(
+rb_test(
     name = "foo_test",
     srcs = ["test/foo_test.rb"],
     deps = [":foo"],
@@ -77,10 +77,10 @@ ruby_test(
 
 ## Rules
 
-### `ruby_library`
+### `rb_library`
 
 <pre>
-ruby_library(name, deps, srcs, data, compatible_with, deprecation, distribs, features, licenses, restricted_to, tags, testonly, toolchains, visibility)
+rb_library(name, deps, srcs, data, compatible_with, deprecation, distribs, features, licenses, restricted_to, tags, testonly, toolchains, visibility)
 </pre>
 
 <table class="table table-condensed table-bordered table-params">
@@ -152,10 +152,10 @@ ruby_library(name, deps, srcs, data, compatible_with, deprecation, distribs, fea
   </tbody>  
 </table>
 
-### `ruby_binary`
+### `rb_binary`
 
 <pre>
-ruby_binary(name, deps, srcs, data, main, compatible_with, deprecation, distribs, features, licenses, restricted_to, tags, testonly, toolchains, visibility, args, output_licenses)
+rb_binary(name, deps, srcs, data, main, compatible_with, deprecation, distribs, features, licenses, restricted_to, tags, testonly, toolchains, visibility, args, output_licenses)
 </pre>
 
 <table class="table table-condensed table-bordered table-params">
@@ -233,10 +233,10 @@ ruby_binary(name, deps, srcs, data, main, compatible_with, deprecation, distribs
   </tbody>  
 </table>
 
-### `ruby_test`
+### `rb_test`
 
 <pre>
-ruby_test(name, deps, srcs, data, main, compatible_with, deprecation, distribs, features, licenses, restricted_to, tags, testonly, toolchains, visibility, args, size, timeout, flaky, local, shard_count)
+rb_test(name, deps, srcs, data, main, compatible_with, deprecation, distribs, features, licenses, restricted_to, tags, testonly, toolchains, visibility, args, size, timeout, flaky, local, shard_count)
 </pre>
 
 <table class="table table-condensed table-bordered table-params">
@@ -316,7 +316,7 @@ ruby_test(name, deps, srcs, data, main, compatible_with, deprecation, distribs, 
 
 ### `bundle_install`
 
-Installs gems with Bundler, and make them available as a `ruby_library`.
+Installs gems with Bundler, and make them available as a `rb_library`.
 
 Example: `WORKSPACE`:
 
@@ -329,13 +329,13 @@ git_repository(
 
 load(
     "@bazelruby_ruby_rules//ruby:deps.bzl",
-    "ruby_register_toolchains",
-    "ruby_rules_dependencies",
+    "rb_register_toolchains",
+    "rb_rules_dependencies",
 )
 
-ruby_rules_dependencies()
+rb_rules_dependencies()
 
-ruby_register_toolchains()
+rb_register_toolchains()
 
 load("@bazelruby_ruby_rules//ruby:defs.bzl", "bundle_install")
 
@@ -349,7 +349,7 @@ bundle_install(
 Example: `lib/BUILD.bazel`:
 
 ```python
-ruby_library(
+rb_library(
     name = "foo",
     srcs = ["foo.rb"],
     deps = ["@gems//:libs"],

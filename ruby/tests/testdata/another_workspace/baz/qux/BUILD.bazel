@@ -1,15 +1,15 @@
 package(default_visibility = ["//visibility:public"])
 
-load("@bazelruby_ruby_rules//ruby:defs.bzl", "ruby_library")
+load("@bazelruby_ruby_rules//ruby:defs.bzl", "rb_library")
 
-ruby_library(
+rb_library(
     name = "j",
     srcs = ["j.rb"],
     includes = ["baz"],
     deps = [":k"],
 )
 
-ruby_library(
+rb_library(
     name = "k",
     srcs = ["k.rb"],
 )

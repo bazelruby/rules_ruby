@@ -15,8 +15,9 @@ def _relativate(path):
     if not path:
         return path
 
-    # Assuming that absolute paths start with "/".
-    # TODO(yugui) support windows
+        # Assuming that absolute paths start with "/".
+        # TODO(yugui) support windows
+
     if path.startswith("/"):
         return path[1:]
     else:
@@ -24,7 +25,7 @@ def _relativate(path):
 
 def _list_libdirs(ruby):
     """List the LOAD_PATH of the ruby"""
-    paths = ruby.eval(ruby, 'print $:.join("\\n")')
+    paths = ruby.eval(ruby, "print $:.join(\"\\n\")")
     paths = sorted(paths.split("\n"))
     rel_paths = [_relativate(path) for path in paths]
     return (paths, rel_paths)
@@ -71,7 +72,7 @@ def _install_host_ruby(ctx, ruby):
         shared_library = _relativate(shared_library),
     )
 
-def _ruby_host_runtime_impl(ctx):
+def _rb_host_runtime_impl(ctx):
     # Locates path to the interpreter
     if ctx.attr.interpreter_path:
         interpreter_path = ctx.path(ctx.attr.interpreter_path)
@@ -106,8 +107,8 @@ def _ruby_host_runtime_impl(ctx):
         executable = False,
     )
 
-ruby_host_runtime = repository_rule(
-    implementation = _ruby_host_runtime_impl,
+rb_host_runtime = repository_rule(
+    implementation = _rb_host_runtime_impl,
     attrs = {
         "interpreter_path": attr.string(),
         "_install_bundler": attr.label(

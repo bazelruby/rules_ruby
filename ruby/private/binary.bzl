@@ -11,7 +11,7 @@ def _to_manifest_path(ctx, file):
     else:
         return ("%s/%s" % (ctx.workspace_name, file.short_path))
 
-def _ruby_binary_impl(ctx):
+def _rb_binary_impl(ctx):
     sdk = ctx.toolchains[TOOLCHAIN_TYPE_NAME].ruby_runtime
     interpreter = sdk.interpreter[DefaultInfo].files_to_run.executable
 
@@ -83,15 +83,15 @@ _ATTRS = {
     ),
 }
 
-ruby_binary = rule(
-    implementation = _ruby_binary_impl,
+rb_binary = rule(
+    implementation = _rb_binary_impl,
     attrs = _ATTRS,
     executable = True,
     toolchains = [TOOLCHAIN_TYPE_NAME],
 )
 
-ruby_test = rule(
-    implementation = _ruby_binary_impl,
+rb_test = rule(
+    implementation = _rb_binary_impl,
     attrs = _ATTRS,
     test = True,
     toolchains = [TOOLCHAIN_TYPE_NAME],

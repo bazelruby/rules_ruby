@@ -22,7 +22,7 @@ def transitive_deps(ctx, extra_files = [], extra_deps = []):
     Also adds extra_deps to the roots of the traversal.
 
     Args:
-      ctx: a ctx object for a ruby_library or a ruby_binary rule.
+      ctx: a ctx object for a rb_library or a rb_binary rule.
       extra_files: a list of File objects to be added to the default_files
       extra_deps: a list of Target objects.
     """

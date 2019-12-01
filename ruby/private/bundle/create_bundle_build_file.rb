@@ -2,7 +2,7 @@
 
 TEMPLATE = 'load(
   "{workspace_name}//ruby:defs.bzl",
-  "ruby_library",
+  "rb_library",
 )
 
 package(default_visibility = ["//visibility:public"])
@@ -13,14 +13,14 @@ filegroup(
   data = [":libs"],
 )
 
-ruby_library(
+rb_library(
   name = "bundler_setup",
   srcs = ["lib/bundler/setup.rb"],
   visibility = ["//visibility:private"],
 )
 
 # DEPRECATED: use :all instead
-ruby_library(
+rb_library(
   name = "libs",
   srcs = glob(
     include = [
@@ -37,7 +37,7 @@ ruby_library(
 '
 
 GEM_TEMPLATE = '
-ruby_library(
+rb_library(
   name = "{name}",
   srcs = glob(
     include = [
@@ -54,7 +54,7 @@ ruby_library(
 '
 
 ALL_TEMPLATE = '
-ruby_library(
+rb_library(
   name = "all",
   deps = {deps},
   rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/lib/bundler/setup.rb"],

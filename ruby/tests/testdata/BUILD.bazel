@@ -1,6 +1,6 @@
 load(
     "//ruby:defs.bzl",
-    "ruby_library",
+    "rb_library",
 )
 
 package(default_visibility = ["//ruby/tests:__pkg__"])
@@ -18,60 +18,60 @@ package(default_visibility = ["//ruby/tests:__pkg__"])
 #
 # g -----h-----i
 
-ruby_library(
+rb_library(
     name = "a",
     srcs = ["a.rb"],
     includes = ["somewhere/a"],
     deps = [":d"],
 )
 
-ruby_library(
+rb_library(
     name = "b",
     srcs = ["b.rb"],
     includes = ["somewhere/b"],
     deps = [":d"],
 )
 
-ruby_library(
+rb_library(
     name = "c",
     srcs = ["c.rb"],
     includes = ["somewhere/c"],
     deps = [":e"],
 )
 
-ruby_library(
+rb_library(
     name = "d",
     srcs = ["d.rb"],
     includes = ["somewhere/d"],
     deps = [":e"],
 )
 
-ruby_library(
+rb_library(
     name = "e",
     srcs = ["e.rb"],
     includes = ["somewhere/e"],
 )
 
-ruby_library(
+rb_library(
     name = "f",
     srcs = ["f.rb"],
     includes = ["somewhere/f"],
 )
 
-ruby_library(
+rb_library(
     name = "g",
     srcs = ["foo/g.rb"],
     deps = [":h"],
 )
 
-ruby_library(
+rb_library(
     name = "h",
     srcs = ["foo/h.rb"],
     includes = ["ruby/tests/testdata"],
     deps = [":i"],
 )
 
-ruby_library(
+rb_library(
     name = "i",
     srcs = ["bar/i.rb"],
 )
