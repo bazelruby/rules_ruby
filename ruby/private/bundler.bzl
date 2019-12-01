@@ -1,4 +1,4 @@
-_DEFAULT_VERSION = "1.16.1"
+_DEFAULT_VERSION = "2.0.2"
 
 def install_bundler(ctx, interpreter, install_bundler, dest, version = _DEFAULT_VERSION):
     args = ["env", "-i", interpreter, install_bundler, version, dest]
