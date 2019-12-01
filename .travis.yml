@@ -47,4 +47,4 @@ env:
   global:
   - PATH=$PATH:$HOME/local/bin
   - BAZEL_OPTS="--host_jvm_args=-Xmx500m --host_jvm_args=-Xms500m"
-  - BAZEL_BUILD_OPTS="--curses=no --genrule_strategy=standalone --spawn_strategy=standalone --verbose_failures -j 20"
+  - BAZEL_BUILD_OPTS="--curses=no --verbose_failures -j 20"
