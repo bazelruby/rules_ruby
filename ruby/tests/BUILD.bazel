@@ -3,6 +3,8 @@ load(
     "ruby_binary",
     "ruby_test",
 )
+load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 
 # Checks if args are correctly passed to the ruby script.
 ruby_test(
@@ -69,13 +71,13 @@ genrule(
         "echo '#!/bin/sh -e' > $@",
         "echo true >> $@",
     ]),
+    message = "Running ruby_bin in genrule",
     output_to_bindir = 1,
     tools = [
         "args_check.rb",
         "@org_ruby_lang_ruby_host//:ruby_bin",
         "@org_ruby_lang_ruby_host//:runtime",
     ],
-    message = "Running ruby_bin in genrule",
 )
 
 sh_test(
@@ -154,15 +156,15 @@ sh_test(
 
 genrule(
     name = "dummy_genfile_load_path_in_runfiles",
-    message = "Running :load_path_in_runfiles in genrule",
     outs = ["load_path_in_runfiles_test_5a.sh"],
-    tools = [":load_path_in_runfiles"],
     cmd = " && ".join([
         "$(location :load_path_in_runfiles)",
         "echo '#!/bin/sh -e' > $@",
         "echo 'true' >> $@",
     ]),
     executable = True,
+    message = "Running :load_path_in_runfiles in genrule",
+    tools = [":load_path_in_runfiles"],
 )
 
 # TODO(yugui) Add a test for case 6a.
@@ -224,4 +226,41 @@ ruby_test(
         "//conditions:default": ["example_ext.so"],
     }),
     main = "ext_test.rb",
+)
+
+## Containerization test
+
+# TODO(yugui) Make it easier to build a tar with the right runfiles structure
+pkg_tar(
+    name = "load_path_in_runfiles_container_layer",
+    srcs = [":load_path_in_runfiles"],
+    include_runfiles = True,
+    package_dir = "/app",
+    remap_paths = {
+        "ruby": "load_path_in_runfiles.runfiles/bazelruby_ruby_rules/ruby",
+        ".": "load_path_in_runfiles.runfiles/",
+    },
+    strip_prefix = "dummy",
+    symlinks = {
+        "/app/load_path_in_runfiles.runfiles/bazelruby_ruby_rules/external": "/app/load_path_in_runfiles.runfiles",
+        "/app/load_path_in_runfiles": "/app/load_path_in_runfiles.runfiles/bazelruby_ruby_rules/ruby/tests/load_path_in_runfiles",
+    },
+)
+
+container_image(
+    name = "load_path_in_runfiles_container_image",
+    base = "@ruby_base_container//image",
+    entrypoint = ["/app/load_path_in_runfiles"],
+    tars = [":load_path_in_runfiles_container_layer"],
+)
+
+sh_test(
+    name = "load_path_in_runfiles_container_test",
+    srcs = ["container_test.sh"],
+    args = [
+        "$(location :load_path_in_runfiles_container_image)",
+        "bazel/ruby/tests:load_path_in_runfiles_container_image",
+    ],
+    data = [":load_path_in_runfiles_container_image"],
+    tags = ["docker"],
 )
