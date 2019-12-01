@@ -39,7 +39,6 @@ def _install_dirs(ctx, ruby, *names):
 
 def _install_host_ruby(ctx, ruby):
     # Places SDK
-    ctx.symlink(ctx.attr._init_loadpath_rb, "init_loadpath.rb")
     ctx.symlink(ruby.interpreter_realpath, ruby.rel_interpreter_path)
 
     # Places the interpreter at a predictable place regardless of the actual binary name
@@ -72,7 +71,6 @@ def _install_host_ruby(ctx, ruby):
     else:
         shared_library = None
 
-    ctx.file("loadpath.lst", "\n".join(rel_paths))
     return struct(
         includedirs = _install_dirs(ctx, ruby, "rubyarchhdrdir", "rubyhdrdir"),
         libdirs = rel_paths,
@@ -121,12 +119,6 @@ ruby_host_runtime = repository_rule(
     implementation = _ruby_host_runtime_impl,
     attrs = {
         "interpreter_path": attr.string(),
-        "_init_loadpath_rb": attr.label(
-            default = "%s//:ruby/tools/init_loadpath.rb" % (
-                RULES_RUBY_WORKSPACE_NAME
-            ),
-            allow_single_file = True,
-        ),
         "_install_bundler": attr.label(
             default = "%s//ruby/private:install_bundler.rb" % (
                 RULES_RUBY_WORKSPACE_NAME

@@ -10,7 +10,6 @@ ruby_toolchain(
     name = "ruby_host",
     interpreter = "//:ruby_bin",
     bundler = "//:bundler",
-    init_files = ["//:init_loadpath"],
     rubyopt = [
         "-I$(RUNFILES_DIR)/org_ruby_lang_ruby_host/bundler/lib",
     ],
@@ -25,12 +24,6 @@ sh_binary(
     name = "ruby_bin",
     srcs = ["ruby"],
     data = [":runtime"],
-)
-
-filegroup(
-    name = "init_loadpath",
-    srcs = ["init_loadpath.rb"],
-    data = ["loadpath.lst"],
 )
 
 cc_import(
@@ -57,8 +50,6 @@ filegroup(
     srcs = glob(
         include = ["**/*"],
         exclude = [
-            "init_loadpath.rb",
-            "loadpath.lst",
             "BUILD.bazel",
             "WORKSPACE",
         ],
