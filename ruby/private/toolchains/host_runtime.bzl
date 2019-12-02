@@ -39,7 +39,6 @@ def _install_dirs(ctx, ruby, *names):
 
 def _install_host_ruby(ctx, ruby):
     # Places SDK
-    ctx.symlink(ctx.attr._init_loadpath_rb, "init_loadpath.rb")
     ctx.symlink(ruby.interpreter_realpath, ruby.rel_interpreter_path)
 
     # Places the interpreter at a predictable place regardless of the actual binary name
@@ -52,12 +51,6 @@ def _install_host_ruby(ctx, ruby):
             "{rel_interpreter_path}": ruby.rel_interpreter_path,
         },
     )
-
-    # Install lib
-    paths, rel_paths = _list_libdirs(ruby)
-    for i, (path, rel_path) in enumerate(zip(paths, rel_paths)):
-        if not _is_subpath(rel_path, rel_paths[:i]):
-            ctx.symlink(path, rel_path)
 
     # Install libruby
     static_library = ruby.expand_rbconfig(ruby, "${libdir}/${LIBRUBY_A}")
@@ -72,10 +65,8 @@ def _install_host_ruby(ctx, ruby):
     else:
         shared_library = None
 
-    ctx.file("loadpath.lst", "\n".join(rel_paths))
     return struct(
         includedirs = _install_dirs(ctx, ruby, "rubyarchhdrdir", "rubyhdrdir"),
-        libdirs = rel_paths,
         static_library = _relativate(static_library),
         shared_library = _relativate(shared_library),
     )
@@ -106,8 +97,6 @@ def _ruby_host_runtime_impl(ctx):
         "BUILD.bazel",
         ctx.attr._buildfile_template,
         substitutions = {
-            "{ruby_path}": repr(ruby.rel_interpreter_path),
-            "{ruby_basename}": repr(ruby.interpreter_name),
             "{includes}": repr(installed.includedirs),
             "{hdrs}": repr(["%s/**/*.h" % path for path in installed.includedirs]),
             "{static_library}": repr(installed.static_library),
@@ -121,12 +110,6 @@ ruby_host_runtime = repository_rule(
     implementation = _ruby_host_runtime_impl,
     attrs = {
         "interpreter_path": attr.string(),
-        "_init_loadpath_rb": attr.label(
-            default = "%s//:ruby/tools/init_loadpath.rb" % (
-                RULES_RUBY_WORKSPACE_NAME
-            ),
-            allow_single_file = True,
-        ),
         "_install_bundler": attr.label(
             default = "%s//ruby/private/toolchains:install_bundler.rb" % (
                 RULES_RUBY_WORKSPACE_NAME

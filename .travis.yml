@@ -34,10 +34,10 @@ before_install:
 - bundle install
 install:
 - bazel $BAZEL_OPTS build $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 -- //...
-- (cd examples && bazel $BAZEL_OPTS build $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 -- //...)
+- (cd examples/simple_script && bazel $BAZEL_OPTS build $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 -- //...)
 script:
 - bazel $BAZEL_OPTS test $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 --test_output=streamed -- //...
-- (cd examples && bazel $BAZEL_OPTS test $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 --test_output=streamed -- //...)
+- (cd examples/simple_script && bazel $BAZEL_OPTS test $BAZEL_BUILD_OPTS --show_progress_rate_limit 0 --test_output=streamed -- //...)
 # If this fails run `bazel run :buildifier`
 - bazel run :buildifier-check
 # If this fails run `bundle exec rubocop -a`
@@ -47,4 +47,4 @@ env:
   global:
   - PATH=$PATH:$HOME/local/bin
   - BAZEL_OPTS="--host_jvm_args=-Xmx500m --host_jvm_args=-Xms500m"
-  - BAZEL_BUILD_OPTS="--curses=no --genrule_strategy=standalone --spawn_strategy=standalone --verbose_failures -j 20"
+  - BAZEL_BUILD_OPTS="--curses=no --verbose_failures -j 20"

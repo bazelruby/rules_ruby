@@ -1,0 +1,12 @@
+#!/bin/sh -eu
+
+if [ $# -lt 2 ]; then
+  echo "Usage: $0 CONTAINER_IMAGE_LOADER CONTAINER_IMAGE_NAME" >&2
+  exit 1
+fi
+
+CONTAINER_IMAGE_LOADER=$1
+CONTAINER_IMAGE_NAME=$2
+
+$CONTAINER_IMAGE_LOADER
+docker run $CONTAINER_IMAGE_NAME

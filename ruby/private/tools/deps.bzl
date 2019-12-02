@@ -38,8 +38,9 @@ def transitive_deps(ctx, extra_files = [], extra_deps = []):
         transitive_files = depset(transitive = deps.data_files),
         collect_data = True,
     )
+    workspace = ctx.label.workspace_name or ctx.workspace_name
     includes = [
-        paths.join(ctx.label.workspace_root, inc)
+        paths.join(workspace, inc)
         for inc in ctx.attr.includes
     ]
     return struct(
