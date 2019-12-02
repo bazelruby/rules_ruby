@@ -40,22 +40,39 @@ def _ruby_binary_impl(ctx):
     deps = _transitive_deps(
         ctx,
         extra_files = interpreter_file_deps + [executable],
-        extra_deps = interpreter_trans_deps,
+        extra_deps = interpreter_trans_deps + ctx.attr._misc_deps,
     )
 
     rubyopt = reversed(deps.rubyopt.to_list())
-
+    intermediate_executable = ctx.actions.declare_file("%s.tpl.intermediate" % ctx.attr.name)
     ctx.actions.expand_template(
         template = ctx.file._wrapper_template,
-        output = executable,
+        output = intermediate_executable,
         substitutions = {
-            "{interpreter}": interpreter.short_path,
             "{loadpaths}": repr(deps.incpaths.to_list()),
             "{rubyopt}": repr(rubyopt),
             "{main}": repr(_to_manifest_path(ctx, main)),
+            "{interpreter}": _to_manifest_path(ctx, interpreter),
         },
-        is_executable = True,
     )
+    if sdk.is_host:
+        ctx.actions.run_shell(
+            inputs = [intermediate_executable],
+            outputs = [executable],
+            command = "grep -v '^#shell ' %s > %s" % (
+                intermediate_executable.path,
+                executable.path,
+            ),
+        )
+    else:
+        ctx.actions.run_shell(
+            inputs = [intermediate_executable],
+            outputs = [executable],
+            command = "sed 's/^#shell //' %s > %s" % (
+                intermediate_executable.path,
+                executable.path,
+            ),
+        )
     return [DefaultInfo(
         executable = executable,
         default_runfiles = deps.default_files,
@@ -80,6 +97,10 @@ _ATTRS = {
     "_wrapper_template": attr.label(
         allow_single_file = True,
         default = "binary_wrapper.tpl",
+    ),
+    "_misc_deps": attr.label_list(
+        allow_files = True,
+        default = ["@bazel_tools//tools/bash/runfiles"],
     ),
 }
 
