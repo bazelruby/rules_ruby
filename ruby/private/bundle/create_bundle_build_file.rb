@@ -30,7 +30,7 @@ ruby_library(
     exclude = {exclude},
   ),
   deps = [":bundler_setup"],
-  rubyopt = ["-r../{repo_name}/lib/bundler/setup.rb"],
+  rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/lib/bundler/setup.rb"],
 )
 
 # PULL EACH GEM INDIVIDUALLY
@@ -48,7 +48,7 @@ ruby_library(
     exclude = {exclude},
   ),
   deps = {deps},
-  rubyopt = ["-r../{repo_name}/lib/bundler/setup.rb"],
+  rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/lib/bundler/setup.rb"],
 )
 
 '
@@ -57,7 +57,7 @@ ALL_TEMPLATE = '
 ruby_library(
   name = "all",
   deps = {deps},
-  rubyopt = ["-r../{repo_name}/lib/bundler/setup.rb"],
+  rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/lib/bundler/setup.rb"],
 )
 '
 require "bundler"
