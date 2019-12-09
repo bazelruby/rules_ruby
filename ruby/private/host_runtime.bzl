@@ -54,7 +54,6 @@ def _bin_install_path(ctx, ruby, bin):
     else:
         return ctx.which(bin)
 
-
 # Commands installed together with ruby command.
 _DEFAULT_SCRIPTS = [
     "irb",
@@ -73,7 +72,6 @@ def _install_host_ruby(ctx, ruby):
         if not script_path:
             fail("Failed to locate %s" % bin_name)
         ctx.symlink(script_path, "%s_bin" % bin_name)
-
 
     # Places the interpreter at a predictable place regardless of the actual binary name
     # so that bundle_install can depend on it.
