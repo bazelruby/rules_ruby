@@ -8,20 +8,11 @@
 	- [`ruby_test`](#rubytest)
 	- [`bundle_install`](#bundleinstall)
 - [What's coming next](#whats-coming-next)
+- [Contributing](#contributing)
+	- [Setup](#setup)
 - [Copyright](#copyright)
-	- [Warranty](#warranty)
 
 <!-- /TOC -->
-
-# Setup
-
-To get the initial stuff setup required by this repo, please run the script:
-
-```bash
-bin/setup
-```
-
-Whenever you'll commit something, a pre-commit hook will run as well.
 
 # Rules Ruby
 
@@ -411,6 +402,26 @@ bundle_install(name, gemfile, gemfile_lock)
 1. Building native extensions in gems with Bazel
 2. Using a specified version of Ruby.
 3. Building and releasing your gems with Bazel
+
+## Contributing
+
+1. Setup dev tools as described in the [setup](#setup) section.
+2. hack, hack, hack...
+3. Make sure all tests pass
+   * `bazel test //...`
+   * `cd examples/simple_script && bazel test //...`
+4. Open a pull request in Github
+
+### Setup
+
+To get the initial stuff setup required by this repo, please run the script:
+
+```bash
+bin/setup
+```
+
+Whenever you'll commit something, a pre-commit hook will run as well.
+
 
 ## Copyright
 
