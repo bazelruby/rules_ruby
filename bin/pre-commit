@@ -1,11 +1,22 @@
 #!/usr/bin/env bash
+#
+# Main dependency shell script that installs BashMatic Library in ~/.bashmatic folder.
 
 export COLUMNS=90
 
-[[ -x bin/deps ]] && source bin/deps
-[[ -x bin/setup ]] && source bin/setup
+export BashMatic="${HOME}/.bashmatic"
 
-[[ -z ${BashMatic} ]] && { 
+[[ -x ./bin/deps ]] && {
+  # shellcheck disable=SC1091
+  source bin/deps
+}
+
+[[ -x ./bin/setup ]] && {
+  # shellcheck disable=SC1091
+  source bin/setup gem::dependencies
+}
+
+[[ -z "${BashMatic}" ]] && {
   echo "Failed to initialize BASH library."
   exit 1
 }
@@ -13,15 +24,15 @@ export COLUMNS=90
 set +e
 
 info "Running Rubocop, please wait..."
-rubocop -F -D 
+rubocop -F -D
 code=$?
 
 if [[ ${code} -ne 0 ]]; then
   run::set-next show-output-on
   run "rubocop -a -D -P"
-  
+
   run::set-next abort-on-error
   run "rubocop -D -P"
 fi
-  
+
 success "RuboCop ran successfully."

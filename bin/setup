@@ -2,26 +2,48 @@
 
 [[ -x bin/deps ]] && source bin/deps
 
-[[ -z ${BashMatic} ]] && { 
+[[ -z ${BashMatic} ]] && {
   echo "Failed to initialize BASH library."
   exit 1
 }
 
-# abort on error
-run::set-all abort-on-error
+function setup::gem::dependencies() {
+  # abort on error
+  run::set-all abort-on-error
 
-# install rubocop
-lib::gem::install relaxed-rubocop
-lib::gem::install rubocop
-
-[[ -f .rubocop.yml ]] || {
-  info "Setting up .rubocop.yml file..."
-  echo "
-inherit_gem:
-  relaxed-rubocop: .rubocop.yml
-" > .rubocop.yml
-  run "git add .rubocop.yml"
+  lib::gem::cache-refresh
+  lib::gem::install rubocop
+  lib::gem::install relaxed-rubocop
 }
 
-[[ -L .git/hooks/pre-commit ]] || run "ln -nfs bin/pre-commit .git/hooks/pre-commit"
+function setup::git::commit-hook() {
+  [[ -L .git/hooks/pre-commit ]] || run "ln -nfs bin/pre-commit .git/hooks/pre-commit"
+}
 
+function setup::detect-bazel-version() {
+  local version
+  version="$(grep versions.check WORKSPACE | awk 'BEGIN{FS="\""}{print $2}')"
+  [[ -z "${version}" && -f .bazelversion ]] && version="$(cat .bazelversion | tr -d '\n')"
+  printf "%s" "${version}"
+}
+
+#——————————————————————————————  main ———————————————————————————————————————————
+
+function setup::main() {
+  setup::gem::dependencies
+  [[ -z ${CI} ]] && setup::git::commit-hook
+
+  local os=$(uname -s | tr '[:upper:]' '[:lower:]')
+  local script
+
+  script="./bin/setup-${os}"
+
+  if [[ -x ${script} ]]; then
+    "${script}" "$(setup::detect-bazel-version)"
+  else
+    echo "Operating system $(uname -s) is not currently supported." >&2
+    return 1
+  fi
+}
+
+setup::main "$@"

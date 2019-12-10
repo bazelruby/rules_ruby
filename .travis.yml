@@ -26,7 +26,7 @@ addons:
     - g++
 
 before_install:
-- .travis/install-bazel.sh 1.1.0
+- bin/setup-linux 1.2.1
 - bazel $BAZEL_OPTS version
 - bazel $BAZEL_OPTS info
 - bazel $BAZEL_OPTS fetch --curses=no -- "//ruby/..."

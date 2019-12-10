@@ -1,4 +1,5 @@
-# vim: ft=shell
+#!/usr/bin/env bash
+# vim: ft=sh
 
 export BashMatic="${HOME}/.bashmatic"
 
@@ -8,4 +9,3 @@ export BashMatic="${HOME}/.bashmatic"
 }
 
 source "${BashMatic}/init.sh"
-
