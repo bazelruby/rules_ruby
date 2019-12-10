@@ -18,7 +18,7 @@ def _register_ruby_26_runtime():
     _ruby_26_runtime(name = "org_ruby_lang_ruby_26")
 
     native.register_toolchains(
-        "@org_ruby_lang_ruby_26//:ruby_host",
+        "@org_ruby_lang_ruby_26//:ruby_26",
     )
 
 def ruby_register_toolchains(version = "host"):

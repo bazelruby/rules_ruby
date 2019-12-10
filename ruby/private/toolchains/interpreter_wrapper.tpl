@@ -9,4 +9,3 @@ else
 fi
 
 exec ${PATH_PREFIX}{rel_interpreter_path} "$@"
-
