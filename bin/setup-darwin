@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+[[ -x bin/deps ]] && source bin/deps
+[[ -z "${BashMatic}" ]] && {
+  echo "Failed to initialize BASH library."
+  exit 1
+}
+
+#——————————————————————————————  OS-X SPECIFIC INSTALLERS —————————————————————————
+
+function setup::brew-validate() {
+  # Homebrew is required to install Bazel
+  if ! brew help >/dev/null; then
+    echo "brew is not installed, please install from https://brew.sh"
+  fi
+}
+
+function setup::brew-install-jdk() {
+  # The JDK homebrew cask is a required to install the java dependencies for Bazel
+  if ! brew cask list | grep -q openjdk; then
+    brew cask install homebrew/cask-versions/adoptopenjdk8
+  fi
+}
+
+function setup::brew-deps() {
+  if ! brew list | grep -q xz; then
+    brew install xz
+  fi
+}
+
+function setup::osx-deps() {
+  # xcode command line tools are required, specifically gcc
+  # if xcode already exists, this command will error, otherwise prompt the user
+  if [[ -n $(xcode-select --install 2>&1 | grep 'already installed') ]]; then
+    echo "xcode-select tools are already installed."
+  fi
+}
+
+function setup::bazelisk-install() {
+  brew install bazelbuild/tap/bazelisk
+}
+
+function setup::darwin() {
+  setup::brew-validate
+  setup::brew-install-jdk
+  setup::brew-deps
+  setup::osx-deps
+  setup::bazelisk-install
+}
+
+setup::darwin "$@"

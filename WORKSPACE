@@ -10,6 +10,10 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
 
+load("@bazel_skylib//lib:versions.bzl", "versions")
+
+versions.check("1.2.1")
+
 local_repository(
     name = "bazelruby_ruby_rules_ruby_tests_testdata_another_workspace",
     path = "ruby/tests/testdata/another_workspace",
@@ -47,7 +51,7 @@ go_rules_dependencies()
 
 go_register_toolchains(go_version = "1.12.9")
 
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 
 gazelle_dependencies()
 

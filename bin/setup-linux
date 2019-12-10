@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+[[ -x bin/deps ]] && source bin/deps
+
+[[ -z "${BashMatic}" ]] && {
+  echo "Failed to initialize BASH library."
+  exit 1
+}
+
+function setup::linux() {
+  local version
+  version="${1}"
+
+  [[ -z "${version}" && -f .bazelversion ]] && version=$(cat .bazelversion | tr -d '\n')
+
+  if [[ -z "${version}" ]]; then
+    echo "Usage: setup-linux BAZEL-VERSION" >&2
+    exit 1
+  else
+    hl::subtle "Installing Bazel version ${version}"
+  fi
+
+  local installer=bazel-${version}-installer-linux-x86_64.sh
+  local release_base_uri=https://github.com/bazelbuild/bazel/releases/download/${version}
+  local require_install=true
+  if test -x ${HOME}/local/${installer}; then
+    cd ${HOME}/local
+    if curl ${release_base_uri}/${installer}.sha256 | sha256sum -c; then
+      require_install=false
+    fi
+  fi
+
+  if ${require_install}; then
+    run "rm -rf ${HOME}/local"
+    run "mkdir ${HOME}/local"
+    run "cd ${HOME}/local"
+    run "wget ${release_base_uri}/${installer}"
+    run "chmod +x ${installer}"
+
+    run::set-next show-output-on
+    run "./${installer} --prefix=${HOME}/local --base=${HOME}/.bazel"
+  fi
+}
+
+setup::linux "$@"
