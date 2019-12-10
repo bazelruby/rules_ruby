@@ -2,7 +2,7 @@
 
 [[ -x bin/deps ]] && source bin/deps
 
-[[ -z ${BashMatic} ]] && { 
+[[ -z ${BashMatic} ]] && {
   echo "Failed to initialize BASH library."
   exit 1
 }
@@ -10,18 +10,8 @@
 # abort on error
 run::set-all abort-on-error
 
-# install rubocop
-lib::gem::install relaxed-rubocop
+lib::gem::cache-refresh
 lib::gem::install rubocop
-
-[[ -f .rubocop.yml ]] || {
-  info "Setting up .rubocop.yml file..."
-  echo "
-inherit_gem:
-  relaxed-rubocop: .rubocop.yml
-" > .rubocop.yml
-  run "git add .rubocop.yml"
-}
+lib::gem::install relaxed-rubocop
 
 [[ -L .git/hooks/pre-commit ]] || run "ln -nfs bin/pre-commit .git/hooks/pre-commit"
-
