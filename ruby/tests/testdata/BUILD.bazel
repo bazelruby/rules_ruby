@@ -5,6 +5,15 @@ load(
 
 package(default_visibility = ["//ruby/tests:__pkg__"])
 
+exports_files([
+    "bundled_commands/erb_golden",
+    "bundled_commands/erb_input",
+    "bundled_commands/irb_golden",
+    "bundled_commands/irb_input",
+    "bundled_commands/rake_golden",
+    "bundled_commands/rake_input",
+])
+
 #
 # Dependency Graph::
 #

@@ -1,0 +1,2 @@
+T = Struct.new(:a, :b, :c)
+T.new(1, 2, 3)

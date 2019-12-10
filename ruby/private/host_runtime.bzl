@@ -37,9 +37,41 @@ def _install_dirs(ctx, ruby, *names):
             ctx.symlink(path, rel_path)
     return rel_paths
 
+def _bin_install_path(ctx, ruby, bin):
+    """Transform the given command name "bin" to actual file name.
+
+    Uses the same logic as "script_installer" in tools/rbinstall.rb in Ruby.
+    But it does not currently support RbConfig::CONFIG['program_transform_name']
+    """
+    install_name = ruby.expand_rbconfig(ruby, "${bindir}/${ruby_install_name}")
+    path = install_name.replace("ruby", bin, 1)
+    if ctx.path(path).exists:
+        return path
+
+    path = ruby.expand_rbconfig(ruby, "${bindir}/%s" % bin)
+    if ctx.path(path).exists:
+        return path
+    else:
+        return ctx.which(bin)
+
+# Commands installed together with ruby command.
+_DEFAULT_SCRIPTS = [
+    "irb",
+    "rdoc",
+    "ri",
+    "erb",
+    "rake",
+    "gem",
+]
+
 def _install_host_ruby(ctx, ruby):
     # Places SDK
     ctx.symlink(ruby.interpreter_realpath, ruby.rel_interpreter_path)
+    for bin_name in _DEFAULT_SCRIPTS:
+        script_path = _bin_install_path(ctx, ruby, bin_name)
+        if not script_path:
+            fail("Failed to locate %s" % bin_name)
+        ctx.symlink(script_path, "%s_bin" % bin_name)
 
     # Places the interpreter at a predictable place regardless of the actual binary name
     # so that bundle_install can depend on it.
@@ -67,8 +99,8 @@ def _install_host_ruby(ctx, ruby):
 
     return struct(
         includedirs = _install_dirs(ctx, ruby, "rubyarchhdrdir", "rubyhdrdir"),
-        static_library = _relativate(static_library),
         shared_library = _relativate(shared_library),
+        static_library = _relativate(static_library),
     )
 
 def _ruby_host_runtime_impl(ctx):
@@ -107,7 +139,6 @@ def _ruby_host_runtime_impl(ctx):
     )
 
 ruby_host_runtime = repository_rule(
-    implementation = _ruby_host_runtime_impl,
     attrs = {
         "interpreter_path": attr.string(),
         "_install_bundler": attr.label(
@@ -129,4 +160,5 @@ ruby_host_runtime = repository_rule(
             allow_single_file = True,
         ),
     },
+    implementation = _ruby_host_runtime_impl,
 )
