@@ -264,3 +264,70 @@ sh_test(
     data = [":load_path_in_runfiles_container_image"],
     tags = ["docker"],
 )
+
+## Tests for bundled commands in the runtime
+
+ruby_binary(
+    name = "diff_test",
+    srcs = ["diff_test.rb"],
+)
+
+sh_test(
+    name = "irb_test",
+    srcs = [":diff_test"],
+    args = [
+        "--stdin",
+        "$(location //ruby/tests/testdata:bundled_commands/irb_input)",
+        "--golden",
+        "$(location //ruby/tests/testdata:bundled_commands/irb_golden)",
+        "--",
+        "$(location @org_ruby_lang_ruby_host//:irb)",
+        "--echo",
+        "--noverbose",
+        "--prompt=simple",
+        "--noreadline",
+    ],
+    data = [
+        "//ruby/tests/testdata:bundled_commands/irb_golden",
+        "//ruby/tests/testdata:bundled_commands/irb_input",
+        "@org_ruby_lang_ruby_host//:irb",
+    ],
+)
+
+sh_test(
+    name = "erb_test",
+    srcs = [":diff_test"],
+    args = [
+        "--stdin",
+        "$(location //ruby/tests/testdata:bundled_commands/erb_input)",
+        "--golden",
+        "$(location //ruby/tests/testdata:bundled_commands/erb_golden)",
+        "--",
+        "$(location @org_ruby_lang_ruby_host//:erb)",
+        "values=foo,bar,baz",
+    ],
+    data = [
+        "//ruby/tests/testdata:bundled_commands/erb_golden",
+        "//ruby/tests/testdata:bundled_commands/erb_input",
+        "@org_ruby_lang_ruby_host//:erb",
+    ],
+)
+
+sh_test(
+    name = "rake_test",
+    srcs = [":diff_test"],
+    args = [
+        "--golden",
+        "$(location //ruby/tests/testdata:bundled_commands/rake_golden)",
+        "--",
+        "$(location @org_ruby_lang_ruby_host//:rake)",
+        "-f",
+        "$(location //ruby/tests/testdata:bundled_commands/rake_input)",
+        "foo",
+    ],
+    data = [
+        "//ruby/tests/testdata:bundled_commands/rake_golden",
+        "//ruby/tests/testdata:bundled_commands/rake_input",
+        "@org_ruby_lang_ruby_host//:rake",
+    ],
+)

@@ -1,0 +1,9 @@
+task :foo => :bar do
+  puts 'foo'
+end
+
+task :bar do
+  puts 'bar'
+end
+
+# vim: set ft=ruby :

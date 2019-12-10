@@ -24,3 +24,6 @@ PLATFORMS
 DEPENDENCIES
   relaxed-rubocop
   rubocop (~> 0.76.0)
+
+BUNDLED WITH
+   2.0.2
