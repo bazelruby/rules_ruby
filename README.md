@@ -29,10 +29,12 @@ Work in progress.
 Add `ruby_rules_dependencies` and `ruby_register_toolchains` into your `WORKSPACE` file.
 
 ```python
+# To get the latest, grab the 'develop' branch.
+
 git_repository(
     name = "bazelruby_ruby_rules",
     remote = "https://github.com/bazelruby/rules_ruby.git",
-    tag = "v0.1.0",
+    branch = "develop",
 )
 
 load(
