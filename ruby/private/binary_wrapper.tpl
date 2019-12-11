@@ -24,6 +24,7 @@
 #
 
 require 'rbconfig'
+require 'shellwords'
 
 def find_runfiles
   stub_filename = File.absolute_path($0)
@@ -89,11 +90,24 @@ def runfiles_envvar(runfiles)
   end
 end
 
-def find_ruby_binary
+def find_ruby_program
   File.join(
     RbConfig::CONFIG['bindir'],
     RbConfig::CONFIG['ruby_install_name'],
   )
+end
+
+def expand_vars(args)
+  args.map do |arg|
+    arg.gsub(/\${(.+?)}/o) do
+      case $1
+      when 'RUNFILES_DIR'
+        runfiles
+      else
+        ENV[$1]
+      end
+    end
+  end
 end
 
 def main(args)
@@ -108,21 +122,20 @@ def main(args)
   runfiles_envkey, runfiles_envvalue = runfiles_envvar(runfiles)
   ENV[runfiles_envkey] = runfiles_envvalue if runfiles_envkey
 
-  ruby_program = find_ruby_binary
+  program_name = {program}
+  if program_name
+    program = File.join(runfiles, program_name)
+  else
+    program = find_ruby_program
+  end
+  program_opts = expand_vars({program_opts})
 
   main = {main}
   main = File.join(runfiles, main)
-  rubyopt = {rubyopt}.map do |opt|
-    opt.gsub(/\${(.+?)}/o) do
-      case $1
-      when 'RUNFILES_DIR'
-        runfiles
-      else
-        ENV[$1]
-      end
-    end
-  end
-  exec(ruby_program, '--disable-gems', *rubyopt, main, *args)
+  rubyopt = expand_vars({rubyopt})
+  ENV['RUBYOPT'] = Shellwords.join(expand_vars({rubyopt}))
+
+  exec(program, *program_opts, main, *args)
   # TODO(yugui) Support windows
 end
 

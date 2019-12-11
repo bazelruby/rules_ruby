@@ -252,6 +252,7 @@ container_image(
     base = "@ruby_base_container//image",
     entrypoint = ["/app/load_path_in_runfiles"],
     tars = [":load_path_in_runfiles_container_layer"],
+    tags = ["docker"],
 )
 
 sh_test(

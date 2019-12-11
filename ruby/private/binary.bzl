@@ -12,6 +12,13 @@ def _to_manifest_path(ctx, file):
         return ("%s/%s" % (ctx.workspace_name, file.short_path))
 
 def _ruby_binary_impl(ctx):
+    return _ruby_binary_rules_impl(
+        ctx,
+        program = None,
+        program_opts = ["--disable-gems"],
+    )
+
+def _ruby_binary_rules_impl(ctx, program, program_opts=[]):
     sdk = ctx.toolchains[TOOLCHAIN_TYPE_NAME].ruby_runtime
     interpreter = sdk.interpreter[DefaultInfo].files_to_run.executable
 
@@ -29,7 +36,7 @@ def _ruby_binary_impl(ctx):
             "main",
         )
 
-    if sdk.is_host:
+    if sdk.is_host and not program:
         interpreter_file_deps = []
         interpreter_trans_deps = []
     else:
@@ -49,10 +56,18 @@ def _ruby_binary_impl(ctx):
         template = ctx.file._wrapper_template,
         output = intermediate_executable,
         substitutions = {
-            "{loadpaths}": repr(deps.incpaths.to_list()),
-            "{rubyopt}": repr(rubyopt),
-            "{main}": repr(_to_manifest_path(ctx, main)),
+            # The ruby interpreter
             "{interpreter}": _to_manifest_path(ctx, interpreter),
+            # $LOAD_PATH
+            "{loadpaths}": repr(deps.incpaths.to_list()),
+            # options for the ruby interpreter
+            "{rubyopt}": repr(rubyopt),
+            # program which evaluates the main script. e.g. ruby, erb, or rake
+            "{program}": repr(program) if program else 'nil',
+            # options for the program.
+            "{program_opts}": repr(program_opts),
+            # the main script
+            "{main}": repr(_to_manifest_path(ctx, main)),
         },
     )
     if sdk.is_host:
