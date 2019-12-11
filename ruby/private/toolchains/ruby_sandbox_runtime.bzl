@@ -1,11 +1,8 @@
 load(":bundler.bzl", "install_bundler")
 load("//ruby/private:constants.bzl", "RULES_RUBY_WORKSPACE_NAME")
-load("//ruby/private/toolchains:repository_context.bzl", "ruby_repository_context")
 
-def _ruby_26_runtime_impl(ctx):
-    ###
-    # Sorbet Ruby
-    ###
+def _ruby_sandbox_runtime_impl(ctx):
+
     ctx.template(
         "BUILD.bazel",
         ctx.attr._buildfile_template,
@@ -15,11 +12,12 @@ def _ruby_26_runtime_impl(ctx):
         executable = False,
     )
 
-ruby_26_runtime = repository_rule(
-    implementation = _ruby_26_runtime_impl,
+
+ruby_sandbox_runtime = repository_rule(
+    implementation = _ruby_sandbox_runtime_impl,
     attrs = {
         "_buildfile_template": attr.label(
-            default = "%s//ruby/private/toolchains:BUILD.26_runtime.tpl" % (
+            default = "%s//ruby/private/toolchains:BUILD.sandbox_runtime.tpl" % (
                 RULES_RUBY_WORKSPACE_NAME
             ),
             allow_single_file = True,

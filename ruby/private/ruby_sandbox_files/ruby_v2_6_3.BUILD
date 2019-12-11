@@ -34,11 +34,6 @@ ARCH = select({
     ":darwin": ARCH_DARWIN,
 })
 
-# native.register_toolchains(
-#     "@%{repo_name}//:cc-toolchain-linux",
-#     "@%{repo_name}//:cc-toolchain-darwin",
-# )
-
 # NOTE: rbconfig expects to find itself in a directory of the form:
 #
 # > `lib/ruby/<RUBY_CORE_VERSION>/<ARCH>`
@@ -1162,7 +1157,7 @@ cc_library(
 
 # core library #################################################################
 
-load("@bazelruby_ruby_rules//ruby/private/rubybuild:utils.bzl", "install_dir", "install_file")
+load("@bazelruby_ruby_rules//ruby/private/ruby_sandbox_files:utils.bzl", "install_dir", "install_file")
 
 filegroup(
     name = "ruby_lib",
@@ -1209,6 +1204,24 @@ filegroup(
 
 # wrapper script ###############################################################
 
+filegroup(
+    name = "ruby_runtime_env",
+    srcs =
+        install_dir(
+            out_prefix = INC_PREFIX,
+            src_prefix = "include",
+        ) + [
+            ":bin/ruby",
+            ":ruby_lib",
+            install_file(
+                name = "install-ruby-config.h",
+                src = "include/ruby/config.h",
+                out = INC_PREFIX + "/ruby/config.h",
+            ),
+        ],
+)
+
+
 genrule(
     name = "generate-ruby.sh",
     outs = ["ruby.sh"],
@@ -1237,60 +1250,9 @@ EOF
     """,
 )
 
-filegroup(
-    name = "ruby_runtime_env",
-    srcs =
-        install_dir(
-            out_prefix = INC_PREFIX,
-            src_prefix = "include",
-        ) + [
-            ":bin/ruby",
-            ":ruby_lib",
-            install_file(
-                name = "install-ruby-config.h",
-                src = "include/ruby/config.h",
-                out = INC_PREFIX + "/ruby/config.h",
-            ),
-        ],
-)
-
 sh_binary(
     name = "ruby",
     srcs = ["ruby.sh"],
     data = [":ruby_runtime_env"],
     visibility = ["//visibility:public"],
-)
-
-# tests ########################################################################
-
-genrule(
-    name = "generate_smoke_test.sh",
-    outs = ["smoke_test.sh"],
-    cmd = """
-cat > $(location smoke_test.sh) <<EOF
-#!/bin/bash
-
-export PATH="\$$(dirname \$$1):\$$PATH"
-
-# Simple smoke-test
-ruby -e '1 + 1'
-
-# Require something from the stdlib
-ruby -e 'require "set"'
-
-EOF
-""",
-)
-
-sh_test(
-    name = "smoke_test",
-    srcs = ["smoke_test.sh"],
-    args = ["$(location :ruby)"],
-    data = [":ruby"],
-    deps = ["@bazel_tools//tools/bash/runfiles"],
-)
-
-test_suite(
-    name = "ruby-2.6",
-    tests = [":smoke_test"],
 )

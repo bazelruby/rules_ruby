@@ -7,11 +7,11 @@ load(
 package(default_visibility = ["//visibility:public"])
 
 ruby_toolchain(
-    name = "ruby_host",
+    name = "toolchain",
     interpreter = "//:ruby_bin",
     bundler = "//:bundler",
     rubyopt = [
-        "-I$(RUNFILES_DIR)/org_ruby_lang_ruby_host/bundler/lib",
+        "-I$(RUNFILES_DIR)/org_ruby_lang_ruby_toolchain/bundler/lib",
     ],
     runtime = "//:runtime",
     is_host = True,

@@ -8,10 +8,6 @@ def _get_bundler_label(repository_ctx, ruby_sdk):
     # TODO(yugui) Support windows as rules_nodejs does
     return Label("%s//:bundler/exe/bundler" % ruby_sdk)
 
-def _get_bundler_lib_label(repository_ctx, ruby_sdk):
-    # TODO(yugui) Support windows as rules_nodejs does
-    return Label("%s//:bundler/lib" % ruby_sdk)
-
 def bundle_install_impl(ctx):
     ctx.symlink(ctx.attr.gemfile, "Gemfile")
     ctx.symlink(ctx.attr.gemfile_lock, "Gemfile.lock")
@@ -85,7 +81,7 @@ bundle_install = repository_rule(
     implementation = bundle_install_impl,
     attrs = {
         "ruby_sdk": attr.string(
-            default = "@org_ruby_lang_ruby_host",
+            default = "@org_ruby_lang_ruby_toolchain",
         ),
         "gemfile": attr.label(
             allow_single_file = True,
