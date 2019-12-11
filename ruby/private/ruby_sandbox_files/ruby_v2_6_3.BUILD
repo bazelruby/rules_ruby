@@ -1,5 +1,7 @@
 # vim: ft=bzl sw=4 ts=4 et
 
+load("@bazelruby_ruby_rules//ruby/private/ruby_sandbox_files:utils.bzl", "install_dir", "install_file")
+
 # caveats ######################################################################
 
 # Hard-coded files
@@ -1157,8 +1159,6 @@ cc_library(
 
 # core library #################################################################
 
-load("@bazelruby_ruby_rules//ruby/private/ruby_sandbox_files:utils.bzl", "install_dir", "install_file")
-
 filegroup(
     name = "ruby_lib",
     srcs =
@@ -1212,6 +1212,8 @@ filegroup(
             src_prefix = "include",
         ) + [
             ":bin/ruby",
+            ":bin/bundler",
+            ":bin/bundle",
             ":ruby_lib",
             install_file(
                 name = "install-ruby-config.h",
@@ -1220,7 +1222,6 @@ filegroup(
             ),
         ],
 )
-
 
 genrule(
     name = "generate-ruby.sh",
@@ -1235,7 +1236,7 @@ base_dir="\$$(dirname \$${BASH_SOURCE[0]})"
 
 # was this script invoked via 'bazel run"?
 if [ -d "\$$base_dir/ruby.runfiles" ]; then
-  base_dir="\$${base_dir}/ruby.runfiles/ruby_2_6_3"
+  base_dir="\$${base_dir}/ruby.runfiles/ruby_sandbox"
 fi
 
 RUBYLIB="\$${RUBYLIB:-}\$${RUBYLIB:+:}\$${base_dir}/lib/ruby/2.6.0/""" + ARCH + """"
@@ -1245,6 +1246,7 @@ export RUBYLIB
 # TODO: Something is re-discovering the stdlib outside of the path provided by
 # RUBYLIB, and when the original is a symlink it causes stdlib files to be
 # loaded multiple times.
+
 exec "\$$base_dir/bin/ruby" -W0 "\$$@"
 EOF
     """,
