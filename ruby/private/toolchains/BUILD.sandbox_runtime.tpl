@@ -8,16 +8,23 @@ package(default_visibility = ["//visibility:public"])
 
 ruby_toolchain(
     name = "toolchain",
-    interpreter = "@ruby_sandbox//:ruby",
-    runtime = "@ruby_sandbox//:ruby_runtime_env",
+    interpreter = "//:ruby_bin",
+    runtime = "//:runtime",
     is_host = False,
     rules_ruby_workspace = "{rules_ruby_workspace}",
 )
 
 sh_binary(
-    name = "ruby",
-    srcs = ["@ruby_sandbox//:ruby.sh"],
-    data = ["@ruby_sandbox//:ruby_runtime_env"],
+    name = "ruby_bin",
+    srcs = [":build/bin/ruby"],
+    data = [":runtime"],
+)
+
+filegroup(
+    name = "runtime",
+    srcs = glob(
+        include = ["build/**/*"],
+    ),
 )
 
 # vim: set ft=bzl :
