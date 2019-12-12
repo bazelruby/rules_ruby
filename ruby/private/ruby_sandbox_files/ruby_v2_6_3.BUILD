@@ -1206,6 +1206,7 @@ filegroup(
 
 filegroup(
     name = "ruby_runtime_env",
+    visibility = ["//visibility:public"],
     srcs =
         install_dir(
             out_prefix = INC_PREFIX,
@@ -1250,7 +1251,10 @@ export RUBYLIB
 exec "\$$base_dir/bin/ruby" -W0 "\$$@"
 EOF
     """,
+    visibility = ["//visibility:public"],
 )
+
+
 
 sh_binary(
     name = "ruby",

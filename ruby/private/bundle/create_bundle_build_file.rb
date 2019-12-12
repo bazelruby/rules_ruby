@@ -5,6 +5,7 @@ TEMPLATE = 'load(
   "ruby_library",
 )
 
+
 package(default_visibility = ["//visibility:public"])
 
 filegroup(

@@ -12,7 +12,7 @@ ruby_binary(
     main = "script.rb",
     deps = [
         "//lib:foo",
-        "@bundle//:rspec",
+        "@bundle//:awesome_print",
     ],
 )
 

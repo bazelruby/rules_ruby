@@ -1,4 +1,3 @@
-load(":bundler.bzl", "install_bundler")
 load("//ruby/private:constants.bzl", "RULES_RUBY_WORKSPACE_NAME")
 load("//ruby/private/toolchains:repository_context.bzl", "ruby_repository_context")
 
@@ -86,12 +85,6 @@ def _ruby_host_runtime_impl(ctx):
     ruby = ruby_repository_context(ctx, interpreter_path)
 
     installed = _install_host_ruby(ctx, ruby)
-    install_bundler(
-        ctx,
-        interpreter_path,
-        ctx.path(ctx.attr._install_bundler).realpath,
-        "bundler",
-    )
 
     ctx.template(
         "BUILD.bazel",
@@ -110,12 +103,6 @@ ruby_host_runtime = repository_rule(
     implementation = _ruby_host_runtime_impl,
     attrs = {
         "interpreter_path": attr.string(),
-        "_install_bundler": attr.label(
-            default = "%s//ruby/private/toolchains:install_bundler.rb" % (
-                RULES_RUBY_WORKSPACE_NAME
-            ),
-            allow_single_file = True,
-        ),
         "_buildfile_template": attr.label(
             default = "%s//ruby/private/toolchains:BUILD.host_runtime.tpl" % (
                 RULES_RUBY_WORKSPACE_NAME

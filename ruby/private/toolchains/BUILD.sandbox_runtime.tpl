@@ -6,26 +6,18 @@ load(
 
 package(default_visibility = ["//visibility:public"])
 
-alias(
-    name = "ruby_bin",
-    actual = "@ruby_sandbox//:ruby",
-)
-
-alias(
-    name = "bundler",
-    actual = "@ruby_sandbox//:ruby",
-)
-
 ruby_toolchain(
     name = "toolchain",
-    interpreter = "//:ruby_bin",
-    bundler = "//:bundler",
-    rubyopt = [
-        "-I$(RUNFILES_DIR)/org_ruby_lang_ruby_toolchain/bundler/lib",
-    ],
-    runtime = "@org_ruby_lang_ruby_toolchain//:ruby_runtime_env",
+    interpreter = "@ruby_sandbox//:ruby",
+    runtime = "@ruby_sandbox//:ruby_runtime_env",
     is_host = False,
     rules_ruby_workspace = "{rules_ruby_workspace}",
+)
+
+sh_binary(
+    name = "ruby",
+    srcs = ["@ruby_sandbox//:ruby.sh"],
+    data = ["@ruby_sandbox//:ruby_runtime_env"],
 )
 
 # vim: set ft=bzl :

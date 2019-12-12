@@ -9,10 +9,6 @@ package(default_visibility = ["//visibility:public"])
 ruby_toolchain(
     name = "toolchain",
     interpreter = "//:ruby_bin",
-    bundler = "//:bundler",
-    rubyopt = [
-        "-I$(RUNFILES_DIR)/org_ruby_lang_ruby_toolchain/bundler/lib",
-    ],
     runtime = "//:runtime",
     is_host = True,
     rules_ruby_workspace = "{rules_ruby_workspace}",
@@ -38,12 +34,6 @@ cc_library(
     name = "headers",
     includes = {includes},
     hdrs = glob({hdrs}),
-)
-
-filegroup(
-    name = "bundler",
-    srcs = ["bundler/exe/bundler"],
-    data = glob(["bundler/**/*.rb"]),
 )
 
 filegroup(
