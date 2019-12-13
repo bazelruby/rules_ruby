@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+puts $LOAD_PATH
+
 require 'openssl'
 require 'lib/foo'
 require "awesome_print"
@@ -9,7 +11,5 @@ def oss_rand
 end
 
 puts Foo.aha + " " + oss_rand
-
-puts $LOAD_PATH
 
 ap Class
