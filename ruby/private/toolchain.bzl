@@ -15,7 +15,6 @@ def _ruby_toolchain_impl(ctx):
     return [platform_common.ToolchainInfo(
         ruby_runtime = RubyRuntimeInfo(
             interpreter = ctx.attr.interpreter,
-            bundler = ctx.attr.bundler,
             runtime = ctx.files.runtime,
             rubyopt = ctx.attr.rubyopt,
             is_host = ctx.attr.is_host,
@@ -26,12 +25,6 @@ _ruby_toolchain = rule(
     implementation = _ruby_toolchain_impl,
     attrs = {
         "interpreter": attr.label(
-            mandatory = True,
-            allow_files = True,
-            executable = True,
-            cfg = "target",
-        ),
-        "bundler": attr.label(
             mandatory = True,
             allow_files = True,
             executable = True,
@@ -52,7 +45,6 @@ _ruby_toolchain = rule(
 def ruby_toolchain(
         name,
         interpreter,
-        bundler,
         runtime,
         rubyopt = [],
         is_host = False,
@@ -62,7 +54,6 @@ def ruby_toolchain(
     _ruby_toolchain(
         name = impl_name,
         interpreter = interpreter,
-        bundler = bundler,
         runtime = runtime,
         rubyopt = rubyopt,
         is_host = is_host,

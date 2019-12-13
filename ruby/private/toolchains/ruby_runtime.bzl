@@ -1,6 +1,21 @@
-load(":bundler.bzl", "install_bundler")
 load("//ruby/private:constants.bzl", "RULES_RUBY_WORKSPACE_NAME")
-load("//ruby/private/tools:repository_context.bzl", "ruby_repository_context")
+load("//ruby/private/toolchains:repository_context.bzl", "ruby_repository_context")
+
+def _install_ruby_version(ctx, version):
+    print("download and extract ruby-build")
+    ctx.download_and_extract(
+        url = "https://github.com/rbenv/ruby-build/archive/v20191205.tar.gz",
+        sha256 = "d8ffe806a215b3afacead72e766f293ce380c78a143911b84cdb5f33e20a5284",
+        stripPrefix = "ruby-build-20191205",
+    )
+
+    install_path = "./build"
+    print("./bin/ruby-build", "--verbose", version, install_path)
+    ctx.execute(
+        ["./bin/ruby-build", "--verbose", version, install_path],
+        quiet = False,
+        timeout = 1600,  # massive timeout because this does a lot and is a beast
+    )
 
 def _is_subpath(path, ancestors):
     """Determines if path is a subdirectory of one of the ancestors"""
@@ -37,41 +52,9 @@ def _install_dirs(ctx, ruby, *names):
             ctx.symlink(path, rel_path)
     return rel_paths
 
-def _bin_install_path(ctx, ruby, bin):
-    """Transform the given command name "bin" to actual file name.
-
-    Uses the same logic as "script_installer" in tools/rbinstall.rb in Ruby.
-    But it does not currently support RbConfig::CONFIG['program_transform_name']
-    """
-    install_name = ruby.expand_rbconfig(ruby, "${bindir}/${ruby_install_name}")
-    path = install_name.replace("ruby", bin, 1)
-    if ctx.path(path).exists:
-        return path
-
-    path = ruby.expand_rbconfig(ruby, "${bindir}/%s" % bin)
-    if ctx.path(path).exists:
-        return path
-    else:
-        return ctx.which(bin)
-
-# Commands installed together with ruby command.
-_DEFAULT_SCRIPTS = [
-    "irb",
-    "rdoc",
-    "ri",
-    "erb",
-    "rake",
-    "gem",
-]
-
-def _install_host_ruby(ctx, ruby):
+def _install_ruby(ctx, ruby):
     # Places SDK
     ctx.symlink(ruby.interpreter_realpath, ruby.rel_interpreter_path)
-    for bin_name in _DEFAULT_SCRIPTS:
-        script_path = _bin_install_path(ctx, ruby, bin_name)
-        if not script_path:
-            fail("Failed to locate %s" % bin_name)
-        ctx.symlink(script_path, "%s_bin" % bin_name)
 
     # Places the interpreter at a predictable place regardless of the actual binary name
     # so that bundle_install can depend on it.
@@ -99,16 +82,30 @@ def _install_host_ruby(ctx, ruby):
 
     return struct(
         includedirs = _install_dirs(ctx, ruby, "rubyarchhdrdir", "rubyhdrdir"),
-        shared_library = _relativate(shared_library),
         static_library = _relativate(static_library),
+        shared_library = _relativate(shared_library),
     )
 
-def _ruby_host_runtime_impl(ctx):
-    # Locates path to the interpreter
-    if ctx.attr.interpreter_path:
-        interpreter_path = ctx.path(ctx.attr.interpreter_path)
-    else:
+def host_ruby_is_correct_version(ctx, version):
+    interpreter_path = ctx.which("ruby")
+    if not interpreter_path:
+        return False
+
+    ruby_version = ctx.execute(["ruby", "--version"]).stdout
+    version_string = "ruby %sp" % version
+
+    print("Checking for version '%s' in '%s'" % (version_string, ruby_version))
+    return version_string in ruby_version
+
+def _ruby_runtime_impl(ctx):
+    # If the current version of ruby is correct use that
+    version = ctx.attr.version
+    if version == "host" or host_ruby_is_correct_version(ctx, version):
         interpreter_path = ctx.which("ruby")
+    else:
+        _install_ruby_version(ctx, version)
+        interpreter_path = ctx.path("./build/bin/ruby")
+
     if not interpreter_path:
         fail(
             "Command 'ruby' not found. Set $PATH or specify interpreter_path",
@@ -117,13 +114,7 @@ def _ruby_host_runtime_impl(ctx):
 
     ruby = ruby_repository_context(ctx, interpreter_path)
 
-    installed = _install_host_ruby(ctx, ruby)
-    install_bundler(
-        ctx,
-        interpreter_path,
-        ctx.path(ctx.attr._install_bundler).realpath,
-        "bundler",
-    )
+    installed = _install_ruby(ctx, ruby)
 
     ctx.template(
         "BUILD.bazel",
@@ -138,27 +129,21 @@ def _ruby_host_runtime_impl(ctx):
         executable = False,
     )
 
-ruby_host_runtime = repository_rule(
+ruby_runtime = repository_rule(
+    implementation = _ruby_runtime_impl,
     attrs = {
-        "interpreter_path": attr.string(),
-        "_install_bundler": attr.label(
-            default = "%s//ruby/private:install_bundler.rb" % (
-                RULES_RUBY_WORKSPACE_NAME
-            ),
-            allow_single_file = True,
-        ),
+        "version": attr.string(default = "host"),
         "_buildfile_template": attr.label(
-            default = "%s//ruby/private:BUILD.host_runtime.tpl" % (
+            default = "%s//ruby/private/toolchains:BUILD.runtime.tpl" % (
                 RULES_RUBY_WORKSPACE_NAME
             ),
             allow_single_file = True,
         ),
         "_interpreter_wrapper_template": attr.label(
-            default = "%s//ruby/private:interpreter_wrapper.tpl" % (
+            default = "%s//ruby/private/toolchains:interpreter_wrapper.tpl" % (
                 RULES_RUBY_WORKSPACE_NAME
             ),
             allow_single_file = True,
         ),
     },
-    implementation = _ruby_host_runtime_impl,
 )

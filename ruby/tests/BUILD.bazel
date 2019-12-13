@@ -57,7 +57,7 @@ sh_test(
     ],
     data = [
         "args_check.rb",
-        "@org_ruby_lang_ruby_host//:ruby_bin",
+        "@org_ruby_lang_ruby_toolchain//:ruby_bin",
     ],
 )
 
@@ -66,7 +66,7 @@ genrule(
     name = "generate_genrule_run_ruby_test",
     outs = ["genrules_run_ruby_test.sh"],
     cmd = " && ".join([
-        ("$(location @org_ruby_lang_ruby_host//:ruby_bin) " +
+        ("$(location @org_ruby_lang_ruby_toolchain//:ruby_bin) " +
          "$(location args_check.rb) foo bar baz"),
         "echo '#!/bin/sh -e' > $@",
         "echo true >> $@",
@@ -75,8 +75,8 @@ genrule(
     output_to_bindir = 1,
     tools = [
         "args_check.rb",
-        "@org_ruby_lang_ruby_host//:ruby_bin",
-        "@org_ruby_lang_ruby_host//:runtime",
+        "@org_ruby_lang_ruby_toolchain//:ruby_bin",
+        "@org_ruby_lang_ruby_toolchain//:runtime",
     ],
 )
 
@@ -176,7 +176,7 @@ cc_binary(
     testonly = True,
     srcs = ["example_ext.c"],
     linkshared = True,
-    deps = ["@org_ruby_lang_ruby_host//:headers"],
+    deps = ["@org_ruby_lang_ruby_toolchain//:headers"],
 )
 
 cc_library(
@@ -185,7 +185,7 @@ cc_library(
     srcs = ["example_ext.c"],
     linkstatic = True,
     tags = ["manual"],
-    deps = ["@org_ruby_lang_ruby_host//:headers"],
+    deps = ["@org_ruby_lang_ruby_toolchain//:headers"],
     alwayslink = True,
 )
 
@@ -263,71 +263,4 @@ sh_test(
     ],
     data = [":load_path_in_runfiles_container_image"],
     tags = ["docker"],
-)
-
-## Tests for bundled commands in the runtime
-
-ruby_binary(
-    name = "diff_test",
-    srcs = ["diff_test.rb"],
-)
-
-sh_test(
-    name = "irb_test",
-    srcs = [":diff_test"],
-    args = [
-        "--stdin",
-        "$(location //ruby/tests/testdata:bundled_commands/irb_input)",
-        "--golden",
-        "$(location //ruby/tests/testdata:bundled_commands/irb_golden)",
-        "--",
-        "$(location @org_ruby_lang_ruby_host//:irb)",
-        "--echo",
-        "--noverbose",
-        "--prompt=simple",
-        "--noreadline",
-    ],
-    data = [
-        "//ruby/tests/testdata:bundled_commands/irb_golden",
-        "//ruby/tests/testdata:bundled_commands/irb_input",
-        "@org_ruby_lang_ruby_host//:irb",
-    ],
-)
-
-sh_test(
-    name = "erb_test",
-    srcs = [":diff_test"],
-    args = [
-        "--stdin",
-        "$(location //ruby/tests/testdata:bundled_commands/erb_input)",
-        "--golden",
-        "$(location //ruby/tests/testdata:bundled_commands/erb_golden)",
-        "--",
-        "$(location @org_ruby_lang_ruby_host//:erb)",
-        "values=foo,bar,baz",
-    ],
-    data = [
-        "//ruby/tests/testdata:bundled_commands/erb_golden",
-        "//ruby/tests/testdata:bundled_commands/erb_input",
-        "@org_ruby_lang_ruby_host//:erb",
-    ],
-)
-
-sh_test(
-    name = "rake_test",
-    srcs = [":diff_test"],
-    args = [
-        "--golden",
-        "$(location //ruby/tests/testdata:bundled_commands/rake_golden)",
-        "--",
-        "$(location @org_ruby_lang_ruby_host//:rake)",
-        "-f",
-        "$(location //ruby/tests/testdata:bundled_commands/rake_input)",
-        "foo",
-    ],
-    data = [
-        "//ruby/tests/testdata:bundled_commands/rake_golden",
-        "//ruby/tests/testdata:bundled_commands/rake_input",
-        "@org_ruby_lang_ruby_host//:rake",
-    ],
 )
