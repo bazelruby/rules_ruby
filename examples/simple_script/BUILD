@@ -12,7 +12,7 @@ ruby_binary(
     main = "script.rb",
     deps = [
         "//lib:foo",
-        "@bundle//:libs",
+        "@bundle//:awesome_print",
     ],
 )
 
@@ -26,6 +26,7 @@ ruby_test(
     rubyopt = ["-rrspec/autorun"],  # require autorun because it is needed
     deps = [
         "//lib:foo",
-        "@bundle//:libs",
+        "@bundle//:awesome_print",
+        "@bundle//:rspec",
     ],
 )

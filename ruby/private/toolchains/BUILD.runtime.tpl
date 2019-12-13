@@ -7,12 +7,8 @@ load(
 package(default_visibility = ["//visibility:public"])
 
 ruby_toolchain(
-    name = "ruby_host",
+    name = "toolchain",
     interpreter = "//:ruby_bin",
-    bundler = "//:bundler",
-    rubyopt = [
-        "-I$(RUNFILES_DIR)/org_ruby_lang_ruby_host/bundler/lib",
-    ],
     runtime = "//:runtime",
     is_host = True,
     rules_ruby_workspace = "{rules_ruby_workspace}",
@@ -27,36 +23,6 @@ sh_binary(
     data = [":runtime"],
 )
 
-sh_binary(
-    name = "irb",
-    srcs = ["irb_bin"],
-)
-
-sh_binary(
-    name = "erb",
-    srcs = ["erb_bin"],
-)
-
-sh_binary(
-    name = "rake",
-    srcs = ["rake_bin"],
-)
-
-sh_binary(
-    name = "rdoc",
-    srcs = ["rdoc_bin"],
-)
-
-sh_binary(
-    name = "ri",
-    srcs = ["ri_bin"],
-)
-
-sh_binary(
-    name = "gem",
-    srcs = ["gem_bin"],
-)
-
 cc_import(
     name = "libruby",
     hdrs = glob({hdrs}),
@@ -68,12 +34,6 @@ cc_library(
     name = "headers",
     includes = {includes},
     hdrs = glob({hdrs}),
-)
-
-filegroup(
-    name = "bundler",
-    srcs = ["bundler/exe/bundler"],
-    data = glob(["bundler/**/*.rb"]),
 )
 
 filegroup(
