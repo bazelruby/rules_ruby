@@ -4,7 +4,7 @@ load(
 )
 
 def ruby_register_toolchains(version = "host"):
-    """Registersr ruby toolchains in the WORKSPACE file."""
+    """Registers ruby toolchains in the WORKSPACE file."""
 
     supported_versions = ["host", "2.6.3", "2.6.5"]
     if version in supported_versions:
@@ -13,7 +13,7 @@ def ruby_register_toolchains(version = "host"):
             version = version,
         )
     else:
-        fail("unsupported ruby version in `ruby_register_toolchains`")
+        fail("ruby_register_toolchains: unsupported ruby version '%s' not in '%s'" % (version, supported_versions))
 
     native.register_toolchains(
         "@org_ruby_lang_ruby_toolchain//:toolchain",
