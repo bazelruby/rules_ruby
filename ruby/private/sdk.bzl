@@ -13,7 +13,7 @@ def ruby_register_toolchains(version = "host"):
             version = version,
         )
     else:
-        fail("unknown ruby version in `ruby_register_toolchains`")
+        fail("unsupported ruby version in `ruby_register_toolchains`")
 
     native.register_toolchains(
         "@org_ruby_lang_ruby_toolchain//:toolchain",

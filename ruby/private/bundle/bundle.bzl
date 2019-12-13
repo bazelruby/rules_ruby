@@ -1,8 +1,6 @@
 load("//ruby/private:constants.bzl", "RULES_RUBY_WORKSPACE_NAME")
 
-_DEFAULT_VERSION = "2.0.2"
-
-def install_bundler(ctx, interpreter, install_bundler, dest, version = _DEFAULT_VERSION):
+def install_bundler(ctx, interpreter, install_bundler, dest, version):
     args = ["env", "-i", interpreter, install_bundler, version, dest]
     environment = {"RUBYOPT": "--disable-gems"}
 
@@ -32,6 +30,7 @@ def bundle_install_impl(ctx):
         interpreter_path,
         "install_bundler.rb",
         "bundler",
+        ctx.attr.version,
     )
 
     bundler = Label("//:bundler/exe/bundler")
@@ -107,6 +106,9 @@ bundle_install = repository_rule(
         ),
         "gemfile_lock": attr.label(
             allow_single_file = True,
+        ),
+        "version": attr.string(
+            default = "2.0.2",
         ),
         "gemspec": attr.label(
             allow_single_file = True,
