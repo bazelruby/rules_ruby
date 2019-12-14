@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
-[[ -x bin/deps ]] && source bin/deps
+[[ -n "${DEBUG}" ]] && set -x
 
-[[ -z ${BashMatic} ]] && {
+[[ -x bin/deps ]] && source "bin/deps"
+
+[[ -z "${BashMatic}" ]] && {
   echo "Failed to initialize BASH library."
   exit 1
 }
@@ -27,9 +29,40 @@ function setup::detect-bazel-version() {
   printf "%s" "${version}"
 }
 
-#——————————————————————————————  main ———————————————————————————————————————————
+function setup::header() {
+  h2 "Installing required development dependencies for working with rules_ruby and Bazel." \
+    "Please wait...."
+}
 
+# prints first argument as the key, right arligned, the second left aligned.
+function setup::table-rows() {
+  local value="$2"
+  value="$(printf "%s" "${value}" | head -1 | tr -C -d '[:digit:][:punct:]' | sed 's/([0-9]+.[0-9]+.[0+9]+)//g;s/[()]/-/g')"
+  printf "${bldylw}%12.12s : ${bldblu}%20.20s     ${txtpur}%s\n${clr}" "$1" "${value}" "$3"
+
+}
+
+function setup::print-versions() {
+  local bazelisk_version="$(ls -ls "$(command -v bazel)" | grep bazelisk | awk 'BEGIN{FS="/"}{print $8}')"
+
+  set +e
+  hl::subtle "Your Current Runtime Environment:"
+  setup::table-rows 'Bazel' "$(bazel --version)" "$(command -v bazel)"
+  setup::table-rows 'Bazelisk' "${bazelisk_version}"
+  setup::table-rows 'Python ' "$(python --version 2>&1)" "$(command -v python) -> $(readlink "$(command -v python)")"
+  setup::table-rows 'Python2' "$(python2 --version 2>&1)" "$(command -v python2)"
+  setup::table-rows 'Python3' "$(python3 --version 2>&1)" "$(command -v python3)"
+  setup::table-rows 'Ruby' "$(ruby --version | sed -E 's/p[0-9]+.*$//g' 2>&1)" "$(command -v ruby)"
+  setup::table-rows 'BASH' "$(bash --version 2>/dev/null | tr -d ',')" "$(command -v bash)"
+  setup::table-rows 'CC' "$(cc --version 2>/dev/null)" "$(cc --version | grep clang)"
+  setup::table-rows 'GO' "$(go version 2>/dev/null)" "$(command -v go)"
+  set -e
+  hr
+}
+
+#——————————————————————————————  main ———————————————————————————————————————————
 function setup::main() {
+  setup::header
   setup::gem::dependencies
   [[ -z ${CI} ]] && setup::git::commit-hook
 
@@ -38,13 +71,36 @@ function setup::main() {
 
   script="./bin/setup-${os}"
 
-  if [[ -x ${script} ]]; then
-    "${script}" "$(setup::detect-bazel-version)"
+  if [[ -x "${script}" ]]; then
+    run::set-all show-output-on abort-on-error
+    run "${script} $(setup::detect-bazel-version)"
+    success 'Setup Completed ✅ '
   else
-    echo "Operating system $(uname -s) is not currently supported." >&2
-    return 1
+    error "Operating system $(uname -s) is not currently supported." >&2
   fi
+
+  hr
+
+  setup::print-versions
 }
 
-setup::main "$@"
+if [[ "$1" =~ "-h" ]]; then
+  printf "
+${bldblu}USAGE: ${clr}
+  bin/setup
 
+${bldblu}DESCRIPTION:${clr}
+  Installs Bazel via bazelisk on Mac, and directly on Linux.
+
+  Both MacOSX and Linux are supported.
+
+  Additionally sets up the git commit hook to check styles.
+
+${bldblu}DO I HAVE TO RUN IT?:${clr}
+
+  ${bldred}RUNNING REQUIRED PRIOR TO USING THE REPO.${clr}
+
+"
+  exit 0
+fi
+setup::main "$@"

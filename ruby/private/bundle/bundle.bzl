@@ -103,6 +103,7 @@ bundle_install = repository_rule(
         ),
         "gemfile": attr.label(
             allow_single_file = True,
+            mandatory = True,
         ),
         "gemfile_lock": attr.label(
             allow_single_file = True,
