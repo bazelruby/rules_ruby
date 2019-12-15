@@ -60,7 +60,6 @@ function setup::print-versions() {
   hr
 }
 
-#——————————————————————————————  main ———————————————————————————————————————————
 function setup::main() {
   setup::header
   setup::gem::dependencies
