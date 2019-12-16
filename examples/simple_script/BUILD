@@ -30,15 +30,3 @@ ruby_test(
         "@bundle//:rspec",
     ],
 )
-
-# TODO: not the best way of defining this, should make `rubocop` rule like `buildifier`
-ruby_binary(
-    name = "rubocop",
-    srcs = [
-        "@bundle//:bin/rubocop",
-    ],
-    main = "@bundle//:bin/rubocop",
-    deps = [
-        "@bundle//:rubocop",
-    ],
-)
