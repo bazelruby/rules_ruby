@@ -1,8 +1,3 @@
-#shell #!/usr/bin/env bash
-#shell # This conditional is evaluated as true in Ruby, false in shell
-#shell if [ ]; then
-#shell eval <<'END_OF_RUBY'
-#shell # -- begin Ruby --
 #!/usr/bin/env ruby
 
 # Ruby-port of the Bazel's wrapper script for Python
@@ -122,28 +117,10 @@ def main(args)
       end
     end
   end
-  exec(ruby_program, '--disable-gems', *rubyopt, main, *args)
+  exec(ruby_program, *rubyopt, main, *args)
   # TODO(yugui) Support windows
 end
 
 if __FILE__ == $0
   main(ARGV)
 end
-#shell END_OF_RUBY
-#shell __END__
-#shell # -- end Ruby --
-#shell fi
-#shell # -- begin Shell Script --
-#shell 
-#shell # --- begin runfiles.bash initialization v2 ---
-#shell # Copy-pasted from the Bazel Bash runfiles library v2.
-#shell set -uo pipefail; f=bazel_tools/tools/bash/runfiles/runfiles.bash
-#shell source "${RUNFILES_DIR:-/dev/null}/$f" 2>/dev/null || \
-#shell source "$(grep -sm1 "^$f " "${RUNFILES_MANIFEST_FILE:-/dev/null}" | cut -f2- -d' ')" 2>/dev/null || \
-#shell source "$0.runfiles/$f" 2>/dev/null || \
-#shell source "$(grep -sm1 "^$f " "$0.runfiles_manifest" | cut -f2- -d' ')" 2>/dev/null || \
-#shell source "$(grep -sm1 "^$f " "$0.exe.runfiles_manifest" | cut -f2- -d' ')" 2>/dev/null || \
-#shell { echo>&2 "ERROR: cannot find $f"; exit 1; }; f=; set -e
-#shell # --- end runfiles.bash initialization v2 ---
-#shell 
-#shell exec "$(rlocation {interpreter})" ${BASH_SOURCE:-$0} "$@"
