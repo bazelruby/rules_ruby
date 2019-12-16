@@ -56,12 +56,6 @@ def bundle_install_impl(ctx):
     if result.return_code:
         fail("Failed to install gems: %s%s" % (result.stdout, result.stderr))
 
-    # exclude any specified files
-    exclude = []
-    for gem, globs in ctx.attr.excludes.items():
-        expanded = ["lib/ruby/*/gems/%s-*/%s" % (gem, glob) for glob in globs]
-        exclude.extend(expanded)
-
     # Create the BUILD file to expose the gems to the WORKSPACE
     args = [
         "env",
@@ -74,7 +68,7 @@ def bundle_install_impl(ctx):
         "BUILD.bazel",  # Bazel build file (can be empty)
         "Gemfile.lock",  # Gemfile.lock where we list all direct and transitive dependencies
         ctx.name,  # Name of the target
-        repr(exclude),
+        repr(ctx.attr.excludes),
         RULES_RUBY_WORKSPACE_NAME,
     ]
     result = ctx.execute(args, quiet = False)
@@ -87,7 +81,6 @@ def bundle_install_impl(ctx):
             ctx.attr._buildfile_template,
             substitutions = {
                 "{repo_name}": ctx.name,
-                "{exclude}": repr(exclude),
                 "{workspace_name}": RULES_RUBY_WORKSPACE_NAME,
             },
         )

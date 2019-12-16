@@ -29,25 +29,18 @@ def _ruby_binary_impl(ctx):
             "main",
         )
 
-    if sdk.is_host:
-        interpreter_file_deps = []
-        interpreter_trans_deps = []
-    else:
-        interpreter_file_deps = [interpreter]
-        interpreter_trans_deps = [sdk.interpreter]
-
     executable = ctx.actions.declare_file(ctx.attr.name)
     deps = _transitive_deps(
         ctx,
-        extra_files = interpreter_file_deps + [executable],
-        extra_deps = interpreter_trans_deps + ctx.attr._misc_deps,
+        extra_files = [executable],
+        extra_deps = ctx.attr._misc_deps,
     )
 
     rubyopt = reversed(deps.rubyopt.to_list())
-    intermediate_executable = ctx.actions.declare_file("%s.tpl.intermediate" % ctx.attr.name)
+
     ctx.actions.expand_template(
         template = ctx.file._wrapper_template,
-        output = intermediate_executable,
+        output = executable,
         substitutions = {
             "{loadpaths}": repr(deps.incpaths.to_list()),
             "{rubyopt}": repr(rubyopt),
@@ -55,24 +48,7 @@ def _ruby_binary_impl(ctx):
             "{interpreter}": _to_manifest_path(ctx, interpreter),
         },
     )
-    if sdk.is_host:
-        ctx.actions.run_shell(
-            inputs = [intermediate_executable],
-            outputs = [executable],
-            command = "grep -v '^#shell ' %s > %s" % (
-                intermediate_executable.path,
-                executable.path,
-            ),
-        )
-    else:
-        ctx.actions.run_shell(
-            inputs = [intermediate_executable],
-            outputs = [executable],
-            command = "sed 's/^#shell //' %s > %s" % (
-                intermediate_executable.path,
-                executable.path,
-            ),
-        )
+
     return [DefaultInfo(
         executable = executable,
         default_runfiles = deps.default_files,

@@ -10,7 +10,6 @@ ruby_toolchain(
     name = "toolchain",
     interpreter = "//:ruby_bin",
     runtime = "//:runtime",
-    is_host = True,
     rules_ruby_workspace = "{rules_ruby_workspace}",
     # TODO(yugui) Extract platform info from RbConfig
     # exec_compatible_with = [],
