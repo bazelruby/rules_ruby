@@ -19,7 +19,6 @@
 #
 
 require 'rbconfig'
-require 'rubygems'
 
 def find_runfiles
   stub_filename = File.absolute_path($0)
