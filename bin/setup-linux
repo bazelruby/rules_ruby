@@ -2,14 +2,29 @@
 
 [[ -x bin/deps ]] && source bin/deps
 
+[[ -n ${DISABLE_COLOR} ]] && lib::color::disable
+
 [[ -z "${BashMatic}" ]] && {
   echo "Failed to initialize BASH library."
   exit 1
 }
 
+function setup::linux::deps() {
+  [[ -n $(command -v curl) && -n $(command -v wget) ]] && return 0
+
+  if [[ -z $(command -v apt-get) ]]; then
+    error "Unable to find the right packaging tool to install dependencies."
+    exit 1
+  fi
+
+  [[ -n $(command -v curl) && -n $(command -v wget) ]] || {
+    error "curl and wget must be pre-installed."
+    exit 2
+  }
+}
+
 function setup::linux() {
-  local version
-  version="${1}"
+  local version="${1}"
 
   [[ -z "${version}" && -f .bazelversion ]] && version=$(cat .bazelversion | tr -d '\n')
 
@@ -20,25 +35,34 @@ function setup::linux() {
     hl::subtle "Installing Bazel version ${version}"
   fi
 
-  local installer=bazel-${version}-installer-linux-x86_64.sh
-  local release_base_uri=https://github.com/bazelbuild/bazel/releases/download/${version}
+  # Ensure we have the tools like curl and wget installe d
+  setup::linux::deps
+
+  local installer="bazel-${version}-installer-linux-x86_64.sh"
+  local release_base_uri="https://github.com/bazelbuild/bazel/releases/download/${version}"
   local require_install=true
-  if test -x ${HOME}/local/${installer}; then
-    cd ${HOME}/local
-    if curl ${release_base_uri}/${installer}.sha256 | sha256sum -c; then
+
+  local installer_path="${HOME}/.ruby_local"
+  local installer_exe="${installer_path}/${installer}"
+
+  if [[ -x "${installer_exe}" ]]; then
+    if curl -q "${release_base_uri}/${installer}.sha256" | sha256sum -c; then
       require_install=false
     fi
   fi
 
   if ${require_install}; then
-    run "rm -rf ${HOME}/local"
-    run "mkdir ${HOME}/local"
-    run "cd ${HOME}/local"
-    run "wget ${release_base_uri}/${installer}"
+    run "rm -rf ${installer_path}"
+    run "mkdir -p ${installer_path}"
+    run "cd ${installer_path}"
+    run "wget ${release_base_uri}/${installer} 2>&1"
     run "chmod +x ${installer}"
 
-    run::set-next show-output-on
-    run "./${installer} --prefix=${HOME}/local --base=${HOME}/.bazel"
+    hl::subtle 'Running Bazel Installer...'
+    run::set-next show-output-on abort-on-error
+
+    run "${installer_exe} --prefix=${installer_path} --base=${HOME}/.bazel 2>&1"
+    success 'Bazel installer completed successfully ✅ '
   fi
 }
 
