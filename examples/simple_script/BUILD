@@ -18,6 +18,7 @@ ruby_binary(
 
 ruby_test(
     name = "script_spec",
+    timeout = "short",
     srcs = [
         "script.rb",
         "spec/script_spec.rb",

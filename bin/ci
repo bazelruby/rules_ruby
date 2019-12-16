@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+export SHELL_INIT="${HOME}/.bashrc"
+export BUNDLE_PATH=vendor/bundle
+export PATH="${HOME}/.rbenv/bin:${HOME}/.rbenv/shims:/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:/opt/local/bin"
+export BAZEL_OPTS="--host_jvm_args=-Xmx500m --host_jvm_args=-Xms500m"
+export BAZEL_BUILD_OPTS="--curses=no --verbose_failures -j 20 --show_progress_rate_limit 0 "
+export BAZEL_TEST_OPTS="--verbose_failures --test_output=streamed --test_verbose_timeout_warnings "
+export RUBY_VERSION=$(cat .ruby-version)
+
+set -xe
+
+function run::tests() {
+  bash -l -c "
+    source ${SHELL_INIT}
+    set -ex
+    bazel ${BAZEL_OPTS} version
+    bazel ${BAZEL_OPTS} info
+    bazel ${BAZEL_OPTS} fetch --curses=no -- '//ruby/...'
+    (cd examples && bazel ${BAZEL_OPTS} fetch --curses=no -- '//...')
+    bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //...
+    bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //...
+    (cd examples/simple_script && bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //...)
+    (cd examples/simple_script && bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //...)
+    bazel run :buildifier-check
+    bundle exec rubocop -E -P -c .rubocop.yml --force-exclusion
+  "
+}
+
+function rbenv::install() {
+  if [[ ! -d ${HOME}/.rbenv ]]; then
+    git clone https://github.com/rbenv/rbenv.git "${HOME}/.rbenv"
+  fi
+  local rbenv_plugins="${HOME}/.rbenv/plugins/ruby-build"
+  if [[ ! -d "${rbenv_plugins}" ]]; then
+    git clone https://github.com/rbenv/ruby-build.git "${rbenv_plugins}"
+  fi
+  export PATH="${HOME}/.rbenv/shims:${HOME}/.rbenv/bin:/usr/local/bin:/usr/bin:/bin:${PATH}"
+  # shellcheck disable=SC2016
+  echo 'export PATH="$HOME/.rbenv/bin:${HOME}/.rbenv/shims:$PATH"' >>"${SHELL_INIT}"
+  # shellcheck disable=SC2016
+  echo 'eval "$(rbenv init -)"' >>"${SHELL_INIT}"
+
+  bash -l -c "
+    source ${SHELL_INIT}
+    set -ex
+    rbenv install -s ${RUBY_VERSION}
+    rbenv global ${RUBY_VERSION}
+    rbenv rehash
+  "
+}
+
+function ruby::install() {
+  bash -l -c "
+    source ${SHELL_INIT}
+    set -ex
+    rbenv install -s ${RUBY_VERSION}
+    rbenv global ${RUBY_VERSION}
+    rbenv rehash
+    ruby --version
+    gem update --system --no-doc
+    gem install bundler --version 2.0.2 --no-doc
+    bundle install --jobs=4 --retry=3 --path \"${BUNDLE_PATH}\"
+  "
+}
+
+if [[ -n $(command -v ruby) ]]; then
+  CURRENT_VERSION=$(ruby -e 'puts RUBY_VERSION')
+  if [[ ${CURRENT_VERSION} != "${RUBY_VERSION}" ]]; then
+    rbenv::install
+    ruby::install
+  fi
+fi
+
+run::tests
