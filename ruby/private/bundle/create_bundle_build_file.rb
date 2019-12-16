@@ -19,6 +19,16 @@ ruby_library(
   visibility = ["//visibility:private"],
 )
 
+ruby_library(
+  name = "bundler",
+  srcs = glob(
+    include = [
+      "bundler/**/*",
+    ],
+  ),
+  rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/lib/bundler/setup.rb"],
+)
+
 # PULL EACH GEM INDIVIDUALLY
 '
 
@@ -34,18 +44,10 @@ ruby_library(
   deps = {deps},
   rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/lib/bundler/setup.rb"],
 )
-
-'
-
-ALL_TEMPLATE = '
-ruby_library(
-  name = "all",
-  deps = {deps},
-  rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/lib/bundler/setup.rb"],
-)
 '
 
 require "bundler"
+require 'json'
 
 def create_bundle_build_file(build_out_file, lock_file, repo_name, excludes, workspace_name)
   # TODO: properly calculate path/ruby version here
@@ -53,7 +55,6 @@ def create_bundle_build_file(build_out_file, lock_file, repo_name, excludes, wor
   ruby_version = "*"
 
   template_out = TEMPLATE.gsub("{workspace_name}", workspace_name)
-                         .gsub("{exclude}", excludes)
                          .gsub("{repo_name}", repo_name)
                          .gsub("{ruby_version}", ruby_version)
 
@@ -63,17 +64,18 @@ def create_bundle_build_file(build_out_file, lock_file, repo_name, excludes, wor
   bundle.specs.each { |spec|
     deps = spec.dependencies.map(&:name)
     deps += [":bundler_setup"]
-    template_out += GEM_TEMPLATE.gsub("{exclude}", excludes)
+
+    exclude_array = excludes[spec.name] || []
+    # We want to exclude files and folder with spaces in them
+    exclude_array += ["**/* *.*", "**/* */*"]
+
+    template_out += GEM_TEMPLATE.gsub("{exclude}", exclude_array.to_s)
                                 .gsub("{name}", spec.name)
                                 .gsub("{version}", spec.version.to_s)
                                 .gsub("{deps}", deps.to_s)
                                 .gsub("{repo_name}", repo_name)
                                 .gsub("{ruby_version}", ruby_version)
   }
-
-  # Append collection of all gems
-  template_out += ALL_TEMPLATE.gsub("{repo_name}", repo_name)
-                              .gsub("{deps}", ([":bundler_setup"] + bundle.specs.map(&:name)).to_s)
 
   # Write the actual BUILD file
   ::File.open(build_out_file, 'w') { |f|
@@ -91,7 +93,9 @@ if $0 == __FILE__
   build_out_file = ARGV[0]
   lock_file = ARGV[1]
   repo_name = ARGV[2]
-  excludes = ARGV[3]
+
+  excludes = JSON.parse(ARGV[3])
+
   workspace_name = ARGV[4]
 
   create_bundle_build_file(build_out_file, lock_file, repo_name, excludes, workspace_name)

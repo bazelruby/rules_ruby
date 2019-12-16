@@ -28,4 +28,7 @@ bundle_install(
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
     version = "2.0.2",
+    excludes = {
+    	"mini_portile": ["test/**/*"]
+    }
 )

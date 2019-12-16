@@ -13,6 +13,7 @@ ruby_binary(
     deps = [
         "//lib:foo",
         "@bundle//:awesome_print",
+        "@bundle//:rails",
     ],
 )
 
@@ -41,5 +42,17 @@ ruby_binary(
     ],
     deps = [
         "@bundle//:rubocop",
+    ]
+)
+
+ruby_binary(
+    name = "rails",
+    main = "@bundle//:bin/rails",
+    srcs = [
+        "@bundle//:bin/rails",
+
+    ],
+    deps = [
+        "@bundle//:rails",
     ]
 )
