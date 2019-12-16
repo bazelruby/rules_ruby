@@ -4,7 +4,7 @@
 #
 
 def _eval_ruby(ruby, script, options = None):
-    arguments = ["env", "-i", ruby.interpreter_realpath]
+    arguments = [ruby.interpreter_realpath]
     if options:
         arguments.extend(options)
     arguments.extend(["-e", script])
