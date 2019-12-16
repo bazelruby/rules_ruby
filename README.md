@@ -20,11 +20,12 @@
 
 Ruby rules for [Bazel](https://bazel.build).
 
-## Status
+## Status:
 
-Work in progress.
+**Work in progress.**
 
-## How to use
+
+## USAGE
 
 Add `ruby_rules_dependencies` and `ruby_register_toolchains` into your `WORKSPACE` file.
 
@@ -78,6 +79,11 @@ ruby_test(
 ```
 
 ## Rules
+
+The following diagram attempts to capture the implementation behind `ruby_library` that depends on the result of `bundle install`, and a `ruby_binary` that depends on both:
+
+![Ruby Rules](docs/img/ruby_rules.png)
+
 
 ### `ruby_library`
 
