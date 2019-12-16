@@ -39,6 +39,8 @@ def bundle_install_impl(ctx):
     args = [
         "env",
         "-i",  # remove all environment variables
+        "-P",
+        "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/bin",
         ctx.path(ruby),  # ruby
         "--disable-gems",  # prevent the addition of gem installation directories to the default load path
         "-I",  # Used to tell Ruby where to load the library scripts
@@ -66,6 +68,8 @@ def bundle_install_impl(ctx):
     args = [
         "env",
         "-i",  # remove all environment variables
+        "-P",
+        "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/bin",
         ctx.path(ruby),  # ruby interpreter
         "--disable-gems",  # prevent the addition of gem installation directories to the default load path
         "-I",  # -I lib (adds this folder to $LOAD_PATH where ruby searchesf for things)

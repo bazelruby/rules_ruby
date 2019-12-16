@@ -4,7 +4,13 @@
 #
 
 def _eval_ruby(ruby, script, options = None):
-    arguments = ["env", "-i", ruby.interpreter_realpath]
+    arguments = [
+        "env",
+        "-i",
+        "-P",
+        "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/bin",
+        ruby.interpreter_realpath,
+    ]
     if options:
         arguments.extend(options)
     arguments.extend(["-e", script])
