@@ -30,3 +30,16 @@ ruby_test(
         "@bundle//:rspec",
     ],
 )
+
+
+ruby_binary(
+    name = "rubocop",
+    main = "@bundle//:bin/rubocop",
+    srcs = [
+        "@bundle//:bin/rubocop",
+
+    ],
+    deps = [
+        "@bundle//:rubocop",
+    ]
+)

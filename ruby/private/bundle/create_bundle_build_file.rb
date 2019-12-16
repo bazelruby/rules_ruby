@@ -19,20 +19,6 @@ ruby_library(
   visibility = ["//visibility:private"],
 )
 
-# DEPRECATED: use :all instead
-ruby_library(
-  name = "libs",
-  srcs = glob(
-    include = [
-      "lib/ruby/{ruby_version}/gems/*/**/*",
-      "lib/ruby/{ruby_version}/bin/**/*",
-    ],
-    exclude = {exclude},
-  ),
-  deps = [":bundler_setup"],
-  rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/lib/bundler/setup.rb"],
-)
-
 # PULL EACH GEM INDIVIDUALLY
 '
 
@@ -42,8 +28,6 @@ ruby_library(
   srcs = glob(
     include = [
       "lib/ruby/{ruby_version}/gems/{name}-{version}/**/*",
-      # TODO scope down included bin files
-      "lib/ruby/{ruby_version}/bin/**/*",
     ],
     exclude = {exclude},
   ),
@@ -60,6 +44,7 @@ ruby_library(
   rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/lib/bundler/setup.rb"],
 )
 '
+
 require "bundler"
 
 def create_bundle_build_file(build_out_file, lock_file, repo_name, excludes, workspace_name)
