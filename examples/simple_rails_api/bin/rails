@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+APP_PATH = Dir.pwd + '/config/application'
+
+require 'rails/commands'
