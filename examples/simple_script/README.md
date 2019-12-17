@@ -10,3 +10,10 @@ Update gemfile using
 ```
 bundle lock --update
 ```
+
+### Rubocop
+Run rubocop with:
+
+```
+bazel run :rubocop -- $(pwd)/* -a
+```
