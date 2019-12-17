@@ -23,18 +23,3 @@ ruby_binary(
         "@bundle//:rails",
     ],
 )
-
-ruby_test(
-    name = "script_spec",
-    srcs = [
-        "script.rb",
-        "spec/script_spec.rb",
-    ],
-    main = "spec/script_spec.rb",
-    rubyopt = ["-rrspec/autorun"],  # require autorun because it is needed
-    deps = [
-        "//lib:foo",
-        "@bundle//:awesome_print",
-        "@bundle//:rspec",
-    ],
-)
