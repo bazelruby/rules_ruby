@@ -14,8 +14,6 @@ ruby_binary(
             "config/**/*",
             "bin/*",
             "config.ru",
-            "Gemfile",
-            "Gemfile.lock",
         ],
     ),
     main = ":bin/rails",
