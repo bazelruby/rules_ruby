@@ -1,69 +1,25 @@
 #!/usr/bin/env bash
 
-[[ -x bin/deps ]] && source bin/deps
-
-[[ -n ${DISABLE_COLOR} ]] && lib::color::disable
-
-[[ -z "${BashMatic}" ]] && {
-  echo "Failed to initialize BASH library."
-  exit 1
-}
-
-function setup::linux::deps() {
-  [[ -n $(command -v curl) && -n $(command -v wget) ]] && return 0
-
-  if [[ -z $(command -v apt-get) ]]; then
-    error "Unable to find the right packaging tool to install dependencies."
-    exit 1
-  fi
-
-  [[ -n $(command -v curl) && -n $(command -v wget) ]] || {
-    error "curl and wget must be pre-installed."
-    exit 2
-  }
-}
+set -xe
 
 function setup::linux() {
-  local version="${1}"
+  [[ -n $(command -v rvm) ]] && {
+    rvm implode --force
+    [[ -d ${HOME}/.rvm ]] && rm -rf "${HOME}/.rvm"
+  }
 
-  [[ -z "${version}" && -f .bazelversion ]] && version=$(cat .bazelversion | tr -d '\n')
+  [[ -f ${HOME}/.bazelrc ]] || cp .circleci/.bazelrc "${HOME}"
 
-  if [[ -z "${version}" ]]; then
-    echo "Usage: setup-linux BAZEL-VERSION" >&2
-    exit 1
-  else
-    hl::subtle "Installing Bazel version ${version}"
-  fi
-
-  # Ensure we have the tools like curl and wget installe d
-  setup::linux::deps
-
-  local installer="bazel-${version}-installer-linux-x86_64.sh"
-  local release_base_uri="https://github.com/bazelbuild/bazel/releases/download/${version}"
-  local require_install=true
-
-  local installer_path="${HOME}/.ruby_local"
-  local installer_exe="${installer_path}/${installer}"
-
-  if [[ -x "${installer_exe}" ]]; then
-    if curl -q "${release_base_uri}/${installer}.sha256" | sha256sum -c; then
-      require_install=false
-    fi
-  fi
-
-  if ${require_install}; then
-    run "rm -rf ${installer_path}"
-    run "mkdir -p ${installer_path}"
-    run "cd ${installer_path}"
-    run "wget ${release_base_uri}/${installer} 2>&1"
-    run "chmod +x ${installer}"
-
-    hl::subtle 'Running Bazel Installer...'
-    run::set-next show-output-on abort-on-error
-
-    run "${installer_exe} --prefix=${installer_path} --base=${HOME}/.bazel 2>&1"
-    success 'Bazel installer completed successfully ✅ '
-  fi
+  sudo apt update -y || true
+  sudo apt-get install -y libreadline-dev zlib1g-dev
+  sudo curl -L -o /usr/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.0/bazelisk-linux-amd64
+  sudo chmod +x /usr/bin/bazel
 }
 
-setup::linux "$@"
+setup::linux
+
+if [[ -z ${CIRCLECI} ]]; then
+  /usr/bin/env bash bin/ci
+else
+  exit 0
+fi

@@ -1,29 +1,37 @@
 <!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
-- [Status](#status)
-- [How to use](#how-to-use)
-- [Rules](#rules)
-	- [`ruby_library`](#rubylibrary)
-	- [`ruby_binary`](#rubybinary)
-	- [`ruby_test`](#rubytest)
-	- [`bundle_install`](#bundleinstall)
-- [What's coming next](#whats-coming-next)
-- [Contributing](#contributing)
-	- [Setup](#setup)
-- [Copyright](#copyright)
+* [Status:](#status)
+* [USAGE](#usage)
+* [Rules](#rules)
+  * [ruby_library](#ruby_library)
+  * [ruby_binary](#ruby_binary)
+  * [ruby_test](#ruby_test)
+  * [bundle_install](#bundle_install)
+* [What's coming next](#whats-coming-next)
+* [Contributing](#contributing)
+  * [Setup](#setup)
+  * [Running Tests](#running-tests)
+* [Copyright](#copyright)
 
 <!-- /TOC -->
 
-# Rules Ruby
+### Build Status
 
-[![Build Status](https://travis-ci.org/bazelruby/rules_ruby.svg?branch=master)](https://travis-ci.org/bazelruby/rules_ruby)
+| Build | Status |
+|---------:	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
+| CircleCI Develop: 	| [![CircleCI](https://circleci.com/gh/bazelruby/rules_ruby/tree/develop.svg?style=svg)](https://circleci.com/gh/bazelruby/rules_ruby/tree/develop) 	|
+| CircleCI Default: 	| [![CircleCI](https://circleci.com/gh/bazelruby/rules_ruby.svg?style=svg)](https://circleci.com/gh/bazelruby/rules_ruby) 	|
+| Develop: 	| [![Build Status](https://travis-ci.org/bazelruby/rules_ruby.svg?branch=develop)](https://travis-ci.org/bazelruby/rules_ruby) 	|
+| Master: 	| [![Build Status](https://travis-ci.org/bazelruby/rules_ruby.svg?branch=master)](https://travis-ci.org/bazelruby/rules_ruby) 	|
+
+
+# Rules Ruby
 
 Ruby rules for [Bazel](https://bazel.build).
 
 ## Status:
 
 **Work in progress.**
-
 
 ## USAGE
 
@@ -151,13 +159,13 @@ ruby_library(name, deps, srcs, data, compatible_with, deprecation, distribs, fea
           NOTE: <code>-I</code> option should usually go to <code>includes</code> attribute.
         </p>
       </td>
-    </tr>    
+    </tr>
   </tbody>
   <tbody>
     <tr>
       <td colspan="2">And other <a href="https://docs.bazel.build/versions/master/be/common-definitions.html#common-attributes">common attributes</a></td>
     </tr>
-  </tbody>  
+  </tbody>
 </table>
 
 ### `ruby_binary`
@@ -210,14 +218,14 @@ ruby_binary(name, deps, srcs, data, main, compatible_with, deprecation, distribs
         <p>The entrypoint file. It must be also in <code>srcs</code>.</p>
         <p>If not specified, <code><var>$(NAME)</var>.rb</code> where <code>$(NAME)</code> is the <code>name</code> of this rule.</p>
       </td>
-    </tr>    
+    </tr>
     <tr>
       <td><code>includes</code></td>
       <td>
         <code>List of strings, optional</code>
         <p>
           List of paths to be added to <code>$LOAD_PATH</code> at runtime.
-          The paths must be relative to the the workspace which this rule belongs to.            
+          The paths must be relative to the the workspace which this rule belongs to.
         </p>
       </td>
     </tr>
@@ -232,13 +240,13 @@ ruby_binary(name, deps, srcs, data, main, compatible_with, deprecation, distribs
           NOTE: <code>-I</code> option should usually go to <code>includes</code> attribute.
         </p>
       </td>
-    </tr>    
+    </tr>
   </tbody>
   <tbody>
     <tr>
       <td colspan="2">And other <a href="https://docs.bazel.build/versions/master/be/common-definitions.html#common-attributes">common attributes</a></td>
     </tr>
-  </tbody>  
+  </tbody>
 </table>
 
 ### `ruby_test`
@@ -291,14 +299,14 @@ ruby_test(name, deps, srcs, data, main, compatible_with, deprecation, distribs, 
         <p>The entrypoint file. It must be also in <code>srcs</code>.</p>
         <p>If not specified, <code><var>$(NAME)</var>.rb</code> where <code>$(NAME)</code> is the <code>name</code> of this rule.</p>
       </td>
-    </tr>    
+    </tr>
     <tr>
       <td><code>includes</code></td>
       <td>
         <code>List of strings, optional</code>
         <p>
           List of paths to be added to <code>$LOAD_PATH</code> at runtime.
-          The paths must be relative to the the workspace which this rule belongs to.            
+          The paths must be relative to the the workspace which this rule belongs to.
         </p>
       </td>
     </tr>
@@ -313,13 +321,13 @@ ruby_test(name, deps, srcs, data, main, compatible_with, deprecation, distribs, 
           NOTE: <code>-I</code> option should usually go to <code>includes</code> attribute.
         </p>
       </td>
-    </tr>    
+    </tr>
   </tbody>
   <tbody>
     <tr>
       <td colspan="2">And other <a href="https://docs.bazel.build/versions/master/be/common-definitions.html#common-attributes">common attributes</a></td>
     </tr>
-  </tbody>  
+  </tbody>
 </table>
 
 ### `bundle_install`
@@ -430,6 +438,13 @@ bin/setup
 
 Whenever you'll commit something, a pre-commit hook will run as well.
 
+### Running Tests
+
+We have a handy script you can use to run all tests:
+
+```bash
+bin/ci
+```
 
 ## Copyright
 

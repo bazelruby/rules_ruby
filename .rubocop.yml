@@ -1,7 +1,9 @@
 AllCops:
+  TargetRubyVersion: 2.6.5
   Exclude:
     - bazel-*/**/*
     - examples/**/*
+    - "**/vendor/bundle/**/*"
 
 inherit_gem:
   relaxed-rubocop: .rubocop.yml
