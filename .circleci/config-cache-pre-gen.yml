@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  rubocop: &bazel_defaults
+  generate_cache: &bazel_defaults
     working_directory: /home/circleci/repo
     resource_class: medium
     docker:
@@ -17,16 +17,59 @@ jobs:
       - checkout
 
       - run:
-          name: "Install ~/.bazelrc and run setup"
+          name: "Install ~/.bazelrc"
           command: |
             cp .circleci/.bazelrc ${HOME}
+
+      - run:
+          name: "Setup"
+          command: |
             /usr/bin/env bash bin/setup
+
+      - run:
+          name: "Bazel Build All"
+          command: bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //...
+
+      - run:
+          name: "Generate Cache SHA"
+          command: |
+            source bin/deps && bazel-sha > bazel.sha
+
+      - save_cache:
+          paths:
+            - /home/circleci/repo/bazel.sha
+            - /home/circleci/.bazelrc
+          key: v2-bazel-sha-{{ .Revision }}
+
+      - save_cache:
+          paths:
+            - /home/circleci/.cache/bazel/_bazel_circleci
+          key: v2-bazel-deps-{{ checksum "bazel.sha" }}
+
+  rubocop:
+    <<: *bazel_defaults
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          keys:
+            - v2-bazel-sha-{{ .Revision }}
+
+      - restore_cache:
+          keys:
+            - v2-bundle-deps-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
 
       - run:
           name: Install Bundler
           command: |
             gem install bundler:2.0.2 --no-doc
             bundle install --jobs=4 --retry=3 --path ${BUNDLE_PATH}
+
+      - save_cache:
+          paths:
+            - /home/circleci/.bundle_cache
+          key: v2-bundle-deps-{{ .Branch }}-{{ checksum "Gemfile.lock" }}
 
       - run:
           name: "Rubocop Style Check"
@@ -38,16 +81,22 @@ jobs:
     steps:
       - checkout
 
+      - restore_cache:
+          keys:
+            - v2-bazel-sha-{{ .Revision }}
+              
+      - restore_cache:
+          keys:
+            - v2-bazel-deps-{{ checksum "bazel.sha" }}
+
       - run:
-          name: "Install ~/.bazelrc and run setup"
+          name: "Setup"
           command: |
-            cp .circleci/.bazelrc ${HOME}
             /usr/bin/env bash bin/setup
 
       - run:
           name: "Show Bazel Info"
           command: |
-            
             /usr/bin/env bash bin/ci bazel-info
 
       - run:
@@ -61,24 +110,28 @@ jobs:
     steps:
       - checkout
 
+      - restore_cache:
+          keys:
+            - v2-bazel-sha-{{ .Revision }}
+            - v2-bazel-deps-{{ checksum "bazel.sha" }}
+
       - run:
-          name: "Install ~/.bazelrc and run setup"
+          name: "Setup"
           command: |
-            cp .circleci/.bazelrc ${HOME}
             /usr/bin/env bash bin/setup
 
       - run:
-          name: "Bazel Simple Script Example Build"
+          name: "Bazel Examples Build"
           command: |
             (cd examples/simple_script && bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //...)
 
       - run:
-          name: "Bazel Simple Script Example Test"
+          name: "Bazel Examples Test"
           command: |
             (cd examples/simple_script && bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //...)
 
       - run:
-          name: "Bazel Simple Script Example Rubocop Check"
+          name: "Bazel Rubocop Test"
           command: |
             (cd examples/simple_script && bazel ${BAZEL_OPTS} run ${BAZEL_BUILD_OPTS} -- :rubocop)
 
@@ -88,10 +141,14 @@ jobs:
     steps:
       - checkout
 
+      - restore_cache:
+          keys:
+            - v2-bazel-sha-{{ .Revision }}
+            - v2-bazel-deps-{{ checksum "bazel.sha" }}
+
       - run:
-          name: "Install ~/.bazelrc and run setup"
+          name: "Setup"
           command: |
-            cp .circleci/.bazelrc ${HOME}
             /usr/bin/env bash bin/setup
 
       - run:
@@ -107,6 +164,13 @@ jobs:
 workflows:
   rules_ruby:
     jobs:
-      - bazel_build_workspace
-      - bazel_build_examples
-      - buildifier
+      - generate_cache
+      - bazel_build_workspace:
+          requires:
+            - generate_cache
+      - bazel_build_examples:
+          requires:
+            - generate_cache
+      - buildifier:
+          requires:
+            - generate_cache

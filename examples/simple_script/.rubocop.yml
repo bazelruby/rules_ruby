@@ -1,10 +1,10 @@
 AllCops:
   TargetRubyVersion: 2.6.5
   Exclude:
-    - "**/rubocop"
-    - "examples/**/*"
-    - "bazel-*/**/*"
-    - "**/external/**/*"
+    - rubocop
+    - bazel-*/**/*
+    - examples/**/*
+    - external/**/*
     - "**/vendor/bundle/**/*"
 
 inherit_gem:

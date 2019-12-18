@@ -1,25 +1,20 @@
 #!/usr/bin/env bash
+#
+set -e
+# shellcheck disable=SC1091
+source "bin/deps"
 
-set -xe
-
-function setup::linux() {
+setup::linux() {
   [[ -n $(command -v rvm) ]] && {
-    rvm implode --force
-    [[ -d ${HOME}/.rvm ]] && rm -rf "${HOME}/.rvm"
+    run "rvm implode --force"
+    [[ -d ${HOME}/.rvm ]] && run "rm -rf ${HOME}/.rvm"
   }
 
-  [[ -f ${HOME}/.bazelrc ]] || cp .circleci/.bazelrc "${HOME}"
+  [[ -f ${HOME}/.bazelrc ]] || run "cp -v .circleci/.bazelrc ${HOME}"
 
-  sudo apt update -y || true
-  sudo apt-get install -y libreadline-dev zlib1g-dev
-  sudo curl -L -o /usr/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.0/bazelisk-linux-amd64
-  sudo chmod +x /usr/bin/bazel
+  run "sudo apt update -y || true"
+  run "sudo apt-get install -y libreadline-dev zlib1g-dev"
+  run "sudo curl -L -o /usr/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.0/bazelisk-linux-amd64"
+  run "sudo chmod +x /usr/bin/bazel"
 }
 
-setup::linux
-
-if [[ -z ${CIRCLECI} ]]; then
-  /usr/bin/env bash bin/ci
-else
-  exit 0
-fi

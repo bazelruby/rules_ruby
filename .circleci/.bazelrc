@@ -1,4 +1,6 @@
-build  --verbose_failures --spawn_strategy=standalone --strategy=Genrule=standalone
+build  --verbose_failures --spawn_strategy=standalone --strategy=Genrule=standalone --show_timestamps --show_progress --show_progress_rate_limit 0.5
 test --spawn_strategy=standalone
 common --color=yes
-test --verbose_failures --test_output=errors --test_verbose_timeout_warnings
+startup --max_idle_secs=1
+test --verbose_failures --test_output=errors --test_verbose_timeout_warnings --show_progress --show_progress_rate_limit 0.5
+run --verbose_failures --show_progress --show_progress_rate_limit 0.5

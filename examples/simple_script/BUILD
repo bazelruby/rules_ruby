@@ -36,7 +36,14 @@ ruby_test(
 ruby_binary(
     name = "rubocop",
     srcs = [
+        ".rubocop.yml",
+        "script.rb",
+        "spec/script_spec.rb",
         "@bundle//:bin/rubocop",
+    ],
+    args = [
+        "-P",
+        "-D",
     ],
     main = "@bundle//:bin/rubocop",
     deps = [

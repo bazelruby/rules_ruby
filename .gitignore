@@ -1,7 +1,6 @@
 **/bazel-*
 **/.idea
-**/vendor/bundle
 **/.bundle
-.DS_Store
+**/vendor/bundle/**
+**/.DS_Store
 **/.vscode
-

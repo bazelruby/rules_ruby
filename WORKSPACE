@@ -90,3 +90,15 @@ container_pull(
     registry = "docker.io",
     repository = "library/ruby",
 )
+
+load("@bazelruby_ruby_rules//ruby:defs.bzl", "bundle_install")
+
+bundle_install(
+    name = "bundle",
+    excludes = {
+        "mini_portile": ["test/**/*"],
+    },
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+    version = "2.0.2",
+)
