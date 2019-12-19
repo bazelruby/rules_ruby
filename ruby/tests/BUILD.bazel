@@ -205,7 +205,7 @@ apple_binary(
 )
 
 genrule(
-    name = "gen_exmaple_ext",
+    name = "gen_example_ext",
     testonly = True,
     srcs = [":example_ext"],
     outs = ["example_ext.bundle"],
