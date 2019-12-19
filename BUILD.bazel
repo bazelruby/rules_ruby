@@ -6,3 +6,8 @@ buildifier(
     name = "buildifier-check",
     mode = "check",
 )
+
+buildifier(
+    name = "buildifier-fix",
+    mode = "fix",
+)

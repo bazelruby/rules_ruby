@@ -1,17 +1,41 @@
-#!/usr/bin/env bash
 # vim: ft=sh
 
 export BashMatic="${HOME}/.bashmatic"
 
 if [[ ! -f "${BashMatic}/init.sh" ]]; then
-  printf "Please wait a minute while we install required dependencies...\n"
   rm -rf "${BashMatic}" 2>/dev/null
   git clone https://github.com/kigster/bashmatic "${BashMatic}" 1>/dev/null 2>&1
+else
+  cd "${BashMatic}" && { 
+    git diff-index --quiet HEAD && git pull 
+  }
+  cd - >/dev/null
 fi
 
 # shellcheck disable=SC1090
-source "${BashMatic}/init.sh"
+source "${BashMatic}/init.sh" 1>/dev/null 2>&1 
+
+__version::detect() {
+  local file="$1"
+  if [[ -f ${file} ]]; then
+    /bin/cat "${file}" | head -1
+  else
+    printf ''
+  fi
+}
+
+[[ -f .bazelversion ]] || {
+  error "Can't find .bazelversion file, required for installing Bazel!"
+  exit 1
+}
 
 # Application Constants
-export RulesRuby__Version=$(cat .rules_version)
-export RulesRuby__BazelVersion=$(cat .bazelversion)
+export RulesRuby__RulesVersion=$(__version::detect .rules_version)
+export RulesRuby__RubyVersion=$(__version::detect .ruby_version)
+export RulesRuby__BazelVersion=$(__version::detect .bazelversion)
+
+bazel-sha() {
+  bazel info | grep output_path | awk 'BEGIN{FS="/"}{ for(i = 1; i <= NF; i++) { if (length($i) == 32) print $i; } }'
+}
+
+run::set-all abort-on-error

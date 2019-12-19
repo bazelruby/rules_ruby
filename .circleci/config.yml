@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  ruby_style: &bazel_defaults
+  rubocop: &bazel_defaults
     working_directory: /home/circleci/repo
     resource_class: medium
     docker:
@@ -15,145 +15,98 @@ jobs:
 
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "Gemfile.lock" }}
+
+      - run:
+          name: "Install ~/.bazelrc and run setup"
+          command: |
+            cp .circleci/.bazelrc ${HOME}
+            /usr/bin/env bash bin/setup
+
       - run:
           name: Install Bundler
           command: |
             gem install bundler:2.0.2 --no-doc
             bundle install --jobs=4 --retry=3 --path ${BUNDLE_PATH}
 
-      - save_cache:
-          paths:
-            - ${BUNDLE_PATH}
-          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
-
-      - run:
-          name: Which everything?
-          command: |
-            set +e
-            bundle -v
-            ruby --version
-            gcc --version | head -1
-            cc --version  | head -1
-            openssl version
-
       - run:
           name: "Rubocop Style Check"
           command: bundle exec rubocop -E -P
 
-  bazel_rules: 
+  bazel_build_workspace:
     <<: *bazel_defaults
 
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - v1-bazel-{{ checksum ".bazelversion" }}
-      - run:
-          name: "Custom Setup Script"
-          command: |
-            /usr/bin/env bash bin/setup-linux
-
-      - save_cache:
-          paths:
-            - ${BUNDLE_PATH}
-          key: v1-bazel-{{ checksum ".bazelversion" }}
 
       - run:
-          name: "Install ~/.bazelrc"
+          name: "Install ~/.bazelrc and run setup"
           command: |
             cp .circleci/.bazelrc ${HOME}
+            /usr/bin/env bash bin/setup
 
       - run:
           name: "Show Bazel Info"
           command: |
-            bazel $BAZEL_OPTS version
-            bazel $BAZEL_OPTS info
-            bazel $BAZEL_OPTS fetch --curses=no -- "//ruby/..."
-            (cd examples && bazel $BAZEL_OPTS fetch --curses=no -- "//...")
+            
+            /usr/bin/env bash bin/ci bazel-info
 
       - run:
-          name: "Bazel Rules Build"
+          name: "Bazel Build & Test Workspace"
           command: |
-            bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //...
+            /usr/bin/env bash bin/ci workspace
 
-      - run:
-          name: "Bazel Rules Test"
-          command: |
-            bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //...
-
-  bazel_examples:
+  bazel_build_examples:
     <<: *bazel_defaults
 
     steps:
       - checkout
 
-      - restore_cache:
-          keys:
-            - v1-bazel-{{ checksum ".bazelversion" }}
-
       - run:
-          name: "Custom Setup Script"
-          command: |
-            /usr/bin/env bash bin/setup-linux
-
-      - save_cache:
-          paths:
-            - ${BUNDLE_PATH}
-          key: v1-bazel-{{ checksum ".bazelversion" }}
-
-      - run:
-          name: "Install ~/.bazelrc"
+          name: "Install ~/.bazelrc and run setup"
           command: |
             cp .circleci/.bazelrc ${HOME}
+            /usr/bin/env bash bin/setup
 
       - run:
-          name: "Bazel Examples Build"
+          name: "Bazel Simple Script Example Build"
           command: |
-            (cd examples/simple_script && bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //...)
+            cd examples/simple_script && bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //...
 
       - run:
-          name: "Bazel Examples Test"
+          name: "Bazel Simple Script Example Test"
           command: |
-            (cd examples/simple_script && bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //...)
+            cd examples/simple_script && bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //...
 
-  bazel_buildifier:
+      - run:
+          name: "Bazel Simple Script Example Rubocop Check"
+          command: |
+            cd examples/simple_script && bazel ${BAZEL_OPTS} run ${BAZEL_BUILD_OPTS} -- :rubocop
+
+  buildifier:
     <<: *bazel_defaults
 
     steps:
       - checkout
 
-      - restore_cache:
-          keys:
-            - v1-bazel-{{ checksum ".bazelversion" }}
-
       - run:
-          name: "Custom Setup Script"
-          command: |
-            /usr/bin/env bash bin/setup-linux
-
-      - save_cache:
-          paths:
-            - ${BAZEL_INSTALLER_DIR}
-          key: v1-bazel-{{ checksum ".bazelversion" }}
-
-      - run:
-          name: "Install ~/.bazelrc"
+          name: "Install ~/.bazelrc and run setup"
           command: |
             cp .circleci/.bazelrc ${HOME}
+            /usr/bin/env bash bin/setup
 
       - run:
-          name: "Bazel Buildifier Check"
+          name: "Bazel Buildifier Build"
           command: |
             bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} :buildifier-check
+
+      - run:
+          name: "Bazel Buildifier Run"
+          command: |
             bazel ${BAZEL_OPTS} run   ${BAZEL_BUILD_OPTS} :buildifier-check
 
 workflows:
   rules_ruby:
     jobs:
-      - ruby_style
-      - bazel_rules
-      - bazel_examples
-      - bazel_buildifier
+      - bazel_build_workspace
+      - bazel_build_examples
+      - buildifier

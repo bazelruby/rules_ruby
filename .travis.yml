@@ -4,6 +4,12 @@ sudo: true
 language: java
 jdk: openjdk11
 
+cache:
+  directories:
+    ${HOME}/.rbenv
+    ${HOME}/.bundle/gems
+    #${HOME}/.cache/bazel/_bazel_${USER}
+
 addons:
   apt:
     packages:
@@ -12,12 +18,17 @@ addons:
       - g++
 
 script:
-  - bin/setup-linux
+  - /usr/bin/env bash bin/setup
+  - /usr/bin/env bash bin/ci
+
+after_script:
+  - /usr/bin/env bash bin/show-env
 
 env:
   global:
-    - BUNDLE_PATH=vendor/bundle
-    - PATH="~/.rbenv/bin:~/.rbenv/shims:/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:/opt/local/bin"
-    - BAZEL_OPTS="--host_jvm_args=-Xmx500m --host_jvm_args=-Xms500m"
-    - BAZEL_BUILD_OPTS="--curses=no --verbose_failures -j 20 --show_progress_rate_limit 0 "
-    - BAZEL_TEST_OPTS="--verbose_failures --test_output=streamed --test_verbose_timeout_warnings "
+    - CI=true
+    - BUNDLE_PATH="${HOME}/.bundle/gems"
+    - PATH="${HOME}/.rbenv/bin:${HOME}/.rbenv/shims:/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:/opt/local/bin:${PATH}"
+    - BAZEL_OPTS="--host_jvm_args=-Xmx700m --host_jvm_args=-Xms700m"
+    - BAZEL_BUILD_OPTS="--curses=no --verbose_failures -j 20 --show_progress_rate_limit 0.5"
+    - BAZEL_TEST_OPTS="--verbose_failures --test_output=streamed --test_verbose_timeout_warnings"

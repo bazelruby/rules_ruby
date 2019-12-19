@@ -1,55 +1,67 @@
 #!/usr/bin/env bash
 
-[[ -x bin/deps ]] && source bin/deps
-[[ -z "${BashMatic}" ]] && {
-  echo "Failed to initialize BASH library."
-  exit 1
-}
+set -e
+# shellcheck disable=SC1091
+source "bin/deps"
 
 #——————————————————————————————  OS-X SPECIFIC INSTALLERS —————————————————————————
 
-function setup::brew-validate() {
+__setup::brew-validate() {
   # Homebrew is required to install Bazel
   if ! brew help >/dev/null; then
     echo "brew is not installed, please install from https://brew.sh"
+  else
+    info: "Homebrew is already installed."
   fi
 }
 
-function setup::brew-install-jdk() {
+__setup::brew-install-jdk() {
   # The JDK homebrew cask is a required to install the java dependencies for Bazel
   if ! brew cask list | grep -q openjdk; then
     run "brew cask install homebrew/cask-versions/adoptopenjdk8"
+  else
+    info: "JDK already installed."
   fi
 }
 
-function setup::brew-deps() {
+__setup::brew-deps() {
   if ! brew list | grep -q xz; then
     "brew install xz"
+  else
+    info: "Found brew package xz."
   fi
 }
 
-function setup::osx-deps() {
+__setup::is-bazelisk-installed() {
+  /bin/ls -al "$(command -v bazel)" | grep -q bazelisk
+}
+
+#——————————————————————————————  PUBLIC INTERFACE —————————————————————————
+
+setup::brew() {
+  __setup::brew-validate
+  __setup::brew-install-jdk
+  __setup::brew-deps
+}
+
+setup::xcode-tools() {
   # xcode command line tools are required, specifically gcc
   # if xcode already exists, this command will error, otherwise prompt the user
   if [[ -n $(xcode-select --install 2>&1) ]]; then
-    hl::subtle "Good News! xcode-select tools are already installed."
+    info: "xcode-select tools are already installed."
   fi
 }
-function setup::is-bazelisk-installed() {
-  ls -al "$(command -v bazel)" | grep -q bazelisk
-}
 
-function setup::bazelisk-install() {
-  setup::is-bazelisk-installed ||
+setup::bazelisk() {
+  if __setup::is-bazelisk-installed; then
+    info: "Bazelisk is already installed."
+  else
     run "brew install bazelbuild/tap/bazelisk"
+  fi
 }
 
-function setup::darwin() {
-  setup::brew-validate
-  setup::brew-install-jdk
-  setup::brew-deps
-  setup::osx-deps
-  setup::bazelisk-install
+setup::darwin() {
+  setup::xcode-tools
+  setup::brew
+  setup::bazelisk
 }
-
-setup::darwin "$@"

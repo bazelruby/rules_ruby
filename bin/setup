@@ -1,105 +1,58 @@
 #!/usr/bin/env bash
 
-[[ -n "${DEBUG}" ]] && set -x
+set -e
+# shellcheck disable=SC1091
+source "bin/deps"
 
-[[ -x bin/deps ]] && source "bin/deps"
-
-[[ -z "${BashMatic}" ]] && {
-  echo "Failed to initialize BASH library."
-  exit 1
+setup::gems() {
+  for gem in rubocop relaxed-rubocop rubocop-performance; do
+    lib::gem::install ${gem}
+  done
 }
 
-function setup::gem::dependencies() {
-  # abort on error
-  run::set-all abort-on-error
-
-  lib::gem::cache-refresh
-  lib::gem::install rubocop
-  lib::gem::install relaxed-rubocop
-}
-
-function setup::git::commit-hook() {
+setup::git() {
   [[ -L .git/hooks/pre-commit ]] || run "ln -nfs bin/pre-commit .git/hooks/pre-commit"
 }
 
-function setup::detect-bazel-version() {
-  local version
-  version="$(grep versions.check WORKSPACE | awk 'BEGIN{FS="\""}{print $2}')"
-  [[ -z "${version}" && -f .bazelversion ]] && version="$(cat .bazelversion | tr -d '\n')"
-  printf "%s" "${version}"
-}
-
-function setup::header() {
-  h2 "Installing required development dependencies for working with rules_ruby and Bazel." \
-    "Please wait...."
-}
-
-# prints first argument as the key, right arligned, the second left aligned.
-function setup::table-rows() {
-  local value="$2"
-  value="$(printf "%s" "${value}" | head -1 | tr -C -d '[:digit:][:punct:]' | sed 's/([0-9]+.[0-9]+.[0+9]+)//g;s/[()]/-/g')"
-  printf "${bldylw}%12.12s : ${bldblu}%20.20s     ${txtpur}%s\n${clr}" "$1" "${value}" "$3"
-
-}
-
-function setup::print-versions() {
-  local bazelisk_version="$(ls -ls "$(command -v bazel)" | grep bazelisk | awk 'BEGIN{FS="/"}{print $8}')"
-
-  set +e
-  hl::subtle "Your Current Runtime Environment:"
-  setup::table-rows 'Bazel' "$(bazel --version)" "$(command -v bazel)"
-  setup::table-rows 'Bazelisk' "${bazelisk_version}"
-  setup::table-rows 'Python ' "$(python --version 2>&1)" "$(command -v python) -> $(readlink "$(command -v python)")"
-  setup::table-rows 'Python2' "$(python2 --version 2>&1)" "$(command -v python2)"
-  setup::table-rows 'Python3' "$(python3 --version 2>&1)" "$(command -v python3)"
-  setup::table-rows 'Ruby' "$(ruby --version | sed -E 's/p[0-9]+.*$//g' 2>&1)" "$(command -v ruby)"
-  setup::table-rows 'BASH' "$(bash --version 2>/dev/null | tr -d ',')" "$(command -v bash)"
-  setup::table-rows 'CC' "$(cc --version 2>/dev/null)" "$(cc --version | grep clang)"
-  setup::table-rows 'GO' "$(go version 2>/dev/null)" "$(command -v go)"
-  set -e
-  hr
-}
-
-function setup::main() {
-  setup::header
-  setup::gem::dependencies
-  [[ -z ${CI} ]] && setup::git::commit-hook
-
+setup::install() {
   local os=$(uname -s | tr '[:upper:]' '[:lower:]')
-  local script
+  local setup_script
+  setup_script="./bin/setup-${os}"
 
-  script="./bin/setup-${os}"
-
-  if [[ -x "${script}" ]]; then
-    run::set-all show-output-on abort-on-error
-    run "${script} $(setup::detect-bazel-version)"
-    success 'Setup Completed ✅ '
+  if [[ -x "${setup_script}" ]]; then
+    set -e
+    # shellcheck disable=SC1090
+    source "${setup_script}"
+    # run it's main function
+    eval "setup::${os} \"$*\""
+    echo
+    if [[ -z ${CI} ]]; then
+      h2 "Please note — to print your Bazel environment run " "${bldylw}bin/show-env"
+    else
+      /usr/bin/env bash bin/show-env || true
+    fi
   else
     error "Operating system $(uname -s) is not currently supported." >&2
   fi
-
-  hr
-
-  setup::print-versions
+  echo
+  return 0
 }
 
-if [[ "$1" =~ "-h" ]]; then
-  printf "
-${bldblu}USAGE: ${clr}
-  bin/setup
+setup::main() {
+  local action="$1"
+  local func="setup::${action}"
 
-${bldblu}DESCRIPTION:${clr}
-  Installs Bazel via bazelisk on Mac, and directly on Linux.
+  if lib::util::is-a-function "${func}"; then
+    h2 "Executing partial setup for action ${bldylw}${action}"
+    shift
+    ${func} "$@"
+  else
+    set +e
+    h2 "Installing required development dependencies for working with rules_ruby and Bazel."
+    setup::gems
+    [[ -z ${CI} ]] && setup::git
+    setup::install "$@"
+  fi
+}
 
-  Both MacOSX and Linux are supported.
-
-  Additionally sets up the git commit hook to check styles.
-
-${bldblu}DO I HAVE TO RUN IT?:${clr}
-
-  ${bldred}RUNNING REQUIRED PRIOR TO USING THE REPO.${clr}
-
-"
-  exit 0
-fi
 setup::main "$@"
