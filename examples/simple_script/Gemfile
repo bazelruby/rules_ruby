@@ -2,6 +2,8 @@
 
 source 'https://rubygems.org'
 
+gem 'colored2'
 gem 'awesome_print'
 gem 'rspec', '~> 3.7.0'
-gem 'rubocop'
+gem 'rubocop', '~> 0.78.0'
+gem 'relaxed-rubocop', '~> 2.4'

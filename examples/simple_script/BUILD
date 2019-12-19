@@ -47,6 +47,7 @@ ruby_binary(
     ],
     main = "@bundle//:bin/rubocop",
     deps = [
+        "@bundle//:relaxed-rubocop",
         "@bundle//:rubocop",
     ],
 )
