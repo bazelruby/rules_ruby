@@ -2,5 +2,4 @@
 
 source 'https://rubygems.org'
 
-gem 'relaxed-rubocop', '~> 2.4'
-gem 'rubocop', '~> 0.77'
+gem 'rubocop', '~> 0.78'

@@ -36,18 +36,20 @@ ruby_test(
 ruby_binary(
     name = "rubocop",
     srcs = [
+        ".relaxed-rubocop-2.4.yml",
         ".rubocop.yml",
         "script.rb",
         "spec/script_spec.rb",
         "@bundle//:bin/rubocop",
     ],
     args = [
+        "-c",
+        ".rubocop.yml",
         "-P",
         "-D",
     ],
     main = "@bundle//:bin/rubocop",
     deps = [
-        "@bundle//:relaxed-rubocop",
         "@bundle//:rubocop",
     ],
 )

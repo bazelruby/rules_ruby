@@ -1,3 +1,5 @@
+inherit_from: .relaxed-rubocop-2.4.yml
+
 AllCops:
   TargetRubyVersion: 2.6.5
   Exclude:
@@ -7,6 +9,4 @@ AllCops:
     - "**/external/**/*"
     - "**/vendor/bundle/**/*"
 
-inherit_gem:
-  relaxed-rubocop: .rubocop.yml
 
