@@ -10,7 +10,6 @@ GEM
     parser (2.6.5.0)
       ast (~> 2.4.0)
     rainbow (3.0.0)
-    relaxed-rubocop (2.4)
     rspec (3.7.0)
       rspec-core (~> 3.7.0)
       rspec-expectations (~> 3.7.0)
@@ -40,7 +39,6 @@ PLATFORMS
 DEPENDENCIES
   awesome_print
   colored2
-  relaxed-rubocop (~> 2.4)
   rspec (~> 3.7.0)
   rubocop (~> 0.78.0)
 
