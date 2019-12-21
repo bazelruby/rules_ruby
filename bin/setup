@@ -1,8 +1,42 @@
 #!/usr/bin/env bash
-
+#
+#
+# 
 set -e
 # shellcheck disable=SC1091
 source "bin/deps"
+
+__setup::actions() {
+  local sep="${1:-', '}"
+  printf "${bldylw}$(lib::array::join "${sep}" $(lib::util::functions-matching setup::))"
+}
+
+setup::help() {
+  printf "
+${bldpur}USAGE:${clr}
+  bin/setup [ $(__setup::actions " | ")${clr} ]
+
+${bldpur}DESCRIPTION:${clr}
+  Runs full setup without any arguments. 
+
+  Accepts one argument — one of the actions that typically run
+  as part of setup.
+
+  For instance, to perform full setup:
+
+    ${bldylw}bin/setup${clr}
+
+  Or, to run only one of the sub-functions (actions), pass 
+  it as an argument:
+    
+    ${bldylw}bin/setup help${clr}
+    ${bldylw}bin/setup no-git-hook${clr}
+
+  etc.
+ "
+}
+
+
 
 setup::gems() {
   for gem in rubocop relaxed-rubocop rubocop-performance; do
@@ -10,12 +44,25 @@ setup::gems() {
   done
 }
 
-setup::git() {
-  inf 'Installing git pre-commit hook'
+setup::no-git-hook() {
   set -e
-  [[ -L .git/hooks/pre-commit ]] || run "cd .git/hooks && ln -nfs ../../bin/pre-commit pre-commit"
+  [[ -L .git/hooks/pre-commit ]] && {
+    info 'Removing git commit hook...'
+    run "rm -f .git/hooks/pre-commit"
+    echo
+  }
   set +e
-  ok:
+}
+
+setup::git-hook() {
+  set -e
+  if [[ ! -L .git/hooks/pre-commit ]]; then
+    info 'Installing git pre-commit hook'
+    run "cd .git/hooks && ln -nfs ../../bin/pre-commit pre-commit && cd -"
+  else
+    info: "git pre-commit hook is already installed."
+  fi
+  set +e
 }
 
 setup::install() {
@@ -36,7 +83,7 @@ setup::install() {
       /usr/bin/env bash bin/show-env || true
     fi
   else
-    error "Operating system $(uname -s) is not currently supported." >&2
+    error "Operating system ${os} is not currently supported." >&2
   fi
   echo
   return 0
@@ -44,19 +91,27 @@ setup::install() {
 
 setup::main() {
   local action="$1"
+  [[ "${action}" == "-h" || ${action} == "--help" ]] && action="help"
   local func="setup::${action}"
 
-  if lib::util::is-a-function "${func}"; then
-    h2 "Executing partial setup for action ${bldylw}${action}"
-    shift
-    ${func} "$@"
+  if [[ -n ${action} ]] ; then
+    if lib::util::is-a-function "${func}"; then
+      [[ ${action} != "help" ]] && h2 "Executing partial setup for action ${bldylw}${action}"
+      shift
+      ${func} "$@"
+    else
+      h1 "Invalid action provided." "Valid actions are: $(__setup::actions)"
+      exit 1
+    fi
   else
     set +e
     h2 "Installing required development dependencies for working with rules_ruby and Bazel."
     setup::gems
-    [[ -z ${CI} ]] && setup::git
+    [[ -z ${CI} ]] && setup::git-hook
     setup::install "$@"
   fi
 }
 
 setup::main "$@"
+
+

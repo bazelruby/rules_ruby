@@ -436,15 +436,50 @@ To get the initial stuff setup required by this repo, please run the script:
 bin/setup
 ```
 
-Whenever you'll commit something, a pre-commit hook will run as well.
+This script does a couple of very useful things, including setting up a git commit
+hook that performs rubocop fixes and buildifier fixes of the Bazel build files.
+
+You can run partial setup comamnds like so:
+
+```bash
+❯ bin/setup -h
+
+USAGE:
+  bin/setup [ gems | git-hook | help | install | main | no-git-hook ]
+
+DESCRIPTION:
+  Runs full setup without any arguments.
+
+  Accepts one argument — one of the actions that typically run
+  as part of setup.
+
+  For instance, to perform full setup:
+
+    bin/setup
+
+  Or, to run only one of the sub-functions (actions), pass
+  it as an argument:
+
+    bin/setup help
+    bin/setup no-git-hook
+
+  etc.
+```
+
+Whenever you'll commit something, a pre-commit hook will run as well. If it
+finds anything that needs fixing, it will attempt to fix it. If the resulting
+git state is different than before the commit, the commit is aborted and the user
+should add any auto-fixed modifications to the list of staged files for commit.
 
 ### Running Tests
 
-We have a handy script you can use to run all tests:
+We have a pretty useful script you can use to run all tests in the repo that run on CI:
 
 ```bash
 bin/ci
 ```
+
+On a MacBook Pro it takes about 3 minutes to run.
 
 ## Copyright
 
