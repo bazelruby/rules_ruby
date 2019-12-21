@@ -11,7 +11,11 @@ setup::gems() {
 }
 
 setup::git() {
-  [[ -L .git/hooks/pre-commit ]] || run "ln -nfs bin/pre-commit .git/hooks/pre-commit"
+  inf 'Installing git pre-commit hook'
+  set -e
+  [[ -L .git/hooks/pre-commit ]] || run "cd .git/hooks && ln -nfs ../../bin/pre-commit pre-commit"
+  set +e
+  ok:
 }
 
 setup::install() {
