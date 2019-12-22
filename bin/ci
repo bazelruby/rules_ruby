@@ -26,6 +26,7 @@ trap exit 1 INT
 
 # Runs Rubocop Tests
 test::rubocop() {
+  set -e
   /usr/bin/env bash -c " 
     ${BashMatic__Expr}
     h2 'Running target: rubocop'
@@ -36,6 +37,7 @@ test::rubocop() {
 
 # Runs Buildifier
 test::buildifier() {
+  set -e
   /usr/bin/env bash -c "
     ${BashMatic__Expr}
     h2 'Running target: buildifier'
@@ -45,6 +47,7 @@ test::buildifier() {
 
 # Builds and runs workspace inside examples/simple_script
 test::simple-script() {
+  set -e
   /usr/bin/env bash -c "
     ${BashMatic__Expr}
     h2 'Testing target: simple-script'
@@ -67,6 +70,7 @@ test::workspace() {
 
 # Private 
 test::bazel-info() {
+  set -e
   /usr/bin/env bash -c "
     ${BashMatic__Expr}
     h2 'Testing target: bazel-info'
