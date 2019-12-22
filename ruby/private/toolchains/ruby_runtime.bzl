@@ -39,7 +39,7 @@ def _relativate(path):
 
 def _list_libdirs(ruby):
     """List the LOAD_PATH of the ruby"""
-    paths = ruby.eval(ruby, 'print $:.join("\\n")')
+    paths = ruby.eval_ruby(ruby, 'print $:.join("\\n")')
     paths = sorted(paths.split("\n"))
     rel_paths = [_relativate(path) for path in paths]
     return (paths, rel_paths)
@@ -91,7 +91,7 @@ def host_ruby_is_correct_version(ctx, version):
     if not interpreter_path:
         return False
 
-    ruby_version = ctx.execute(["ruby", "--version"]).stdout
+    ruby_version = ctx.execute(["ruby", "-e", "puts RUBY_VERSION"]).stdout
     version_string = "ruby %sp" % version
 
     print("Checking for version '%s' in '%s'" % (version_string, ruby_version))

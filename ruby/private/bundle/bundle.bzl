@@ -1,54 +1,77 @@
-load("//ruby/private:constants.bzl", "RULES_RUBY_WORKSPACE_NAME")
+load(
+    "//ruby/private:constants.bzl",
+    "RULES_RUBY_WORKSPACE_NAME",
+    "BUNDLER",
+    "BUNDLER_BINARY")
 
-def install_bundler(ctx, interpreter, install_bundler, dest, version):
-    args = [interpreter, install_bundler, version, dest]
-    environment = {"RUBYOPT": "--disable-gems"}
+def install_gem(ctx, gem_name, gem_version, gem_home = gem_name):
+    args = [
+        ruby_path(ctx),
+        "install_gem.rb",
+        gem_name,
+        gem_version,
+        gem_home
+    ]
 
     result = ctx.execute(args, environment = environment)
+
     if result.return_code:
-        message = "Failed to evaluate ruby snippet with {}: {}".format(
+        message = "Failed to install gem {} version {} with install_gem.rb, ruby={}: error={}".format(
+            gem_name,
+            gem_version,
             interpreter,
             result.stderr,
         )
         fail(message)
 
-def bundle_install_impl(ctx):
-    ctx.symlink(ctx.attr.gemfile, "Gemfile")
-    ctx.symlink(ctx.attr.gemfile_lock, "Gemfile.lock")
-    ctx.symlink(ctx.attr._create_bundle_build_file, "create_bundle_build_file.rb")
-    ctx.symlink(ctx.attr._install_bundler, "install_bundler.rb")
-
-    # TODO(kig) Make Gemspec reference from Gemfile actually work
-    if ctx.attr.gemspec:
-        ctx.symlink(ctx.attr.gemspec, ctx.path(ctx.attr.gemspec).basename)
-
-    ruby = ctx.attr.ruby_interpreter
-    interpreter_path = ctx.path(ruby)
-
-    install_bundler(
+def install_bundler(ctx, ruby_path)
+    install_gem(
         ctx,
-        interpreter_path,
-        "install_bundler.rb",
+        ruby_path(ctx),
         "bundler",
         ctx.attr.version,
     )
 
-    bundler = Label("//:bundler/exe/bundler")
+def ruby_path(ctx)
+    return ctx.path(ctx.attr.ruby_interpreter)
 
-    # Install the Gems into the workspace
-    args = [
-        ctx.path(ruby),  # ruby
-        "--disable-gems",  # prevent the addition of gem installation directories to the default load path
+def ruby_exec(ctx, incpaths = [])
+    args = [ruby_path]  # ruby
+    if ctx.attr.rubygems:
+        args.append("--disable=gems")
+    else
+        args.append("--enable=gems")
+
+    include_args = [["-I", _relative(incpath)] for incpath in incpaths]
+    print("INCLUDE ARGS ARE: ", include_args)
+
+    args.append(include_args)
+
+def bundle_install_impl(ctx):
+    # Re-create bundle-friendly environment in the output container
+    ctx.symlink(ctx.attr.gemfile, "Gemfile")
+    ctx.symlink(ctx.attr.gemfile_lock, "Gemfile.lock")
+
+    if ctx.attr.gemspec:
+        ctx.symlink(ctx.attr.gemspec, ctx.name + ".gemspec")
+
+    ctx.symlink(ctx.attr._create_bundle_build_file, "create_bundle_build_file.rb")
+    ctx.symlink(ctx.attr._install_bundler, "install_bundler.rb")
+
+    bundler = Label(BUNDLER)
+
+    args.append([
         "-I",  # Used to tell Ruby where to load the library scripts
         "bundler/lib",
-        "bundler/exe/bundler",  # run
+        BUNDLER_BINARY,  # run
         "install",  #   > bundle install
         "--deployment",  # In the deployment mode, gems are dumped to --path and frozen; also .bundle/config file is created
         "--standalone",  # Makes a bundle that can work without depending on Rubygems or Bundler at runtime.
         "--frozen",  # Do not allow the Gemfile.lock to be updated after this install.
         "--binstubs=bin",  # Creates a directory and place any executables from the gem there.
         "--path=lib",  # The location to install the specified gems to.
-    ]
+    ])
+
     result = ctx.execute(args, quiet = False)
 
     if result.return_code:
@@ -85,14 +108,29 @@ bundle_install = repository_rule(
     implementation = bundle_install_impl,
     attrs = {
         "ruby_sdk": attr.string(
-            default = "@org_ruby_lang_ruby_toolchain",
+            default = DEFAULT_RUBY_TOOLCHAIN,
         ),
         "ruby_interpreter": attr.label(
-            default = "@org_ruby_lang_ruby_toolchain//:ruby",
+            default = DEFAULT_RUBY_SDK_LABEL,
         ),
+        "path": attr.string(
+            default = "lib",
+        ),
+        "rubygems" = attr.bool(
+            default =True
+        ),
+        "deployment" = attr.bool(
+            default = True
+        )
         "gemfile": attr.label(
             allow_single_file = True,
             mandatory = True,
+        ),
+        "standalone" = attr.bool() {
+            default = True
+        },
+        "standalone_groups" = attr.string_list( # eg [ "production" or "development", "test" ]
+
         ),
         "gemfile_lock": attr.label(
             allow_single_file = True,
@@ -102,12 +140,13 @@ bundle_install = repository_rule(
         ),
         "gemspec": attr.label(
             allow_single_file = True,
+            mandatory = False
         ),
         "excludes": attr.string_list_dict(
             doc = "List of glob patterns per gem to be excluded from the library",
         ),
         "_install_bundler": attr.label(
-            default = "%s//ruby/private/bundle:install_bundler.rb" % (
+            default = "%s//ruby/private/bundle:install_gem.rb" % (
                 RULES_RUBY_WORKSPACE_NAME
             ),
             allow_single_file = True,

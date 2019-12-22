@@ -5,3 +5,16 @@ RubyLibrary = provider(
         "rubyopt",
     ],
 )
+
+Ruby = provider(
+    doc = ""
+    fields = [
+        "path",
+        "interpreter_name",
+        "interpreter_realpath",
+        "eval",
+        "rbconfig",
+        "expand_rbconfig",
+        "_ctx",
+    ],
+)

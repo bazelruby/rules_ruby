@@ -51,12 +51,11 @@ def ruby_repository_context(repository_ctx, interpreter_path):
         rel_interpreter_path = rel_interpreter_path,
         interpreter_name = interpreter_path.basename,
         interpreter_realpath = interpreter_path,
-
         # Standard repository structure for ruby runtimes
 
         # Helper methods
-        eval = _eval_ruby,
+        eval_ruby = _eval_ruby,
         rbconfig = _rbconfig,
         expand_rbconfig = _expand_rbconfig,
-        _ctx = repository_ctx,
+        _repository_ctx = repository_ctx,
     )

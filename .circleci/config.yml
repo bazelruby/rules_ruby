@@ -102,9 +102,34 @@ jobs:
           command: |
             bazel ${BAZEL_OPTS} run   ${BAZEL_BUILD_OPTS} :buildifier-check
 
+
+  rspec:
+    <<: *bazel_defaults
+
+    steps:
+      - checkout
+
+      - run:
+          name: "Install ~/.bazelrc and run setup"
+          command: |
+            cp .circleci/.bazelrc ${HOME}
+            /usr/bin/env bash bin/setup
+
+      - run:
+          name: "Bundle Install"
+          command: |
+            gem install bundler --no-doc
+            bundle install
+
+      - run:
+          name: "Run Specs"
+          command: |
+            bundle exec rspec
+
 workflows:
   rules_ruby:
     jobs:
       - bazel_build_workspace
       - bazel_build_examples
       - buildifier
+      - rspec

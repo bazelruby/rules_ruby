@@ -1,7 +1,7 @@
 load(":constants.bzl", "TOOLCHAIN_TYPE_NAME")
 load(":providers.bzl", "RubyLibrary")
 load(
-    "//ruby/private/tools:deps.bzl",
+    "//ruby/private/tools:transitive_deps.bzl",
     _transitive_deps = "transitive_deps",
 )
 

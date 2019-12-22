@@ -9,4 +9,10 @@ AllCops:
     - "**/external/**/*"
     - "**/vendor/bundle/**/*"
 
+      
+# In Bazel we want to use __FILE__ because __dir__points to the actual sources
+Style/ExpandPathArguments:
+  Enabled: false
 
+Style/Dir:
+  Enabled: false
