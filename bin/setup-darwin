@@ -25,11 +25,7 @@ __setup::brew-install-jdk() {
 }
 
 __setup::brew-deps() {
-  if ! brew list | grep -q xz; then
-    "brew install xz"
-  else
-    info: "Found brew package xz."
-  fi
+  lib::brew::install::packages 'xz' 'ydiff'
 }
 
 __setup::is-bazelisk-installed() {

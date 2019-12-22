@@ -9,8 +9,8 @@ package(default_visibility = ["//visibility:public"])
 ruby_toolchain(
     name = "toolchain",
     interpreter = "//:ruby_bin",
-    runtime = "//:runtime",
     rules_ruby_workspace = "{rules_ruby_workspace}",
+    runtime = "//:runtime",
     # TODO(yugui) Extract platform info from RbConfig
     # exec_compatible_with = [],
     # target_compatible_with = [],
@@ -25,14 +25,14 @@ sh_binary(
 cc_import(
     name = "libruby",
     hdrs = glob({hdrs}),
-    static_library = {static_library},
     shared_library = {shared_library},
+    static_library = {static_library},
 )
 
 cc_library(
     name = "headers",
-    includes = {includes},
     hdrs = glob({hdrs}),
+    includes = {includes},
 )
 
 filegroup(

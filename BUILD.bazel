@@ -2,11 +2,11 @@ load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
 
 buildifier(
     name = "buildifier",
-    exclude_patterns = [".git/**"],
+    exclude_patterns = ["./.git/**/*"],
 )
 
 buildifier(
     name = "buildifier-check",
-    exclude_patterns = [".git/**"],
+    exclude_patterns = ["./.git/**/*"],
     mode = "check",
 )
