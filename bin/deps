@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # vim: ft=sh
 
 export BashMatic="${HOME}/.bashmatic"
@@ -5,15 +6,10 @@ export BashMatic="${HOME}/.bashmatic"
 if [[ ! -f "${BashMatic}/init.sh" ]]; then
   rm -rf "${BashMatic}" 2>/dev/null
   git clone https://github.com/kigster/bashmatic "${BashMatic}" 1>/dev/null 2>&1
-else
-  cd "${BashMatic}" && { 
-    git diff-index --quiet HEAD && git pull 
-  }
-  cd - >/dev/null
 fi
 
 # shellcheck disable=SC1090
-source "${BashMatic}/init.sh" 1>/dev/null 2>&1 
+source "${BashMatic}/init.sh" 1>/dev/null 2>&1
 
 __version::detect() {
   local file="$1"
@@ -38,4 +34,30 @@ bazel-sha() {
   bazel info | grep output_path | awk 'BEGIN{FS="/"}{ for(i = 1; i <= NF; i++) { if (length($i) == 32) print $i; } }'
 }
 
+help-header() {
+  printf "${bldylw}$*${clr}"
+}
+
+help-usage() {
+  printf "  ${bldgrn}$*${clr}"
+}
+
+help-example() {
+  printf "    ${bldpur}$*${clr}"
+}
+
+deps::start-clock() {
+  export __start=$(millis)
+}
+
+deps::print-duration() {
+  local finish=$(millis)
+  local duration=$(( finish - __start ))
+  info "Total running time for was ${bldylw}$(lib::time::duration::millis-to-secs ${duration}) seconds.\n\n"
+}
+
+
 run::set-all abort-on-error
+
+# ensure we can exit with Ctrl-C
+trap exit 1 INT

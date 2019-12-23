@@ -6,9 +6,8 @@ jdk: openjdk11
 
 cache:
   directories:
-    ${HOME}/.rbenv
-    ${HOME}/.bundle/gems
-    #${HOME}/.cache/bazel/_bazel_${USER}
+    - ${HOME}/.rbenv
+    - ${HOME}/.bundle/gems
 
 addons:
   apt:
@@ -19,7 +18,7 @@ addons:
 
 script:
   - /usr/bin/env bash bin/setup
-  - /usr/bin/env bash bin/ci
+  - /usr/bin/env bash bin/test-suite
 
 after_script:
   - /usr/bin/env bash bin/show-env
@@ -29,6 +28,6 @@ env:
     - CI=true
     - BUNDLE_PATH="${HOME}/.bundle/gems"
     - PATH="${HOME}/.rbenv/bin:${HOME}/.rbenv/shims:/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:/opt/local/bin:${PATH}"
-    - BAZEL_OPTS="--host_jvm_args=-Xmx700m --host_jvm_args=-Xms700m"
-    - BAZEL_BUILD_OPTS="--curses=no --verbose_failures -j 20 --show_progress_rate_limit 0.5"
+    - BAZEL_OPTS="--max_idle_secs=1 --host_jvm_args=-Xmx1200m --host_jvm_args=-Xms1200m"
+    - BAZEL_BUILD_OPTS="--curses=no --verbose_failures -j 30 --show_progress_rate_limit 0.5"
     - BAZEL_TEST_OPTS="--verbose_failures --test_output=streamed --test_verbose_timeout_warnings"
