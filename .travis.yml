@@ -8,7 +8,6 @@ cache:
   directories:
     ${HOME}/.rbenv
     ${HOME}/.bundle/gems
-    #${HOME}/.cache/bazel/_bazel_${USER}
 
 addons:
   apt:
@@ -19,7 +18,7 @@ addons:
 
 script:
   - /usr/bin/env bash bin/setup
-  - /usr/bin/env bash bin/ci
+  - /usr/bin/env bash bin/test-suite
 
 after_script:
   - /usr/bin/env bash bin/show-env

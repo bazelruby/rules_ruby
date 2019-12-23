@@ -1,42 +1,53 @@
 #!/usr/bin/env bash
 #
+# Runs setup.
+# Run bin/setup help for info.
 #
-# 
 set -e
 # shellcheck disable=SC1091
 source "bin/deps"
 
+#—————————————————————————————————————————————————————————————————————————————————————————————————————————————
+# Private Functions
+#—————————————————————————————————————————————————————————————————————————————————————————————————————————————
+
 __setup::actions() {
-  local sep="${1:-', '}"
-  printf "${bldylw}$(lib::array::join "${sep}" $(lib::util::functions-matching setup::))"
+  local sep="${1}"
+  printf "${bldylw}$(lib::array::join "${sep}" $(lib::util::functions-matching "setup::" | sed 's/ main//g'))${clr}"
 }
+
+#—————————————————————————————————————————————————————————————————————————————————————————————————————————————
+# Public Functions
+#—————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
 setup::help() {
   printf "
-${bldpur}USAGE:${clr}
-  bin/setup [ $(__setup::actions " | ")${clr} ]
+$(help-header USAGE)
+  ${bldblk}# without any arguments runs a complete setup.${clr}
+$(help-usage "bin/setup")
 
-${bldpur}DESCRIPTION:${clr}
-  Runs full setup without any arguments. 
+  ${bldblk}# alternatively, a sub-setup function name can be passed:${clr}
+$(help-usage "bin/setup [ $(__setup::actions " | ") ]")
 
-  Accepts one argument — one of the actions that typically run
-  as part of setup.
+$(help-header DESCRIPTION:)
+  Runs full setup without any arguments.
 
-  For instance, to perform full setup:
+  Accepts one optional argument — one of the actions that typically run
+  as part of setup, with one exception — ${bldylw}remove-git-hook${clr}.
+  This action removes the git commit hook installed by the setup.
 
-    ${bldylw}bin/setup${clr}
+$(help-header EXAMPLES:)
+$(help-example "bin/setup")
 
-  Or, to run only one of the sub-functions (actions), pass 
+  Or, to run only one of the sub-functions (actions), pass
   it as an argument:
-    
-    ${bldylw}bin/setup help${clr}
-    ${bldylw}bin/setup no-git-hook${clr}
 
-  etc.
+$(help-example bin/setup help)
+$(help-example bin/setup remove-git-hook)
+
+etc.
  "
 }
-
-
 
 setup::gems() {
   for gem in rubocop relaxed-rubocop rubocop-performance; do
@@ -44,7 +55,7 @@ setup::gems() {
   done
 }
 
-setup::no-git-hook() {
+setup::remove-git-hook() {
   set -e
   [[ -L .git/hooks/pre-commit ]] && {
     info 'Removing git commit hook...'
@@ -58,14 +69,14 @@ setup::git-hook() {
   set -e
   if [[ ! -L .git/hooks/pre-commit ]]; then
     info 'Installing git pre-commit hook'
-    run "cd .git/hooks && ln -nfs ../../bin/pre-commit pre-commit && cd -"
+    run "cd .git/hooks && ln -nfs ../../bin/linter pre-commit && cd -"
   else
     info: "git pre-commit hook is already installed."
   fi
   set +e
 }
 
-setup::install() {
+setup::os-specific() {
   local os=$(uname -s | tr '[:upper:]' '[:lower:]')
   local setup_script
   setup_script="./bin/setup-${os}"
@@ -94,13 +105,17 @@ setup::main() {
   [[ "${action}" == "-h" || ${action} == "--help" ]] && action="help"
   local func="setup::${action}"
 
-  if [[ -n ${action} ]] ; then
+  if [[ -n ${action} ]]; then
     if lib::util::is-a-function "${func}"; then
       [[ ${action} != "help" ]] && h2 "Executing partial setup for action ${bldylw}${action}"
       shift
       ${func} "$@"
+      local code=$?
+      [[ ${code} -eq 0 ]] && success "Setup for ${action} was successful"
+      [[ ${code} -ne 0 ]] && error "Error setting up ${action}"
+      exit ${code}
     else
-      h1 "Invalid action provided." "Valid actions are: $(__setup::actions)"
+      h1 "Invalid action provided." "Valid actions are: $(__setup::actions " | ")"
       exit 1
     fi
   else
@@ -108,10 +123,8 @@ setup::main() {
     h2 "Installing required development dependencies for working with rules_ruby and Bazel."
     setup::gems
     [[ -z ${CI} ]] && setup::git-hook
-    setup::install "$@"
+    setup::os-specific "$@"
   fi
 }
 
 setup::main "$@"
-
-

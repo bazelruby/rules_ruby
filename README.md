@@ -1,7 +1,7 @@
-<!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
+<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
 * [Status:](#status)
-* [USAGE](#usage)
+* [Usage](#usage)
 * [Rules](#rules)
   * [ruby_library](#ruby_library)
   * [ruby_binary](#ruby_binary)
@@ -10,7 +10,13 @@
 * [What's coming next](#whats-coming-next)
 * [Contributing](#contributing)
   * [Setup](#setup)
+    * [Using the Script](#using-the-script)
+    * [OS-Specific Setup](#os-specific-setup)
+      * [Issues During Setup](#issues-during-setup)
+  * [Developing Rules](#developing-rules)
   * [Running Tests](#running-tests)
+    * [Test Script](#test-script)
+  * [Linter](#linter)
 * [Copyright](#copyright)
 
 <!-- /TOC -->
@@ -33,7 +39,9 @@ Ruby rules for [Bazel](https://bazel.build).
 
 **Work in progress.**
 
-## USAGE
+We have a guide on [Building your first Ruby Project](https://github.com/bazelruby/rules_ruby/wiki/Build-your-ruby-project) on the Wiki. We encourage you to check it out.
+
+## Usage
 
 Add `ruby_rules_dependencies` and `ruby_register_toolchains` into your `WORKSPACE` file.
 
@@ -421,65 +429,122 @@ bundle_install(name, gemfile, gemfile_lock)
 
 ## Contributing
 
-1. Setup dev tools as described in the [setup](#setup) section.
-2. hack, hack, hack...
-3. Make sure all tests pass
-   * `bazel test //...`
-   * `cd examples/simple_script && bazel test //...`
-4. Open a pull request in Github
+We welcome contributions to RulesRuby. Please make yourself familiar with the [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md) document.
+
+You may notice that there is more than one Bazel WORKSPACE inside this repo. There is one in `examples/simple_script` for instance, because
+we use this example to validate and test the rules. So be mindful whether your current directory contains `WORKSPACE` file or not.
 
 ### Setup
 
-To get the initial stuff setup required by this repo, please run the script:
+#### Using the Script
+
+You will need Homebrew installed prior to running the script.
+
+After that, cd into the top level folder and run the setup script in your Terminal:
 
 ```bash
-bin/setup
+❯ bin/setup
 ```
 
-This script does a couple of very useful things, including setting up a git commit
-hook that performs rubocop fixes and buildifier fixes of the Bazel build files.
-
-You can run partial setup comamnds like so:
+This runs a complete setup, shouldn't take too long. You can explore various script options with the `help` command:
 
 ```bash
-❯ bin/setup -h
+❯ bin/setup help
+USAGE
+  # without any arguments runs a complete setup.
+  bin/setup
 
-USAGE:
-  bin/setup [ gems | git-hook | help | install | main | no-git-hook ]
+  # alternatively, a sub-setup function name can be passed:
+  bin/setup [ gems | git-hook | help | os-specific | main | remove-git-hook ]
 
 DESCRIPTION:
   Runs full setup without any arguments.
 
-  Accepts one argument — one of the actions that typically run
-  as part of setup.
+  Accepts one optional argument — one of the actions that typically run
+  as part of setup, with one exception — remove-git-hook.
+  This action removes the git commit hook installed by the setup.
 
-  For instance, to perform full setup:
-
-    bin/setup
-
-  Or, to run only one of the sub-functions (actions), pass
-  it as an argument:
-
-    bin/setup help
-    bin/setup no-git-hook
-
-  etc.
+EXAMPLES:
+    bin/setup — runs the entire setup.
 ```
 
-Whenever you'll commit something, a pre-commit hook will run as well. If it
-finds anything that needs fixing, it will attempt to fix it. If the resulting
-git state is different than before the commit, the commit is aborted and the user
-should add any auto-fixed modifications to the list of staged files for commit.
+#### OS-Specific Setup
+
+Note that the setup contains `os-specific` section. This is because there are two extension scripts:
+
+ * `bin/setup-linux`
+ * `bin/setup-darwin`
+
+Those will install Bazel and everything else you need on either platform. In fact, we use the linux version on CI.
+
+##### Issues During Setup
+
+**Please report any errors to `bin/setup` as Issues on Github. You can assign them to @kigster.**
+
+### Developing Rules
+
+Besides making yourself familiar with the existing code, and [Bazel documentation on writing rules](https://docs.bazel.build/versions/master/skylark/concepts.html), you might want to follow this order:
+
+  1. Setup dev tools as described in the [setup](#Setup) section.
+  3. hack, hack, hack...
+  4. Make sure all tests pass — you can run a single command for that (but see more on it [below](#test-script).
+
+    ```bash
+    bin/test-suite
+    ```
+
+OR you can run individual Bazel test commands from the inside.
+
+   * `bazel test //...`
+   * `cd examples/simple_script && bazel test //...`
+
+  4. Open a pull request in Github, and please be as verbose as possible in your description.
+
+In general, it's always a good idea to ask questions first — you can do so by creating an issue.
 
 ### Running Tests
 
-We have a pretty useful script you can use to run all tests in the repo that run on CI:
+After running setup, and since this is a bazel repo you can use Bazel commands:
+
+```bazel
+bazel build //...:all
+bazel query //...:all
+bazel test //...:all
+```
+
+But to run tests inside each sub-WORKSPACE, you will need to repeat that in each sub-folder. Luckily, there is a better way.
+
+#### Test Script
+
+This script runs all tests (including sub-workspaces) when ran without arguments:
 
 ```bash
-bin/ci
+bin/test-suite
+```
+
+Run it with `help` command to see other options, and to see what parts you can run individually. At the moment they are:
+
+```bash
+# alternatively, a partial test name can be passed:
+bin/test-suite [ all | bazel-info | buildifier | help | rspec | rubocop | simple-script |  workspace ]
 ```
 
 On a MacBook Pro it takes about 3 minutes to run.
+
+### Linter
+
+We are using RuboCop for ruby and Buildifier for Bazel. Both are represented by a single script `bin/linter`, which just like the scripts above runs ALL linters when ran without arguments, accepts `help` commnd, and can be run on a subset of linting strategies:
+
+```bash
+bin/linter
+```
+
+The following are the partial linting functions you can run:
+
+```bash
+# alternatively, a partial linter name can be passed:
+bin/linter [ all | buildifier | help | rubocop ]
+```
 
 ## Copyright
 

@@ -47,13 +47,12 @@ jobs:
       - run:
           name: "Show Bazel Info"
           command: |
-            
-            /usr/bin/env bash bin/ci bazel-info
+            /usr/bin/env bash bin/test-suite bazel-info
 
       - run:
           name: "Bazel Build & Test Workspace"
           command: |
-            /usr/bin/env bash bin/ci workspace
+            /usr/bin/env bash bin/test-suite workspace
 
   bazel_build_examples:
     <<: *bazel_defaults

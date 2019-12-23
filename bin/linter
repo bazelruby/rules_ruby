@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+#
+# Main dependency shell script that installs BashMatic Library in ~/.bashmatic folder.
+
+export COLUMNS=65
+
+set -e
+# shellcheck disable=SC1091
+source "bin/deps"
+
+[[ -n $(command -v rubocop) ]] || {
+  # shellcheck disable=SC1091
+  source bin/setup
+  setup::main gems
+}
+
+export __git_pre="/tmp/rules-ruby-git-status-before-commit.$$"
+export __git_post="/tmp/rules-ruby-git-status-after-commit.$$"
+
+__lint::cleanup() {
+  for f in "${__git_pre}" "${__git_post}"; do
+    [[ -f "${f}" ]] && rm -f "${f}"
+  done
+}
+
+deps::start-clock
+run::set-all abort-on-error
+
+__lint::actions() {
+  local sep="${1:-', '}"
+  printf "${bldylw}$(lib::array::join "${sep}" $(lib::util::functions-matching "lint::" | sed 's/ main//g'))${clr}"
+}
+
+lint::help() {
+  printf "
+$(help-header USAGE)
+  ${bldblk}# without any arguments runs a complete setup.${clr}
+$(help-usage "bin/linter")
+
+  ${bldblk}# alternatively, a partial linter name can be passed:${clr}
+$(help-usage "bin/linter [ $(__lint::actions " | ") ]")
+
+$(help-header DESCRIPTION:)
+  Runs various linters either all serially, or by name based on
+  the arguments. Run ${bldylw}bin/linter help${clr} to see all commands.
+
+$(help-header EXAMPLES:)
+$(help-example "bin/linter")
+
+  Or, to run only one of the sub-functions (actions), pass
+  it as an argument:
+
+$(help-example bin/linter help)
+$(help-example bin/linter rubocop)
+$(help-example bin/linter buildifier)
+
+  etc.
+"
+ exit 0
+}
+
+lint::rubocop() {
+  h2::green "Running Rubocop, please wait..."
+  run "rubocop || rubocop -a"
+  inf "Rubocop completed."
+  ok:
+}
+
+# runs buildifer from the PATH if it exists, otherwise bazel target
+# we want before-commit to be as fast as possible.
+lint::buildifier() {
+  h2::green "Buildifier"
+  if [[ -n $(command -v buildifier) ]]; then
+    info "Running $(command -v buildifier).."
+    run "find . -name 'BUILD*' -o -name 'WORKSPACE' -o -name '*.bzl'  | grep -v '.git' | xargs buildifier -v"
+  else
+    info "Running ${bldylw}bazel run :buildifier..."
+    run "bazel run :buildifier"
+  fi
+}
+
+lint::all() {
+  # number of modified files
+  local changes_before=$(git status -s | md5)
+  trap __lint::cleanup EXIT
+  git status -s >"${__git_pre}"
+
+  set -e
+  run::set-all abort-on-error
+  lint::rubocop
+
+  set -e
+  run::set-all abort-on-error
+  lint::buildifier
+
+  git status -s >"${__git_post}"
+
+  local changes_after=$(git status -s | md5)
+  if [[ ${changes_before} != "${changes_after}" ]]; then
+    hl::subtle "Git status -s output changed after before-commit hook."
+    info "Changes before before-commit hook:"
+    hr
+    diff "${pre}" "${post}"
+    hr
+    echo
+    info "ACTION: ${bldylw}Please add any respective files to the commit and retry."
+    retrn 1
+  else
+    echo
+    success "No changes detected, changes passed linter inspection."
+    return 0
+  fi
+}
+
+
+lint::main() {
+  local action="$1"
+  [[ "${action}" == "-h" || ${action} == "--help" ]] && action="help"
+  local func="lint::${action}"
+
+  if [[ -n ${action} ]]; then
+    if lib::util::is-a-function "${func}"; then
+      [[ ${action} != "help" ]] && h2 "Executing partial linting for ${bldylw}${action}"
+      shift
+      ${func} "$@"
+      local code=$?
+      [[ ${code} -eq 0 ]] && success "Linter ${action} was successful"
+      [[ ${code} -ne 0 ]] && error "Linter failed for ${action}"
+      deps::print-duration
+      exit ${code}
+    else
+      h1 "Invalid action provided." "Valid lint actions are: $(__lint::actions)"
+      exit 1
+    fi
+  else
+    set +e
+    lint::all
+    deps::print-duration
+  fi
+}
+
+lint::main "$@"
+
+exit 0

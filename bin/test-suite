@@ -1,0 +1,245 @@
+#!/usr/bin/env bash
+
+set -e
+
+# shellcheck disable=SC1091
+source "bin/deps"
+
+export SHELL_INIT="${HOME}/.bashrc"
+export BUNDLE_PATH="${BUNDLE_PATH:-${HOME}/.bundle/gems}"
+export PATH="${HOME}/.rbenv/bin:${HOME}/.rbenv/shims:/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:/opt/local/bin"
+
+export BAZEL_OPTS="--host_jvm_args=-Xmx500m --host_jvm_args=-Xms500m"
+export BAZEL_BUILD_OPTS="--curses=no --verbose_failures -j 15 --show_progress_rate_limit 0 "
+export BAZEL_TEST_OPTS="--verbose_failures --test_output=streamed --test_verbose_timeout_warnings "
+export RUBY_VERSION=$(cat .ruby-version)
+
+export BashMatic__Expr="
+  [[ -f ${SHELL_INIT} ]] && source ${SHELL_INIT}
+  [[ -f ${HOME}/.bashmatic/init.sh ]] && source ${HOME}/.bashmatic/init.sh
+  set -e
+"
+
+deps::start-clock
+
+run::set-all abort-on-error
+
+#—————————————————————————————————————————————————————————————————————————————————————————————————————————————
+# Private Functions
+#—————————————————————————————————————————————————————————————————————————————————————————————————————————————
+
+__test-suite::setup::environment() {
+  # shellcheck disable=SC2016
+  grep -q 'bashmatic/init.sh' ${SHELL_INIT} || echo '[[ -d ${HOME}/.bashmatic ]] && source ${HOME}/.bashmatic/init.sh' >>"${SHELL_INIT}"
+
+  [[ -n $(command -v rbenv) ]] && {
+    export PATH="${HOME}/.rbenv/shims:${HOME}/.rbenv/bin:/usr/local/bin:/usr/bin:/bin:${PATH}"
+    # shellcheck disable=SC2016
+    grep -q 'rbenv/shims' "${SHELL_INIT}" ||
+      run "echo 'export PATH="$HOME/.rbenv/bin:${HOME}/.rbenv/shims:$PATH"' >> ${SHELL_INIT}"
+
+    eval "$(rbenv init -)"
+
+    # shellcheck disable=SC2016
+    grep -q 'rbenv init' "${SHELL_INIT}" ||
+      run "echo 'eval \"$(rbenv init -)\"' >>${SHELL_INIT}"
+  }
+}
+
+# Setup rbenv if needed, and install Ruby but only if needed
+__test-suite::setup::rbenv-ruby() {
+
+  if [[ ! -d ${HOME}/.rbenv || -z $(command -v rbenv) ]]; then
+    [[ -d "${HOME}/.rbenv" ]] && run "mv ${HOME}/.rbenv ${HOME}/.rbenv.backup.$(date '+%s')"
+    run "rm -rf ${HOME}/.rbenv"
+    run "git clone https://github.com/rbenv/rbenv.git ${HOME}/.rbenv"
+  fi
+
+  export PATH="${HOME}/.rbenv/bin:${HOME}/.rbenv/shims:${PATH}"
+
+  local rbenv_plugins="${HOME}/.rbenv/plugins/ruby-build"
+  if [[ ! -d "${rbenv_plugins}" ]]; then
+    run "git clone https://github.com/rbenv/ruby-build.git ${rbenv_plugins}"
+  fi
+
+  __test-suite::setup::environment
+
+  run "source ${SHELL_INIT}"
+  run "rbenv install -s ${RUBY_VERSION}"
+  run "rbenv global ${RUBY_VERSION}"
+  run "rbenv rehash"
+  run "ruby --version"
+  run "gem update --system --no-doc"
+  run "gem install bundler --version 2.0.2 --no-doc"
+  run "bundle install --jobs=4 --retry=3 --path "${BUNDLE_PATH}""
+
+}
+
+__test::actions() {
+  local sep=', '
+  printf "${bldylw}$(lib::array::join "${sep}" $(lib::util::functions-matching "test::"))"
+}
+
+__test::exec() {
+  local target
+  target="$1"
+  shift
+  set -e
+  /usr/bin/env bash -c "
+    ${BashMatic__Expr}
+    h2 \"Testing Target: ${bldcyn}${target}\"
+    $*
+  "
+}
+
+[[ -n ${DEBUG} ]] && set -x
+
+#—————————————————————————————————————————————————————————————————————————————————————————————————————————————
+# Public Functions
+#—————————————————————————————————————————————————————————————————————————————————————————————————————————————
+
+test::help() {
+  printf "
+$(help-header USAGE)
+  ${bldblk}# without any arguments runs a complete test suite.${clr}
+$(help-usage "bin/test-suite")
+
+  ${bldblk}# alternatively, a partial test name can be passed:${clr}
+$(help-usage "bin/test-suite [ $(__test::actions " | ") ]")
+
+$(help-header DESCRIPTION:)
+  Shell script that runs all or partial tests. Can be used locally and on CI.
+
+$(help-header EXAMPLES:)
+$(help-example "bin/test-suite")
+
+  Or, to run only one individual test group, pass it as an argument:
+
+$(help-example bin/test-suite help)
+$(help-example bin/test-suite workspace)
+$(help-example bin/test-suite simple-example)
+
+  etc.
+"
+ exit 0
+}
+
+# Runs Rubocop Tests
+test::rubocop() {
+  __test::exec rubocop "
+    bundle install --path=${BUNDLE_PATH}
+    bundle exec rubocop -E -D .rubocop.yml --force-exclusion
+  "
+}
+
+# Runs Buildifier
+test::buildifier() {
+  __test::exec buildifier "
+    bazel run :buildifier-check
+  "
+}
+
+# Builds and runs workspace inside examples/simple_script
+test::simple-script() {
+  __test::exec simple-script "
+    cd examples/simple_script
+    bazel ${BAZEL_OPTS} info
+    bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //...
+    bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //...
+    bazel ${BAZEL_OPTS} run ${BAZEL_BUILD_OPTS} -- :rubocop
+  "
+}
+
+test::workspace() {
+  __test::exec workspace "
+    bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //...
+    bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //...
+  "
+}
+
+# Private
+test::bazel-info() {
+  __test::exec bazel-info "
+    bazel ${BAZEL_OPTS} version
+    bazel ${BAZEL_OPTS} info
+    bazel ${BAZEL_OPTS} fetch --curses=no -- '//ruby/...'
+  "
+}
+
+# Run rspecs once we have something in the spec folder.
+test::rspec() {
+  [[ -d "spec" ]] || return 0
+  __test::exec rspec "
+    bundle check || bundle install
+    bundle exec rspec
+  "
+}
+
+
+test::all() {
+  test::bazel-info
+  test::workspace
+  test::simple-script
+  test::buildifier
+  test::rubocop
+  test::rspec
+}
+
+test-suite::setup() {
+  # shellcheck disable=SC1090
+  [[ -f ${SHELL_INIT} ]] && source "${SHELL_INIT}"
+
+  if [[ -n $(command -v ruby) ]]; then
+    CURRENT_VERSION=$(ruby -e 'puts RUBY_VERSION')
+    if [[ ${CURRENT_VERSION} != "${RUBY_VERSION}" ]]; then
+      __test-suite::setup::rbenv-ruby
+    else
+      info "Ruby already exists and matches the version:"
+      info "$(command -v ruby), version: ${bldylw}$(ruby --version)"
+    fi
+  else
+    hl::subtle "Ruby wasn't found, installing via rbenv..."
+    __test-suite::setup::rbenv-ruby
+  fi
+}
+
+test-suite::main() {
+  local action="${1}"
+
+  [[ "${action}" == "-h" || ${action} == "--help" ]] && action="help"
+  [[ -z ${action} ]] && action=all
+  local func="test::${action}"
+
+  if [[ -n ${action} && ${action} != "all" ]]; then
+    shift
+    if lib::util::is-a-function "${func}"; then
+      [[ "${action}" != "help" ]] && {
+        box::green-in-cyan "RulesRuby Test Suite Runner" "RubyRules Version $(cat .rules_version)"
+        test-suite::setup
+        h1 "Executing partial tests for action ${bldylw}${action}"
+      }
+      ${func} "$@"
+      local code=$?
+      [[ ${code} -eq 0 ]] && success "Test Suite for ${action} was successful"
+      [[ ${code} -ne 0 ]] && error "Error running tests for ${action}"
+      deps::print-duration
+      exit ${code}
+    else
+      info "Invalid action ${action}."
+      info "List of valid actions are: $(__test::actions)"
+      exit 1
+    fi
+  else
+    box::green-in-cyan "RulesRuby Test Suite Runner —— full test suite in series." "RubyRules Version $(cat .rules_version)"
+    test-suite::setup
+    run::set-all abort-on-error
+    set -e
+    test::all
+    success "Test suite was successful!"
+    deps::print-duration
+  fi
+}
+
+test-suite::main "$@"
+
+set +x
