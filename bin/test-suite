@@ -19,7 +19,11 @@ export BashMatic__Expr="
   [[ -f ${HOME}/.bashmatic/init.sh ]] && source ${HOME}/.bashmatic/init.sh
   set -e
 "
-
+export Bazel__BuildSteps="
+    bazel ${BAZEL_OPTS} info;                                                  echo; echo
+    bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //... ;                   echo; echo
+    bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //... ; echo; echo
+"
 deps::start-clock
 
 run::set-all abort-on-error
@@ -121,7 +125,7 @@ $(help-example bin/test-suite simple-example)
 
   etc.
 "
- exit 0
+  exit 0
 }
 
 # Runs Rubocop Tests
@@ -143,25 +147,20 @@ test::buildifier() {
 test::simple-script() {
   __test::exec simple-script "
     cd examples/simple_script
-    bazel ${BAZEL_OPTS} info
-    bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //...
-    bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //...
-    bazel ${BAZEL_OPTS} run ${BAZEL_BUILD_OPTS} -- :rubocop
+    ${Bazel__BuildSteps}
+    bazel ${BAZEL_OPTS} run ${BAZEL_BUILD_OPTS} -- :rubocop ;
   "
 }
 
 test::workspace() {
-  __test::exec workspace "
-    bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //...
-    bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //...
-  "
+  __test::exec workspace "${Bazel__BuildSteps}"
 }
 
 # Private
 test::bazel-info() {
   __test::exec bazel-info "
-    bazel ${BAZEL_OPTS} version
-    bazel ${BAZEL_OPTS} info
+    bazel ${BAZEL_OPTS} version; echo; echo
+    bazel ${BAZEL_OPTS} info; echo; echo
     bazel ${BAZEL_OPTS} fetch --curses=no -- '//ruby/...'
   "
 }
@@ -174,7 +173,6 @@ test::rspec() {
     bundle exec rspec
   "
 }
-
 
 test::all() {
   test::bazel-info

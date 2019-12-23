@@ -9,7 +9,7 @@ jobs:
     environment:
       PATH: "/usr/local/bin:/usr/bin:/sbin:/opt/bin:/home/circleci/repo/bin:/bin:/sbin:/usr/sbin"
       BUNDLE_PATH: /home/circleci/.bundle_cache
-      BAZEL_OPTS: "--host_jvm_args=-Xmx400m --host_jvm_args=-Xms400m"
+      BAZEL_OPTS: "--max_idle_secs=1 --host_jvm_args=-Xmx500m --host_jvm_args=-Xms500m"
       BAZEL_BUILD_OPTS: "--curses=no --verbose_failures --jobs 10"
       BAZEL_TEST_OPTS: "--verbose_failures --test_output=streamed --test_verbose_timeout_warnings "
 
@@ -34,7 +34,6 @@ jobs:
 
   bazel_build_workspace:
     <<: *bazel_defaults
-
     steps:
       - checkout
 
@@ -43,11 +42,6 @@ jobs:
           command: |
             cp .circleci/.bazelrc ${HOME}
             /usr/bin/env bash bin/setup
-
-      - run:
-          name: "Show Bazel Info"
-          command: |
-            /usr/bin/env bash bin/test-suite bazel-info
 
       - run:
           name: "Bazel Build & Test Workspace"
@@ -65,6 +59,11 @@ jobs:
           command: |
             cp .circleci/.bazelrc ${HOME}
             /usr/bin/env bash bin/setup
+
+      - run:
+          name: "Show Bazel Info"
+          command: |
+            /usr/bin/env bash bin/test-suite bazel-info
 
       - run:
           name: "Bazel Simple Script Example Build"
