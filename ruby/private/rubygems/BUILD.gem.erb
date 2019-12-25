@@ -1,0 +1,27 @@
+
+ruby_library(
+  name = "<%= gem.name %>",
+  srcs = glob(
+    include = [
+      <% (gem.gemspec&.require_paths || [ 'lib' ])&.each do |lib|  %>
+      "/<%= gem.gem_path %>/<%= lib %>/**/*.rb",
+      <% end %>
+    ],
+    exclude = <%= exclude_array || [] %>,
+  ),
+  deps = <%= deps || []  %>,
+  rubyopt = ["-r${RUNFILES_DIR}/<%= repo_name %>/lib/bundler/setup.rb"],
+)
+
+<%  unless gem.executables&.empty?  %>
+  <%  gem.executables.each do |executable|  %>
+
+ruby_binary(
+  name = "<%= gem.name %>.<%= File.basename(executable) %>",
+  main = "/<%= executable  %>",
+  deps = [ ":<%= gem.name %>" ] + <%= deps %>,
+  rubyopt = ["-r${RUNFILES_DIR}/<%= repo_name %>/lib/bundler/setup.rb"],
+)
+
+  <%  end %>
+<%  end %>

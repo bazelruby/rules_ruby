@@ -1,0 +1,31 @@
+# This is the ERB template of the Bundler's own BUILD file.
+load(
+    "<%= workspace_name %>//ruby:defs.bzl",
+    "ruby_library",
+)
+
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "binstubs",
+    srcs = glob(["bin/**/*"]),
+    data = [":libs"],
+)
+
+ruby_library(
+    name = "bundler_setup",
+    srcs = ["lib/bundler/setup.rb"],
+    visibility = ["//visibility:public"],
+)
+
+ruby_library(
+    name = "bundler",
+    srcs = glob(
+        include = [
+            "bundler/**/*",
+        ],
+    ),
+    rubyopt = ["-r${RUNFILES_DIR}/<%= repo_name %>/lib/bundler/setup.rb"],
+)
+
+# PULL EACH GEM INDIVIDUALLY

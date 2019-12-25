@@ -2,17 +2,18 @@
 
 This Workspace includes a simple ruby script that includes and external gem and an internal library
 
-
 ### Bundle
 
-Update gemfile using
+Update gemfile using:
 
 ```
+gem instal bundler
 bundle lock --update
 ```
 
-### Rubocop
-Run rubocop with:
+### Running Rubocop
+
+Your Gemfile incldues RuboCop, but you can run it via Bazel:
 
 ```
 bazel run :rubocop -- $(pwd)/* -a

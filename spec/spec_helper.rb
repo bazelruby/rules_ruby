@@ -2,7 +2,10 @@
 
 require 'rspec'
 require 'rspec/its'
-require_relative '../ruby/private/bundle/build_file_generator'
+
+require_relative '../ruby/private/rubygems/rules_ruby'
+require_relative '../ruby/private/rubygems/gem_install'
+require_relative '../ruby/private/rubygems/bundle_install'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
