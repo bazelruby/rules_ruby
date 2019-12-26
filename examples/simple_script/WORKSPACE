@@ -21,14 +21,19 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
 
-load("@bazelruby_ruby_rules//ruby:defs.bzl", "bundle_install")
+load(
+    "@bazelruby_ruby_rules//ruby:defs.bzl",
+    "ruby_bundle_install",
+)
 
-bundle_install(
+ruby_bundle_install(
     name = "bundle",
+    bundler_version = "2.1.2",
     excludes = {
         "mini_portile": ["test/**/*"],
     },
+    gem_home = "vendor/bundle",
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
-    version = "2.0.2",
+    rubygems_sources = ["https://rubygems.org"],
 )

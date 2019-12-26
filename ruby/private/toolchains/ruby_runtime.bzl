@@ -57,7 +57,7 @@ def _install_ruby(ctx, ruby):
     ctx.symlink(ruby.interpreter_realpath, ruby.rel_interpreter_path)
 
     # Places the interpreter at a predictable place regardless of the actual binary name
-    # so that bundle_install can depend on it.
+    # so that ruby_bundle can depend on it.
     ctx.template(
         "ruby",
         ctx.attr._interpreter_wrapper_template,

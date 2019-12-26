@@ -12,12 +12,14 @@ load(
     _test = "ruby_test",
 )
 load(
-    "@bazelruby_ruby_rules//ruby/private:bundle.bzl",
-    _bundle_install = "bundle_install",
+    "@bazelruby_ruby_rules//ruby/private/bundle:bundle.bzl",
+    _bundle_install = "ruby_bundle_install",
+    _gem_install = "ruby_gem_install",
 )
 
-ruby_toolchain = _toolchain
-ruby_library = _library
 ruby_binary = _binary
+ruby_bundle_install = _bundle_install
+ruby_gem_install = _gem_install
+ruby_library = _library
 ruby_test = _test
-bundle_install = _bundle_install
+ruby_toolchain = _toolchain

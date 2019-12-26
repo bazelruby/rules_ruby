@@ -2,11 +2,13 @@ inherit_from: .relaxed-rubocop-2.4.yml
 
 AllCops:
   TargetRubyVersion: 2.6.5
+  Include:
+    - examples/**/*.rb
+    - tools/private/**/*.rb
   Exclude:
-    - "**/rubocop"
-    - "examples/**/*"
     - "bazel-*/**/*"
     - "**/external/**/*"
+    - "**/rubocop"
     - "**/vendor/bundle/**/*"
 
 

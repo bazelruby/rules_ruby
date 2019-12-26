@@ -5,6 +5,10 @@ load(
     "ruby_binary",
     "ruby_test",
 )
+load(
+    "@bazelruby_ruby_rules//ruby/private:rubocop.bzl",
+    "ruby_rubocop",
+)
 
 ruby_binary(
     name = "default_bin",
@@ -32,24 +36,36 @@ ruby_test(
     ],
 )
 
-# TODO: not the best way of defining this, should make `rubocop` rule like `buildifier`
-ruby_binary(
+ruby_rubocop(
     name = "rubocop",
-    srcs = [
-        ".relaxed-rubocop-2.4.yml",
-        ".rubocop.yml",
-        "script.rb",
-        "spec/script_spec.rb",
-        "@bundle//:bin/rubocop",
-    ],
-    args = [
-        "-c",
-        ".rubocop.yml",
-        "-P",
-        "-D",
-    ],
-    main = "@bundle//:bin/rubocop",
-    deps = [
-        "@bundle//:rubocop",
+    srcs = glob(
+        ["**/*.rb"],
+    ),
+    autofix = True,
+    rubocop_configs = [
+        ":.relaxed-rubocop-2.4.yml",
+        ":.rubocop.yml",
     ],
 )
+
+# # TODO: not the best way of defining this, should make `rubocop` rule like `buildifier`
+# ruby_binary(
+#     name = "rubocop",
+#     srcs = [
+#         ".relaxed-rubocop-2.4.yml",
+#         ".rubocop.yml",
+#         "script.rb",
+#         "spec/script_spec.rb",
+#         "@bundle//:bin/rubocop",
+#     ],
+#     args = [
+#         "-c",
+#         ".rubocop.yml",
+#         "-P",
+#         "-D",
+#     ],
+#     main = "@bundle//:bin/rubocop",
+#     deps = [
+#         "@bundle//:rubocop",
+#     ],
+# )

@@ -6,7 +6,7 @@
   * [ruby_library](#ruby_library)
   * [ruby_binary](#ruby_binary)
   * [ruby_test](#ruby_test)
-  * [bundle_install](#bundle_install)
+  * [ruby_bundle](#ruby_bundle)
 * [What's coming next](#whats-coming-next)
 * [Contributing](#contributing)
   * [Setup](#setup)
@@ -338,7 +338,7 @@ ruby_test(name, deps, srcs, data, main, compatible_with, deprecation, distribs, 
   </tbody>
 </table>
 
-### `bundle_install`
+### `ruby_bundle`
 
 Installs gems with Bundler, and make them available as a `ruby_library`.
 
@@ -361,9 +361,9 @@ ruby_rules_dependencies()
 
 ruby_register_toolchains()
 
-load("@bazelruby_ruby_rules//ruby:defs.bzl", "bundle_install")
+load("@bazelruby_ruby_rules//ruby:defs.bzl", "ruby_bundle")
 
-bundle_install(
+ruby_bundle(
     name = "gems",
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
@@ -381,7 +381,7 @@ ruby_library(
 ```
 
 <pre>
-bundle_install(name, gemfile, gemfile_lock)
+ruby_bundle_install(name, gemfile, gemfile_lock)
 </pre>
 <table class="table table-condensed table-bordered table-params">
   <colgroup>

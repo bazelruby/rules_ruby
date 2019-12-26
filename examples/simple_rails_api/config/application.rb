@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rails"
 # Pick the frameworks you want:
 require "active_model/railtie"

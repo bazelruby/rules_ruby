@@ -1,6 +1,6 @@
 load(
-    "//ruby/private/bundle:bundle.bzl",
-    _bundle_install = "bundle_install",
+    "//ruby/private/bundle/bundle.bzl",
+    ruby_bundle_install = _ruby_bundle_install_impl
 )
 
-bundle_install = _bundle_install
+ruby_bundle_install = _ruby_bundle_install_impl
