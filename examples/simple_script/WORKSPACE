@@ -32,7 +32,6 @@ ruby_bundle_install(
     excludes = {
         "mini_portile": ["test/**/*"],
     },
-    gem_home = "vendor/bundle",
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
     rubygems_sources = ["https://rubygems.org"],

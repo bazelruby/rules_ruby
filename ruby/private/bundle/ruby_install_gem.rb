@@ -39,6 +39,7 @@ module RulesRuby
     attr_reader :spec, :errors, :result, :sources, :name_tuple
 
     include ::RulesRuby::Helpers
+    Helpers.prog_name = 'ruby_install_gem'
 
     def initialize(gem_info)
       @gem_info   = gem_info
@@ -96,6 +97,9 @@ module RulesRuby
     def_delegators :@gem_info, :name, :version, :gem_home, :sources, :use_nested_path
     attr_accessor :options, :gem_info
 
+    include ::RulesRuby::Helpers
+    Helpers.prog_name = 'ruby_install_gem::cli'
+
     def initialize(cli_options)
       @options  = cli_options
       @gem_info = cli_options.tuple
@@ -111,18 +115,11 @@ module RulesRuby
              else
                wrn "Error installing #{self}:\n#{@errors.join(', ')}".red
                1
-             end
+            end
 
       exit code
     end
 
-    def inf(*args)
-      puts 'ruby_install_gem ❘ '.light_blue + args.map(&:to_s).join(' ').to_s
-    end
-
-    def wrn(*args)
-      puts 'ruby_install_gem ❘ '.yellow + args.map(&:to_s).join(' ').to_s.red
-    end
 
     USAGE = <<~INFO
       #{'USAGE'.pink}:

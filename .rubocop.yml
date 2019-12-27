@@ -4,7 +4,7 @@ AllCops:
   TargetRubyVersion: 2.6.5
   Include:
     - examples/**/*.rb
-    - tools/private/**/*.rb
+    - ruby/private/**/*.rb
   Exclude:
     - "bazel-*/**/*"
     - "**/external/**/*"
@@ -12,3 +12,5 @@ AllCops:
     - "**/vendor/bundle/**/*"
 
 
+Metrics/BlockLength:
+  Enabled: false

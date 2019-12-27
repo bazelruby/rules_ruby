@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'rspec'
+require 'rspec/its'
+
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
@@ -30,10 +33,7 @@ end
 # 5. The process fails with an unhandled exception.
 ENV['HOME'] ||= '/'
 
-require_relative '../script'
-
-describe 'oss_rand' do
-  it 'generates a String' do
-    expect(oss_rand).to be_a_kind_of String
-  end
+if ARGV.any? { |arg| arg.end_with?('spec_helper.rb')}
+  require_relative 'lib/simple_script_spec'
+  require_relative 'lib/foo/foo_spec'
 end

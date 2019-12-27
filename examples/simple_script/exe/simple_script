@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+lib_path = File.expand_path(File.dirname(__FILE__) + '/../lib')
+$LOAD_PATH << lib_path if File.exist?(lib_path) && !$LOAD_PATH.include?(lib_path)
+
+require 'simple_script'
+require 'foo/foo'
+
+if ARGV&.first == 'script'
+  SimpleScript.oss_rand
+elsif ARGV&.first == 'foo'
+  SimpleScript::Foo.new(ARGV)
+else
+  puts 'Call me with an argument of either "script" or "foo"!'
+end

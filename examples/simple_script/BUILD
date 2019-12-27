@@ -3,69 +3,66 @@ package(default_visibility = ["//:__subpackages__"])
 load(
     "@bazelruby_ruby_rules//ruby:defs.bzl",
     "ruby_binary",
+    "ruby_library",
     "ruby_test",
 )
-load(
-    "@bazelruby_ruby_rules//ruby/private:rubocop.bzl",
-    "ruby_rubocop",
-)
 
-ruby_binary(
-    name = "default_bin",
-    srcs = ["script.rb"],
-    main = "script.rb",
-    deps = [
-        "//lib:foo",
-        "@bundle//:awesome_print",
+ruby_library(
+    name = "simple-script-lib",
+    srcs = [
+        "exe/simple_script",
+        "lib/foo/foo.rb",
+        "lib/simple_script.rb",
     ],
 )
+
+# ruby_binary(
+#     name = "simple-script-bin",
+#     srcs = [":simple-script-lib"],
+#     main = "//exe:simple_script",
+#     deps = [
+#         "//lib:simple-script",
+#         "@bundle//:awesome_print",
+#     ],
+# )
 
 ruby_test(
-    name = "script_spec",
+    name = "simple-script-spec",
     timeout = "short",
     srcs = [
-        "script.rb",
-        "spec/script_spec.rb",
+        "spec/lib/foo/foo_spec.rb",
+        "spec/lib/simple_script_spec.rb",
+        "spec/spec_helper.rb",
     ],
-    main = "spec/script_spec.rb",
+    main = "spec/spec_helper.rb",
     rubyopt = ["-rrspec/autorun"],  # require autorun because it is needed
     deps = [
-        "//lib:foo",
+        ":simple-script-lib",
         "@bundle//:awesome_print",
         "@bundle//:rspec",
     ],
 )
 
-ruby_rubocop(
+ruby_binary(
     name = "rubocop",
-    srcs = glob(
-        ["**/*.rb"],
-    ),
-    autofix = True,
-    rubocop_configs = [
-        ":.relaxed-rubocop-2.4.yml",
-        ":.rubocop.yml",
+    srcs = [
+        ".relaxed-rubocop-2.4.yml",
+        ".rubocop.yml",
+        "lib/foo/foo.rb",
+        "lib/simple_script.rb",
+        "spec/lib/foo/foo_spec.rb",
+        "spec/lib/simple_script_spec.rb",
+        "spec/spec_helper.rb",
+        "@bundle//:bin/rubocop",
+    ],
+    args = [
+        "-c",
+        ".rubocop.yml",
+        "-P",
+        "-D",
+    ],
+    main = "@bundle//:bin/rubocop",
+    deps = [
+        "@bundle//:rubocop",
     ],
 )
-
-# # TODO: not the best way of defining this, should make `rubocop` rule like `buildifier`
-# ruby_binary(
-#     name = "rubocop",
-#     srcs = [
-#         ".relaxed-rubocop-2.4.yml",
-#         ".rubocop.yml",
-#         "script.rb",
-#         "spec/script_spec.rb",
-#         "@bundle//:bin/rubocop",
-#     ],
-#     args = [
-#         "-c",
-#         ".rubocop.yml",
-#         "-P",
-#         "-D",
-#     ],
-#     main = "@bundle//:bin/rubocop",
-#     deps = [
-#         "@bundle//:rubocop",
-#     ],
-# )

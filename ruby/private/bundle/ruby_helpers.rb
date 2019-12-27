@@ -45,6 +45,12 @@ module RulesRuby
   # @formatter:on
 
   module Helpers
+    class << self
+      attr_accessor :prog_name
+    end
+
+    self.prog_name = 'helpers'
+
     def ruby_version(ruby_version = RUBY_VERSION)
       @ruby_version ||= (ruby_version.split('.')[0..1] << 0).join('.')
     end
@@ -53,6 +59,14 @@ module RulesRuby
     # eg. "lib/ruby/2.6.0/gems/rubocop-0.78.0"
     def relative_gem_path(gem_tuple)
       @relative_gem_path ||= "ruby/#{ruby_version}/gems/#{gem_tuple.name}-#{gem_tuple.version}"
+    end
+
+    def inf(*args)
+      puts Helpers.prog_name.light_blue + ' | ' + args.map(&:to_s).join(' ').to_s
+    end
+
+    def wrn(*args)
+      puts Helpers.prog_name.yellow +  ' | ' + args.map(&:to_s).join(' ').to_s.red
     end
   end
 

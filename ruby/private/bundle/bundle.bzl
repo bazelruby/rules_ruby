@@ -44,48 +44,27 @@ def install_gem(
 def install_bundler(ctx, interpreter, bundler_version, gem_home):
     return install_gem(ctx, interpreter, "bundler", bundler_version, gem_home)
 
-def _ruby_install_gem(ctx):
-    ctx.symlink(ctx.attr._ruby_install_gem, "ruby_install_gem.rb")
-    ctx.symlink(ctx.attr._ruby_bundle_install, "ruby_bundle_install.rb")
-    ctx.symlink(ctx.attr._ruby_bundle_install, "ruby_bundle_install.rb")
-
-    ruby = ctx.attr.ruby_interpreter
-
-    interpreter_path = ctx.path(ruby)
-
-    gem_home = ctx.attr.gem_home
-    gem_name = ctx.attr.gem_name
-    gem_version = ctx.attr.gem_version
-
-    # Install the Gems into the workspace
+def run_bundler(ctx, interpreter, environment, gem_home, extra_args, quiet = True):
+    # Now we are running bundle install
     args = [
-        ctx.path(ruby),  # ruby
+        interpreter,  # ruby
         "--disable-gems",  # prevent the addition of gem installation directories to the default load path
-        "ruby_install_gem.rb",  # gem installer
-        gem_name,
-        gem_version,
-        ".",
-    ]
+        "-I",  # Used to tell Ruby where to load the library scripts
+        gem_home,  # Add vendor/bundle to the list of resolvers
+        gem_home + "/exe/bundler",  # our binary
+    ] + extra_args
 
-    print("installing GEML", gem_name, ", v(", gem_version, ") to [", gem_home, "]s")
-    result = ctx.execute(args, quiet = False)
+    result = ctx.execute(args, environment = environment, quiet = quiet)
 
     if result.return_code:
-        fail("Failed to install gems: %s%s" % (result.stdout, result.stderr))
-    else:
-        return 0
-
-# def get_transitive_srcs(srcs, deps):
-#     return depset(
-#         srcs,
-#         transitive = [dep[RubyLibrary].transitive_ruby_sources for dep in deps],
-#     )
+        fail("BUNDLE {} FAILED: %s%s".format(extra_args[0]) % (result.stdout, result.stderr))
 
 def _ruby_bundle_install_impl(ctx):
     ctx.symlink(ctx.attr.gemfile, "Gemfile")
     ctx.symlink(ctx.attr.gemfile_lock, "Gemfile.lock")
     ctx.symlink(ctx.attr._ruby_bundle_install, "ruby_bundle_install.rb")
     ctx.symlink(ctx.attr._ruby_install_gem, "ruby_install_gem.rb")
+    ctx.symlink(ctx.attr._ruby_helpers, "ruby_helpers.rb")
 
     gem_home = ctx.attr.gem_home
     ruby = ctx.attr.ruby_interpreter
@@ -112,45 +91,46 @@ def _ruby_bundle_install_impl(ctx):
         "path": gem_home,
     }
 
-    bundle_config_args = [
-        ctx.path(ruby),  # ruby
-        "-I",  # Used to tell Ruby where to load the library scripts
-        ".",
-        "-I",  # Used to tell Ruby where to load the library scripts
-        gem_home,  # Add vendor/bundle to the list of resolvers
-        gem_home + "/exe/bundler",  # our binary
-        "config",  # config
-        "--local",  # set bundle config locally only
-    ]
+    # bundle_config_args = [
+    #     ctx.path(ruby),  # ruby
+    #     "-I",  # Used to tell Ruby where to load the library scripts
+    #     ".",
+    #     "-I",  # Used to tell Ruby where to load the library scripts
+    #     gem_home,  # Add vendor/bundle to the list of resolvers
+    #     gem_home + "/exe/bundler",  # our binary
+    #     "config",  # config
+    #     "--local",  # set bundle config locally only
+    # ]
 
     for option, value in [(option, value) for option, value in bundler_config.items()]:
-        args = bundle_config_args + [
+        args = [
+            "config",
+            "--local",
             option,
             value,
+            " >/dev/null",
         ]
-        result = ctx.execute(args, environment = environment, quiet = False)
-        if result.return_code:
-            fail("Failed set bundler configuration %s%s" % (result.stdout, result.stderr))
-        else:
-            print("Bundle Config option {} is set to {}".format(option, value))
+        run_bundler(ctx, interpreter_path, environment, gem_home, args)
 
-    # Now we are running bundle install
-    args = [
-        ctx.path(ruby),  # ruby
-        "--disable-gems",  # prevent the addition of gem installation directories to the default load path
-        "-I",  # Used to tell Ruby where to load the library scripts
-        gem_home,  # Add vendor/bundle to the list of resolvers
-        gem_home + "/exe/bundler",  # our binary
-        "install",  # binary's argument
-        "--binstubs=bin",  # Creates a directory and place any executables from the gem there.
-    ]
+    run_bundler(ctx, interpreter_path, environment, gem_home, ["install", "--binstubs=bin"])
 
-    print("Running Bundle install with args:", args)
+    # # Now we are running bundle install
+    # args = [
+    #     ctx.path(ruby),  # ruby
+    #     "--disable-gems",  # prevent the addition of gem installation directories to the default load path
+    #     "-I",  # Used to tell Ruby where to load the library scripts
+    #     gem_home,  # Add vendor/bundle to the list of resolvers
+    #     gem_home + "/exe/bundler",  # our binary
+    #     "install",  # binary's argument
+    #     "--binstubs=bin",  # Creates a directory and place any executables from the gem there.
+    # ]
 
-    result = ctx.execute(args, environment = environment, quiet = False)
+    # print("Running Bundle install with args:", args)
 
-    if result.return_code:
-        fail("Failed to install gems: %s%s" % (result.stdout, result.stderr))
+    # result = ctx.execute(args, environment = environment, quiet = False)
+
+    # if result.return_code:
+    #     fail("Failed to install gems: %s%s" % (result.stdout, result.stderr))
 
     print("Now we'll parse the Gemfile.lock and install all the dependent gems...")
 
@@ -172,19 +152,45 @@ def _ruby_bundle_install_impl(ctx):
         "-r",
         ctx.name,  # Name of the target
         "-e",
-        "'" + repr(ctx.attr.excludes) + "'",  # Excludes are in JSON format
+        repr(ctx.attr.excludes),  # Excludes are in JSON format
         "-w",
         RULES_RUBY_WORKSPACE_NAME,
     ]
 
-    print("RUNNING ruby_bundle_install.rb: ", args)
-
     result = ctx.execute(args, environment = environment, quiet = False)
-
     if result.return_code:
         fail("Failed to create build file: %s%s" % (result.stdout, result.stderr))
+
+def _ruby_install_gem(ctx):
+    ctx.symlink(ctx.attr._ruby_install_gem, "ruby_install_gem.rb")
+    ctx.symlink(ctx.attr._ruby_bundle_install, "ruby_bundle_install.rb")
+    ctx.symlink(ctx.attr._ruby_helpers, "ruby_helpers.rb")
+
+    ruby = ctx.attr.ruby_interpreter
+
+    interpreter_path = ctx.path(ruby)
+
+    gem_home = ctx.attr.gem_home
+    gem_name = ctx.attr.gem_name
+    gem_version = ctx.attr.gem_version
+
+    # Install the Gems into the workspace
+    args = [
+        ctx.path(ruby),  # ruby
+        "--disable-gems",  # prevent the addition of gem installation directories to the default load path
+        "ruby_install_gem.rb",  # gem installer
+        gem_name,
+        gem_version,
+        ".",
+    ]
+
+    print("installing GEM", gem_name, ", v(", gem_version, ") to [", gem_home, "]s")
+    result = ctx.execute(args, quiet = False)
+
+    if result.return_code:
+        fail("Failed to install gems: %s%s" % (result.stdout, result.stderr))
     else:
-        print("Build file generation was successful")
+        return 0
 
 ruby_bundle_install = repository_rule(
     implementation = _ruby_bundle_install_impl,

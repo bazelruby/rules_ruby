@@ -55,9 +55,11 @@ module RulesRuby
     # This BUILD file will include the bundler itself at the top, and the each
     # gem mentioned in the lock file below.
     attr_reader :repo_name, :excludes, :workspace_name, :generated_build_file,
-                :gemfile_lock_file, :bundle_path
+                :gemfile_lock_file, :bundle_path, :verbose
 
     include RulesRuby::Helpers
+
+    Helpers.prog_name = 'ruby_bundle_install'
 
     def initialize(
       repo_name:,
@@ -65,7 +67,8 @@ module RulesRuby
       workspace_name:,
       generated_build_file: DEFAULT_BUILD_FILE,
       gemfile_lock_file: DEFAULT_GEMFILE_LOCK,
-      bundle_path: BUNDLE_PATH
+      bundle_path: BUNDLE_PATH,
+      verbose: false
     )
 
       @repo_name            = repo_name
@@ -74,13 +77,18 @@ module RulesRuby
       @generated_build_file = generated_build_file
       @gemfile_lock_file    = gemfile_lock_file
       @bundle_path          = bundle_path
+      @verbose = verbose
     end
 
     def render_build_file!
+      puts
+      inf "Starting to render BUILD file..."
+
       template_out.puts templates.bundler
                                  .gsub('{workspace_name}', workspace_name)
                                  .gsub('{repo_name}', repo_name)
                                  .gsub('{ruby_version}', ruby_version)
+                                 .gsub('{bundle_path}', bundle_path)
 
       # Append to the end specific gem libraries and dependencies
       bundle_lock_file = Bundler::LockfileParser.new(Bundler.read_file(gemfile_lock_file))
@@ -91,6 +99,8 @@ module RulesRuby
           d << ':bundler_setup'
           d.flatten!
         end
+
+        inf "Adding gem #{spec.name.to_s.red} v#{spec.version.to_s.green}..."
 
         # We want to exclude files and folder with spaces in them
         exclude_array = (excludes[spec.name] || []) + ['**/* *.*', '**/* */*']
@@ -106,6 +116,8 @@ module RulesRuby
                                    .gsub('{ruby_version}', ruby_version)
                                    .gsub('{gem_path}', gem_path)
                                    .gsub('{bundle_path}', bundle_path)
+                                   .gsub('{workspace_name}', workspace_name)
+
 
         gem_executables(spec, gem_path).each do |binary|
           template_out.puts templates.gem_binary
@@ -116,15 +128,21 @@ module RulesRuby
                                      .gsub('{label_name}', binary.label_name)
                                      .gsub('{bin_path}', binary.bin_path)
                                      .gsub('{bundle_path}', bundle_path)
+                                     .gsub('{workspace_name}', workspace_name)
+                                     .gsub('{ruby_version}', ruby_version)
         end
       end
+
+      inf "Creating the BUILD file in #{generated_build_file.red}, total length: #{template_out.string.size}"
 
       # Write the actual BUILD file
       ::File.open(generated_build_file, 'w') { |f|
         f.puts template_out.string
       }
 
-      run_buildifier!
+      inf "All done!".green
+
+      # run_buildifier!
     end
 
     def run_buildifier!(build_file = generated_build_file,
@@ -232,6 +250,10 @@ module RulesRuby
               exit 1
             end
 
+            opts.on('-v', '--verbose', 'Print verbose info') do |n|
+              options.verbose = true
+            end
+
             opts.on('-h', '--help', 'Prints this help') do
               puts opts
               exit
@@ -254,7 +276,8 @@ end
 
 if $0 == __FILE__
   options = RulesRuby::Parser.parse_argv(ARGV.empty? ? ['-h'] : ARGV.dup)
-  RulesRuby::BundleInstall.new(**options.to_h)
+  pp options.to_h if options.verbose
+  RulesRuby::BundleInstall.new(**options.to_h).render_build_file!
 end
 
 
@@ -284,7 +307,7 @@ filegroup(
 
 ruby_library(
   name = "bundler_setup",
-  srcs = ["{bundle_path}/bundler/setup.rb"],
+  srcs = ["{bundle_path}/lib/bundler/setup.rb"],
   visibility = ["//visibility:private"],
 )
 
@@ -295,10 +318,18 @@ ruby_library(
       "bundler/**/*",
     ],
   ),
-  rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/{bundle_path}/bundler/setup.rb"],
+  rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/{bundle_path}/lib/bundler/setup.rb"],
 )
 
 ——————————————————————————————————————————————————————————————————————
+
+load(
+  "{workspace_name}//ruby:defs.bzl",
+  "ruby_library",
+  "ruby_binary",
+  "ruby_test",
+)
+
 
 # Build constructs for the gem {name} (#{version})
 
@@ -326,28 +357,25 @@ ruby_library(
   name = "{name}",
   srcs = [":{name}.package"],
   deps = {deps},
-  rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/{bundle_path}/bundler/setup.rb"],
+  rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/{bundle_path}/lib/bundler/setup.rb"],
   visibility = ["//visibility:public"],
 )
 
 ruby_test(
-  name = "{name}",
+  name = "{name}.test",
   srcs = [":{name}.package"],
   deps = {deps},
-  rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/{bundle_path}/bundler/setup.rb"],
+  rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/{bundle_path}/lib/bundler/setup.rb"],
   visibility = ["//visibility:public"],
 )
 
 ——————————————————————————————————————————————————————————————————————
 
-# gem {name} (v{version}) includes executables, so we are exporting them
-# to the outside Ruby code.
-
 ruby_binary(
   name = "{label_name}",  # eg, rspec/bin/rspec
   main = "{bin_path}",
   deps = [":{name}"] + {deps},
-  rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/{bundle_path}/bundler/setup.rb"],
+  rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/{bundle_path}/lib/bundler/setup.rb"],
   visibility = ["//visibility:public"],
 )
 
