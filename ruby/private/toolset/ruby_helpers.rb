@@ -27,16 +27,23 @@ class String
   end
 
   def on_orange
-    colorize(37)
+    colorize(32)
   end
 
   def light_blue
     colorize(36)
   end
+
+  def help_header
+    "#{upcase}:".on_orange
+  end
 end
 
 module RulesRuby
   DEFAULT_RUBYGEMS_SOURCE = 'https://rubygems.org'
+  BUNDLE_PATH             = 'vendor/bundle'
+  DEFAULT_GEMFILE_LOCK    = 'Gemfile.lock'
+  DEFAULT_BUILD_FILE      = 'BUILD.bazel'
 
   # @formatter:off
   class BundleError < StandardError; end
@@ -56,7 +63,7 @@ module RulesRuby
     end
 
     # Path where the gem sources can be found
-    # eg. "lib/ruby/2.6.0/gems/rubocop-0.78.0"
+    # eg. "ruby/2.6.0/gems/rubocop-0.78.0"
     def relative_gem_path(gem_tuple)
       @relative_gem_path ||= "ruby/#{ruby_version}/gems/#{gem_tuple.name}-#{gem_tuple.version}"
     end
@@ -66,7 +73,7 @@ module RulesRuby
     end
 
     def wrn(*args)
-      puts Helpers.prog_name.yellow +  ' | ' + args.map(&:to_s).join(' ').to_s.red
+      puts Helpers.prog_name.yellow + ' | ' + args.map(&:to_s).join(' ').to_s.red
     end
   end
 

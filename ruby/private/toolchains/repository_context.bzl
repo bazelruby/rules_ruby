@@ -24,7 +24,7 @@ def _rbconfig(ruby, name):
     options = ["-rrbconfig"]
     script = "print RbConfig::CONFIG[{}]".format(
         # Here we actually needs String#dump in Ruby but
-        # repr in Python is compatible enough.
+        # repr() in Python is compatible enough.
         repr(name),
     )
     return _eval_ruby(ruby, script = script, options = options)
@@ -33,7 +33,7 @@ def _expand_rbconfig(ruby, expr):
     options = ["-rrbconfig"]
     script = "print RbConfig.expand({})".format(
         # Here we actually needs String#dump in Ruby but
-        # repr in Python is compatible enough.
+        # repr() in Python is compatible enough.
         repr(expr),
     )
     return _eval_ruby(ruby, script = script, options = options)

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rspec'
 require 'rspec/its'
 require 'simple_script'
@@ -17,4 +18,3 @@ RSpec.describe SimpleScript::Foo do
     its(:size) { should be_zero }
   end
 end
-

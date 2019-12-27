@@ -14,3 +14,14 @@ AllCops:
 
 Metrics/BlockLength:
   Enabled: false
+
+Layout/HashAlignment:
+  Enabled: true
+  EnforcedColonStyle: table
+
+Style/Dir:
+  Enabled: false
+
+# In Bazel we want to use __FILE__ because __dir__points to the actual sources
+Style/ExpandPathArguments:
+  Enabled: false

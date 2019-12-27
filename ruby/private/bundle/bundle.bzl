@@ -4,14 +4,14 @@ load(
     "RULES_RUBY_WORKSPACE_NAME",
 )
 
+# Installs arbitrary gem/version combo to any location specified by gem_home
+# The tool used here is ruby_install_gem.rb
 def install_gem(
         ctx,
         interpreter,
         gem_name,
         gem_version,
-        gem_home = "vendor/bundle"):
-    print("install-gem [", gem_name, " v(", gem_version, ")] into to GEM_HOME which is [", gem_home, "]")
-
+        gem_home = BUNDLE_DEFAULT_DESTINATION):
     args = [
         interpreter,
         "ruby_install_gem.rb",
@@ -21,8 +21,6 @@ def install_gem(
         gem_version,
         "-g",
         gem_home,
-        # we are installing bundler into vendor/bundle but directly, not under
-        # the ruby/<ruby-version>/gems... etc folder, like all other gems.
     ]
 
     environment = {"RUBYOPT": "--enable-gems", "GEM_HOME": gem_home, "GEM_PATH": gem_home}
@@ -65,6 +63,9 @@ def _ruby_bundle_install_impl(ctx):
     ctx.symlink(ctx.attr._ruby_bundle_install, "ruby_bundle_install.rb")
     ctx.symlink(ctx.attr._ruby_install_gem, "ruby_install_gem.rb")
     ctx.symlink(ctx.attr._ruby_helpers, "ruby_helpers.rb")
+    ctx.symlink(ctx.attr._build_bundle_template, "BUILD.bundler.tpl")
+    ctx.symlink(ctx.attr._build_gem_library_template, "BUILD.gem.library.tpl")
+    ctx.symlink(ctx.attr._build_gem_binary_template, "BUILD.gem.binary.tpl")
 
     gem_home = ctx.attr.gem_home
     ruby = ctx.attr.ruby_interpreter
@@ -82,6 +83,7 @@ def _ruby_bundle_install_impl(ctx):
 
     bundler = Label("//vendor/bundle/exe/bundler")
 
+    # Bundler is deprecating ¬ ¬
     # Set local configuration options for bundler
     bundler_config = {
         "deployment": "'true'",
@@ -91,49 +93,25 @@ def _ruby_bundle_install_impl(ctx):
         "path": gem_home,
     }
 
-    # bundle_config_args = [
-    #     ctx.path(ruby),  # ruby
-    #     "-I",  # Used to tell Ruby where to load the library scripts
-    #     ".",
-    #     "-I",  # Used to tell Ruby where to load the library scripts
-    #     gem_home,  # Add vendor/bundle to the list of resolvers
-    #     gem_home + "/exe/bundler",  # our binary
-    #     "config",  # config
-    #     "--local",  # set bundle config locally only
-    # ]
-
     for option, value in [(option, value) for option, value in bundler_config.items()]:
         args = [
             "config",
             "--local",
             option,
             value,
-            " >/dev/null",
         ]
-        run_bundler(ctx, interpreter_path, environment, gem_home, args)
+        run_bundler(ctx, interpreter_path, environment, gem_home, args, True)
 
-    run_bundler(ctx, interpreter_path, environment, gem_home, ["install", "--binstubs=bin"])
+    # This runs bundle install
+    run_bundler(
+        ctx,
+        interpreter_path,
+        environment,
+        gem_home,
+        ["install", "--binstubs=bin"],
+    )
 
-    # # Now we are running bundle install
-    # args = [
-    #     ctx.path(ruby),  # ruby
-    #     "--disable-gems",  # prevent the addition of gem installation directories to the default load path
-    #     "-I",  # Used to tell Ruby where to load the library scripts
-    #     gem_home,  # Add vendor/bundle to the list of resolvers
-    #     gem_home + "/exe/bundler",  # our binary
-    #     "install",  # binary's argument
-    #     "--binstubs=bin",  # Creates a directory and place any executables from the gem there.
-    # ]
-
-    # print("Running Bundle install with args:", args)
-
-    # result = ctx.execute(args, environment = environment, quiet = False)
-
-    # if result.return_code:
-    #     fail("Failed to install gems: %s%s" % (result.stdout, result.stderr))
-
-    print("Now we'll parse the Gemfile.lock and install all the dependent gems...")
-
+    #
     # Create the BUILD file to expose the gems to the WORKSPACE
     args = [
         ctx.path(ruby),  # ruby interpreter
@@ -193,7 +171,6 @@ def _ruby_install_gem(ctx):
         return 0
 
 ruby_bundle_install = repository_rule(
-    implementation = _ruby_bundle_install_impl,
     attrs = {
         "ruby_sdk": attr.string(
             default = "@org_ruby_lang_ruby_toolchain",
@@ -223,30 +200,48 @@ ruby_bundle_install = repository_rule(
             doc = "List of glob patterns per gem to be excluded from the library",
         ),
         "_ruby_install_gem": attr.label(
-            default = "%s//ruby/private/bundle:ruby_install_gem.rb" % (
+            default = "%s//ruby/private/toolset:ruby_install_gem.rb" % (
                 RULES_RUBY_WORKSPACE_NAME
             ),
             allow_single_file = True,
         ),
         "_ruby_bundle_install": attr.label(
-            default = "%s//ruby/private/bundle:ruby_bundle_install.rb" % (
+            default = "%s//ruby/private/toolset:ruby_bundle_install.rb" % (
                 RULES_RUBY_WORKSPACE_NAME
             ),
             doc = "Generates the BUILD file for the entire bundle",
             allow_single_file = True,
         ),
         "_ruby_helpers": attr.label(
-            default = "%s//ruby/private/bundle:ruby_helpers.rb" % (
+            default = "%s//ruby/private/toolset:ruby_helpers.rb" % (
                 RULES_RUBY_WORKSPACE_NAME
             ),
             doc = "Generates the BUILD file for the entire bundle",
             allow_single_file = True,
         ),
+        "_build_gem_binary_template": attr.label(
+            default = "%s//ruby/private/toolset:BUILD.gem.binary.tpl" % (
+                RULES_RUBY_WORKSPACE_NAME
+            ),
+            allow_single_file = True,
+        ),
+        "_build_gem_library_template": attr.label(
+            default = "%s//ruby/private/toolset:BUILD.gem.library.tpl" % (
+                RULES_RUBY_WORKSPACE_NAME
+            ),
+            allow_single_file = True,
+        ),
+        "_build_bundle_template": attr.label(
+            default = "%s//ruby/private/toolset:BUILD.bundler.tpl" % (
+                RULES_RUBY_WORKSPACE_NAME
+            ),
+            allow_single_file = True,
+        ),
     },
+    implementation = _ruby_bundle_install_impl,
 )
 
 ruby_gem_install = repository_rule(
-    implementation = _ruby_install_gem,
     attrs = {
         "ruby_sdk": attr.string(
             default = "@org_ruby_lang_ruby_toolchain",
@@ -285,4 +280,5 @@ ruby_gem_install = repository_rule(
             allow_single_file = True,
         ),
     },
+    implementation = _ruby_install_gem,
 )

@@ -3,14 +3,48 @@
 #
 # © 2018-2020 BazelRuby Authors
 #
-# This ruby helper installs Bundler when called without
-# arguments. Alternatively, it can be called to install ANY
-# gem like so:
+# This ruby helper installs Bundler when called without arguments.
+# Alternatively, it can be called to install ANY gem like so:
+# ———————————————————————————————————————————————————————————————————————————————————
 #
-# Usage:
-#     ./install_gem.rb gem-name:gem-version  [ gem-home = Dir.pwd ]
-# Eg:
-#     ./install_gem.rb bundler
+# Example:
+#    ./install_gem.rb -n nokogiri:1.8.7.1 -g ~/.gems -p
+#
+#
+# ❯ ruby ruby_install_gem.rb -h
+# USAGE:
+#    ruby_install_gem.rb [gem[:version]] [ options ]
+#
+# DESCRIPTION
+#    Downloads and Install a gem in the repository or in the Bazel's build folder,
+#    Used by bundle_install.rb to install bundler itself.
+#
+# EXAMPLE:
+#    # This will install to ./vendor/bundle/rspec-3.2.0
+#    ruby_install_gem.rb rspec:3.2.0 -g vendor/bundle -s https://rubygems.org
+#
+#    # This will install to ~/.gems/ruby/2.5.0/gems/sym-2.8.1
+#    ruby_install_gem.rb -n sym -v 2.8.1 -g ~/.gems -p
+#
+# OPTIONS:
+#
+#    -n, --gem-name=NAME[:VERSION]    Name of the gem to install. May include the
+#                                     version after the ":".
+#    -v, --gem-version=N.Y.X          Gem version to install, optional.
+#    -s, --sources URL1,URL2..        Optional list of URIs to look for gems at
+#    -g, --gem-home=PATH              Directory where the gem should be installed.
+#    -p, --nested-path                If set, the gem will be installed under the
+#                                     gem-path provided, but in a deeply nested folder
+#                                     corresponding to a ruby standard.
+#
+#                                     For instance, if GEM_HOME is "./vendor/bundle",
+#                                     and -p is set, then the resulting gem folder will
+#                                     be the following path (for rspec-core):
+#                                     ./vendor/bundle/ruby/2.5.0/gems/rspec-core-3.9.0
+#                                     assuming Ruby 2.5.* version.
+#    -h, --help                       Prints this help
+#
+# ———————————————————————————————————————————————————————————————————————————————————
 
 # install any gem whatsoever.
 
@@ -36,10 +70,11 @@ module RulesRuby
     extend Forwardable
 
     def_delegators :@gem_info, :name, :version, :gem_home, :sources, :user_nested_path
+
     attr_reader :spec, :errors, :result, :sources, :name_tuple
 
     include ::RulesRuby::Helpers
-    Helpers.prog_name = 'ruby_install_gem'
+    Helpers.prog_name = 'ruby-install-gem'
 
     def initialize(gem_info)
       @gem_info   = gem_info
@@ -58,19 +93,23 @@ module RulesRuby
 
     # Unpacks the gem contents into a given library.
     def install!
-      Dir.mktmpdir { |dir|
+      Dir.mktmpdir do |dir|
         Dir.chdir(dir) { source.download(spec) }
-        downloaded = File.join(dir, "#{name}-#{version}.gem")
+        gem_spec = "#{name}-#{version}.gem"
+        downloaded = File.join(dir, gem_spec)
         Gem::Package.new(downloaded).extract_files(gem_home)
-      }
+        inf "OK : ".green + "extracted #{gem_spec.red} to #{gem_home.blue}"
+        inf "PWD: " + File.absolute_path(gem_home).red
+      end
       @result = true
-      self
+      exit(0)
     rescue StandardError => e
       warn "Exception while attempting to unpack gem #{name} (#{version}) to #{gem_path}: ".red
       warn " • #{e.message}"
       @result = false
       @errors << e.message
-      self
+      STDERR.pp @errors
+      exit(0)
     end
 
     private
@@ -95,51 +134,26 @@ module RulesRuby
   class CLI
     extend Forwardable
     def_delegators :@gem_info, :name, :version, :gem_home, :sources, :use_nested_path
+
     attr_accessor :options, :gem_info
 
     include ::RulesRuby::Helpers
-    Helpers.prog_name = 'ruby_install_gem::cli'
+    Helpers.prog_name = 'ruby-install-gem-cli'
 
     def initialize(cli_options)
       @options  = cli_options
       @gem_info = cli_options.tuple
-      puts "\n"
-      inf 'installing ', gem_info.to_s
 
       installer = GemInstall.new(gem_info).install!
 
-      code = if installer.result
-               inf 'PWD = ', Dir.pwd.to_s.pink
-               inf 'OK  = ', gem_info.to_s
-               0
-             else
-               wrn "Error installing #{self}:\n#{@errors.join(', ')}".red
-               1
-            end
-
-      exit code
+      if installer.result
+        inf 'OK  : ', gem_info.to_s
+        inf 'ROOT: ', Dir.pwd.to_s.pink
+      else
+        wrn "Error installing #{self}:\n#{@errors.join(', ')}".red
+        exit(1)
+      end
     end
-
-
-    USAGE = <<~INFO
-      #{'USAGE'.pink}:
-          #{File.basename($0).on_orange + ' [gem[:version]] [ options ]'.on_orange}
-
-      #{'DESCRIPTION'.pink}
-          Downloads and Install a gem in the repository or in the Bazel's build folder,
-          Used by bundle_install.rb to install bundler itself.
-    INFO
-
-    EXAMPLES = <<~EX
-      #{'EXAMPLE'.pink}:
-          # This will install to ./vendor/bundle/rspec-3.2.0
-          #{File.basename($0)} rspec:3.2.0 -g vendor/bundle -s https://rubygems.org
-
-          # This will install to ~/.gems/ruby/2.5.0/gems/sym-2.8.1
-          #{File.basename($0)} -n sym -v 2.8.1 -g ~/.gems -p
-
-      #{'OPTIONS'.pink}:
-    EX
 
     class << self
       def transform_options(options)
@@ -148,8 +162,7 @@ module RulesRuby
                                                options.gem_home,
                                                options.sources,
                                                options.use_nested_path)
-        options.tuple.valid? || show_help
-        options
+        options.tuple.valid? ? options.tuple : show_help
       end
 
       def show_help
@@ -166,6 +179,7 @@ module RulesRuby
 
           options.gem_name        = nil
           options.gem_version     = nil
+          options.sources         = %w(https://rubygems.org)
           options.gem_home        = ENV['GEM_HOME'] || '.'
           options.use_nested_path = false
 
@@ -189,7 +203,7 @@ module RulesRuby
 
             opts.on('-s', '--sources URL1,URL2..',
                     'Optional list of URIs to look for gems at') do |n|
-              options.sources = n.split(',').map { |u| URI.new(u) }
+              options.sources = n.split(',').map { |u| URI(u) }
             end
 
             opts.on('-g', '--gem-home=PATH',
@@ -220,11 +234,33 @@ module RulesRuby
         end
       end
     end
+
+    USAGE = <<~INFO
+      #{'USAGE'.pink}:
+          #{File.basename($0).on_orange + ' [gem[:version]] [ options ]'.on_orange}
+
+      #{'DESCRIPTION'.pink}
+          Downloads and Install a gem in the repository or in the Bazel's
+          build folder, Used by bundle_install.rb to install bundler itself.
+    INFO
+
+    EXAMPLES = <<~EX
+      #{'EXAMPLE'.pink}:
+          # This will install to ./vendor/bundle/rspec-3.2.0
+          #{File.basename($0)} rspec:3.2.0 -g vendor/bundle -s https://rubygems.org
+
+          # This will install to ~/.gems/ruby/2.5.0/gems/sym-2.8.1
+          #{File.basename($0)} -n sym -v 2.8.1 -g ~/.gems -p
+
+      #{'OPTIONS'.pink}:
+    EX
   end
 end
 
 if $0 == __FILE__
-  RulesRuby::CLI.class_eval do
-    new(transform_options(parse_argv(ARGV))).install!
+  module RulesRuby
+    CLI.class_eval do
+      ::RulesRuby::GemInstall.new(transform_options(parse_argv(ARGV))).install!
+    end
   end
 end

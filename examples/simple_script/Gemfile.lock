@@ -46,5 +46,3 @@ DEPENDENCIES
   rspec-its (~> 1.3.0)
   rubocop (~> 0.78.0)
 
-BUNDLED WITH
-   2.1.2

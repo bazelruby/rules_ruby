@@ -80,6 +80,28 @@ jobs:
           command: |
             cd examples/simple_script && bazel ${BAZEL_OPTS} run ${BAZEL_BUILD_OPTS} -- :rubocop
 
+  rspec_examples:
+    <<: *bazel_defaults
+
+    steps:
+      - checkout
+
+      - run:
+          name: "Install ~/.bazelrc and run setup"
+          command: |
+            cp .circleci/.bazelrc ${HOME}
+            /usr/bin/env bash bin/setup
+
+      - run:
+          name: "Bundle Install"
+          command: |
+            cd examples/simple_script && bundle install --path vendor/bundle
+
+      - run:
+          name: "RSpecs"
+          command: |
+            cd examples/simple_script && bundle exec rspec
+
   buildifier:
     <<: *bazel_defaults
 
@@ -108,3 +130,4 @@ workflows:
       - bazel_build_workspace
       - bazel_build_examples
       - buildifier
+      - rspec_examples

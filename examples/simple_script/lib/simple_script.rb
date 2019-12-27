@@ -11,6 +11,6 @@ module SimpleScript
   self.output = STDOUT
 
   def self.oss_rand
-    SimpleScript.output.puts "OpenSSL Random Number is: #{OpenSSL::BN.rand(512).to_s}"
+    SimpleScript.output.puts "OpenSSL Random Number is: #{OpenSSL::BN.rand(512)}"
   end
 end

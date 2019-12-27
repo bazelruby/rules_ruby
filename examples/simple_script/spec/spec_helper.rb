@@ -33,7 +33,7 @@ end
 # 5. The process fails with an unhandled exception.
 ENV['HOME'] ||= '/'
 
-if ARGV.any? { |arg| arg.end_with?('spec_helper.rb')}
+if ARGV.any? { |arg| arg.end_with?('spec_helper.rb') }
   require_relative 'lib/simple_script_spec'
   require_relative 'lib/foo/foo_spec'
 end

@@ -5,13 +5,3 @@ RubyLibrary = provider(
         "rubyopt",
     ],
 )
-
-# A provider with one field, transitive_sources.
-RubyApp = provider(
-    fields = [
-        "transitive_ruby_sources",
-        "ruby_incpaths",
-        "rubyopt",
-        "bundled_gems",
-    ],
-)

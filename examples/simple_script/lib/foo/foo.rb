@@ -1,19 +1,23 @@
 # frozen_string_literal: true
 
+require 'simple_script'
+require 'forwardable'
+
 module SimpleScript
   class Foo
+    extend Forwardable
+
+    def_delegators :@output, :puts
     attr_accessor :output
-
     def initialize(argv = ARGV)
-      self.output = STDOUT
+      @output = SimpleScript.output
+      return unless argv&.first == 'foo'
 
-      if argv&.first == 'foo'
-        aha!
-      end
+      aha!
     end
 
     def aha!
-      output.puts 'Congratulations! You\'ve accomplished a complete FUBAR!'
+      puts 'Congratulations! You\'ve accomplished a complete FUBAR!'
     end
   end
 end

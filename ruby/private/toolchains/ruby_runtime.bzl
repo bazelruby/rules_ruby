@@ -91,7 +91,7 @@ def host_ruby_is_correct_version(ctx, version):
     if not interpreter_path:
         return False
 
-    ruby_version = ctx.execute(["ruby", "--version"]).stdout
+    ruby_version = ctx.execute(["ruby", "-e", "puts RUBY_VERSION"]).stdout
     version_string = "ruby %sp" % version
 
     print("Checking for version '%s' in '%s'" % (version_string, ruby_version))

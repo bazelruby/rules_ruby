@@ -10,21 +10,24 @@ load(
 ruby_library(
     name = "simple-script-lib",
     srcs = [
-        "exe/simple_script",
+        "exe/simple-script",
         "lib/foo/foo.rb",
         "lib/simple_script.rb",
     ],
+    deps = [
+        "@bundle//:awesome_print",
+    ],
 )
 
-# ruby_binary(
-#     name = "simple-script-bin",
-#     srcs = [":simple-script-lib"],
-#     main = "//exe:simple_script",
-#     deps = [
-#         "//lib:simple-script",
-#         "@bundle//:awesome_print",
-#     ],
-# )
+ruby_binary(
+    name = "simple-script-exe",
+    srcs = ["exe/simple-script"],
+    main = "exe/simple-script",
+    deps = [
+        ":simple-script-lib",
+        "@bundle//:awesome_print",
+    ],
+)
 
 ruby_test(
     name = "simple-script-spec",
@@ -35,10 +38,10 @@ ruby_test(
         "spec/spec_helper.rb",
     ],
     main = "spec/spec_helper.rb",
-    rubyopt = ["-rrspec/autorun"],  # require autorun because it is needed
+    rubyopt = ["-rrspec/autorun"],  # require autorun because it is neededxXXXXXXXXXXXXX
     deps = [
         ":simple-script-lib",
-        "@bundle//:awesome_print",
+        "@bundle//:ast",
         "@bundle//:rspec",
     ],
 )
@@ -50,7 +53,6 @@ ruby_binary(
         ".rubocop.yml",
         "lib/foo/foo.rb",
         "lib/simple_script.rb",
-        "spec/lib/foo/foo_spec.rb",
         "spec/lib/simple_script_spec.rb",
         "spec/spec_helper.rb",
         "@bundle//:bin/rubocop",

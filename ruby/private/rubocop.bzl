@@ -64,8 +64,8 @@ _ATTRS = {
 }
 
 ruby_rubocop = rule(
-    implementation = _ruby_rubocop_impl,
     attrs = _ATTRS,
     executable = True,
     toolchains = [TOOLCHAIN_TYPE_NAME],
+    implementation = _ruby_rubocop_impl,
 )
