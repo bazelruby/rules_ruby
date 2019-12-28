@@ -48,7 +48,8 @@ module RulesRuby
   # @formatter:off
   class BundleError < StandardError; end
   class GemfileNotFound < BundleError; end
-  class BuildifierError < BundleError; end
+  class BuildifierCantRunError < BundleError; end
+  class BuildifierFailedError < BundleError; end
   # @formatter:on
 
   module Helpers
@@ -68,16 +69,21 @@ module RulesRuby
       @relative_gem_path ||= "ruby/#{ruby_version}/gems/#{gem_tuple.name}-#{gem_tuple.version}"
     end
 
+    def hdr(class_or_instance)
+      puts "\n\n"
+      puts Helpers.prog_name.light_blue + " ❬ #{class_or_instance.is_a?(Class) ? class_or_instance.name : class_or_instance.class.name} ❭ ".red
+    end
+
     def inf(*args)
-      puts Helpers.prog_name.light_blue + ' | ' + args.map(&:to_s).join(' ').to_s
+      puts Helpers.prog_name.light_blue + ' ❬ ' + args.map(&:to_s).join(' ').to_s + ' ❭ '
     end
 
     def wrn(*args)
-      puts Helpers.prog_name.yellow + ' | ' + args.map(&:to_s).join(' ').to_s.red
+      puts Helpers.prog_name.yellow + ' ❬ ' + args.map(&:to_s).join(' ').to_s.red + ' ❭ '
     end
   end
 
-  GemInfo = Struct.new(:name, :version, :gem_home, :sources, :use_nested_path) do
+  class GemInfo < Struct.new(:name, :version, :gem_home, :sources, :use_nested_path)
     include Helpers
 
     def initialize(*args)

@@ -10,6 +10,7 @@ def _ruby_library_impl(ctx):
         fail("At least srcs or deps must be present")
 
     deps = _transitive_deps(ctx)
+
     return [
         DefaultInfo(
             default_runfiles = deps.default_files,

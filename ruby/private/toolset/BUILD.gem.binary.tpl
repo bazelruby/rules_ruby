@@ -1,10 +1,10 @@
 
-# Binary Rule for Gem #{name}
-
+# Binary Rule for Gem #{name} version {version}
 ruby_binary(
-  name = "{label_name}",  # eg, rspec/bin/rspec
-  main = "{bin_path}",
-  deps = [":{name}"] + {deps},
-  rubyopt = ["-r${RUNFILES_DIR}/{repo_name}/{bundle_path}/lib/bundler/setup.rb"],
+  name = "{label}",
+  srcs = ["{full_path}"],
+  main = "{full_path}",
+  deps = {deps},
+  rubyopt = {rubyopts},
   visibility = ["//visibility:public"],
 )

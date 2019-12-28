@@ -91,16 +91,20 @@ module RulesRuby
       @errors = []
     end
 
+    # Primary public method of this class
     # Unpacks the gem contents into a given library.
     def install!
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) { source.download(spec) }
         gem_spec = "#{name}-#{version}.gem"
         downloaded = File.join(dir, gem_spec)
+
         Gem::Package.new(downloaded).extract_files(gem_home)
-        inf "OK : ".green + "extracted #{gem_spec.red} to #{gem_home.blue}"
-        inf "PWD: " + File.absolute_path(gem_home).red
+
+        inf ' OK: '.green + "extracted #{gem_spec.red} to #{gem_home.blue}"
+        inf 'CWD: ' + File.absolute_path(gem_home).red
       end
+
       @result = true
       exit(0)
     rescue StandardError => e
@@ -144,6 +148,8 @@ module RulesRuby
       @options  = cli_options
       @gem_info = cli_options.tuple
 
+      hdr
+
       installer = GemInstall.new(gem_info).install!
 
       if installer.result
@@ -157,6 +163,7 @@ module RulesRuby
 
     class << self
       def transform_options(options)
+        #noinspection RubyResolve
         options.tuple = RulesRuby::GemInfo.new(options.gem_name,
                                                options.gem_version,
                                                options.gem_home,
