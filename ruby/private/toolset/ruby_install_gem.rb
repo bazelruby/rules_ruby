@@ -69,18 +69,22 @@ module RulesRuby
   class GemInstall
     extend Forwardable
 
-    def_delegators :@gem_info, :name, :version, :gem_home, :sources, :user_nested_path
+    def_delegators :@gem_info, :name, :version, :gem_home, :sources, :use_nested_path
 
-    attr_reader :spec, :errors, :result, :sources, :name_tuple
+    attr_reader :spec, :errors, :result, :sources, :name_tuple, :debug
 
     include ::RulesRuby::Helpers
     Helpers.prog_name = 'ruby-install-gem'
 
-    def initialize(gem_info)
+    def initialize(gem_info, debug = false)
+      pp gem_info if debug
+      @debug      = debug
       @gem_info   = gem_info
       @name_tuple = Gem::NameTuple.new(name, version)
       @sources    = gem_info.sources.map { |uri| Gem::Source.new(uri) }
       @source     = source # fetch from sources
+
+      @gem_info.gem_home = gem_home + '/' + relative_gem_path(gem_info) if gem_info.use_nested_path
 
       if @source.nil?
         raise GemfileNotFound, "Gem #{gem_info} was not found in #{sources}"
@@ -155,6 +159,7 @@ module RulesRuby
       if installer.result
         inf 'OK  : ', gem_info.to_s
         inf 'ROOT: ', Dir.pwd.to_s.pink
+        exit(0)
       else
         wrn "Error installing #{self}:\n#{@errors.join(', ')}".red
         exit(1)
@@ -180,15 +185,17 @@ module RulesRuby
 
       def parse_argv(argv = ARGV.dup)
         OpenStruct.new.tap do |options|
-          # Accept first argument as the gem:version in addition to flags.
-          options.gem_name, options.gem_versions = argv.first.split(':') \
-            if !argv.first.nil? && !argv.first.start_with?('-')
-
           options.gem_name        = nil
           options.gem_version     = nil
+          #
+          # Accept first argument as the gem:version in addition to flags.
+          options.gem_name, options.gem_version = argv.first.split(':') \
+            if !argv.first.nil? && !argv.first.start_with?('-')
+
           options.sources         = %w(https://rubygems.org)
           options.gem_home        = ENV['GEM_HOME'] || '.'
           options.use_nested_path = false
+          options.debug           = false
 
           opt_parser = OptionParser.new do |opts|
             opts.banner = USAGE + "\n" + EXAMPLES
@@ -216,6 +223,11 @@ module RulesRuby
             opts.on('-g', '--gem-home=PATH',
                     'Directory where the gem should be installed.') do |n|
               options.gem_home = n
+            end
+
+            opts.on('-d', '--debug', 
+                    'Add debugging information') do |*|
+              options.debug = true
             end
 
             opts.on('-p', '--nested-path',
@@ -267,7 +279,9 @@ end
 if $0 == __FILE__
   module RulesRuby
     CLI.class_eval do
-      ::RulesRuby::GemInstall.new(transform_options(parse_argv(ARGV))).install!
+      options = parse_argv(ARGV)
+      gem_info = transform_options(options)
+      ::RulesRuby::GemInstall.new(gem_info, options.debug).install!
     end
   end
 end

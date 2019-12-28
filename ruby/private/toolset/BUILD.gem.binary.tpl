@@ -8,3 +8,4 @@ ruby_binary(
   rubyopt = {rubyopts},
   visibility = ["//visibility:public"],
 )
+

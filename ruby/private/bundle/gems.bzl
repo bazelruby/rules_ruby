@@ -11,19 +11,17 @@ def install_gem(
         interpreter,
         gem_name,
         gem_version,
-        gem_home = BUNDLE_DEFAULT_DESTINATION):
+        gem_home = BUNDLE_DEFAULT_DESTINATION,
+        environment = {}):
     args = [
         interpreter,
         "ruby_install_gem.rb",
-        "-n",
-        gem_name,
-        "-v",
-        gem_version,
+        gem_name + ":" + gem_version,
         "-g",
         gem_home,
+        "-p",
+        "-d",
     ]
-
-    environment = {"RUBYOPT": "--enable-gems", "GEM_HOME": gem_home, "GEM_PATH": gem_home}
 
     result = ctx.execute(
         args,
@@ -39,34 +37,35 @@ def install_gem(
         )
         fail(message)
 
-def install_bundler(ctx, interpreter, bundler_version, gem_home):
-    return install_gem(ctx, interpreter, "bundler", bundler_version, gem_home)
-
 def _ruby_install_gems(ctx):
     ctx.symlink(ctx.attr._ruby_install_gem, "ruby_install_gem.rb")
     ctx.symlink(ctx.attr._ruby_helpers, "ruby_helpers.rb")
     ctx.symlink(ctx.attr._build_gem_library_template, "BUILD.gem.library.tpl")
     ctx.symlink(ctx.attr._build_gem_binary_template, "BUILD.gem.binary.tpl")
 
+    repo = ctx.attr.name
     gems = ctx.attr.gems
-    gem_home = ctx.attr.gem_home
+    gem_home = repo + "/" + ctx.attr.gem_home
     rubygems_sources = ctx.attr.rubygems_sources
     ruby = ctx.attr.ruby_interpreter
     interpreter_path = ctx.path(ruby)
 
     environment = {"RUBYOPT": "--enable-gems", "GEM_HOME": gem_home, "GEM_PATH": gem_home}
 
-    for gem_name, gem_version in [(gem_name, gem_version) for gem_name, gem_version in gems()]:
+    for gem_name, gem_version in [(gem_name, gem_version) for gem_name, gem_version in ctx.attr.gems.items()]:
         result = install_gem(
             ctx,
             interpreter_path,
             gem_name,
             gem_version,
             gem_home,
+            environment,
         )
 
         if result.return_code:
             fail("Failed to create build file: %s%s" % (result.stdout, result.stderr))
+        else:
+            print("Gem %s (%s) installed successfully" % (gem_name, gem_version))
 
 ruby_gems_install = repository_rule(
     attrs = {
@@ -76,8 +75,7 @@ ruby_gems_install = repository_rule(
         "ruby_interpreter": attr.label(
             default = "@org_ruby_lang_ruby_toolchain//:ruby",
         ),
-        "gems": attr.string_list_dict(
-            default = {},
+        "gems": attr.string_dict(
             mandatory = True,
         ),
         "gem_home": attr.string(

@@ -68,17 +68,19 @@ jobs:
       - run:
           name: "Bazel Simple Script Example Build"
           command: |
-            cd examples/simple_script && bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //...
+            cd examples/simple_script && bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- :all
 
       - run:
           name: "Bazel Simple Script Example Test"
           command: |
-            cd examples/simple_script && bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //...
+            cd examples/simple_script && bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- :simple-script.spec
 
       - run:
-          name: "Bazel Simple Script Example Rubocop Check"
+          name: "Bazel Simple Script Example Run"
           command: |
-            cd examples/simple_script && bazel ${BAZEL_OPTS} run ${BAZEL_BUILD_OPTS} -- :rubocop
+            cd examples/simple_script
+            bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- :simple-script.lib
+            bazel ${BAZEL_OPTS} run ${BAZEL_BUILD_OPTS} -- :simple-script.exe
 
   rspec_examples:
     <<: *bazel_defaults

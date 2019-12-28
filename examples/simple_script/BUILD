@@ -1,7 +1,6 @@
 package(default_visibility = ["//:__subpackages__"])
 
-# load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
+#load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 load(
     "@bazelruby_ruby_rules//ruby:defs.bzl",
     "ruby_binary",
@@ -24,14 +23,6 @@ filegroup(
     ],
 )
 
-filegroup(
-    name = "simple-script.deps",
-    srcs = [
-        "@bundle//:awesome_print",
-        "@bundle//:rspec",
-    ],
-)
-
 ruby_library(
     name = "simple-script.lib",
     srcs = [
@@ -43,14 +34,6 @@ ruby_library(
     ],
 )
 
-pkg_tar(
-    name = "simple-script-tar",
-    srcs = [
-        ":simple-script.sources",
-    ],
-    mode = "0755",
-)
-
 ruby_binary(
     name = "simple-script.exe",
     srcs = ["exe/simple-script"],
@@ -60,6 +43,22 @@ ruby_binary(
         "@bundle//:awesome_print",
     ],
 )
+
+filegroup(
+    name = "simple-script.deps",
+    srcs = [
+        "@bundle//:awesome_print",
+        "@bundle//:rspec",
+    ],
+)
+
+#pkg_tar(
+#    name = "simple-script.tar",
+#    data = [
+#        ":simple-script.lib",
+#    ],
+#    mode = "0755",
+#)
 
 ruby_test(
     name = "simple-script.spec",
@@ -77,6 +76,8 @@ ruby_test(
     main = "spec/spec_helper.rb",
     rubyopt = ["-rrspec/autorun"],
     deps = [
+        ":simple-script.lib",
+        "@bundle//:awesome_print",
         "@bundle//:rspec",
     ],
 )

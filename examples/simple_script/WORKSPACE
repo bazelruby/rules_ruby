@@ -37,6 +37,20 @@ rules_pkg_dependencies()
 load(
     "@bazelruby_ruby_rules//ruby:defs.bzl",
     "ruby_bundle_install",
+    "ruby_gems_install",
+)
+
+ruby_gems_install(
+    name = "simple-gem-set",
+    gem_home = "lib/gems",
+    gems = {
+        "awesome_print": "1.8.0",
+        "colored2": "3.1.2",
+        "rspec": "3.7.0",
+        "rspec-its": "1.3.0",
+        "rubocop": "0.78.0",
+    },
+    rubygems_sources = ["https://rubygems.org"],
 )
 
 ruby_bundle_install(
