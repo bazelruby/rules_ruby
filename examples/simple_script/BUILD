@@ -34,12 +34,33 @@ ruby_library(
     ],
 )
 
+ruby_library(
+    name = "simple-script.lib.gemset",
+    srcs = [
+        ":simple-script.sources",
+    ],
+    deps = [
+        "@gemset//:awesome_print",
+        "@gemset//:rspec",
+    ],
+)
+
 ruby_binary(
     name = "simple-script.exe",
     srcs = ["exe/simple-script"],
     main = "exe/simple-script",
     deps = [
         ":simple-script.lib",
+        "@bundle//:awesome_print",
+    ],
+)
+
+ruby_binary(
+    name = "simple-script.exe.gemset",
+    srcs = ["exe/simple-script"],
+    main = "exe/simple-script",
+    deps = [
+        ":simple-script.lib.gemset",
         "@bundle//:awesome_print",
     ],
 )

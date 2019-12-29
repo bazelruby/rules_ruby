@@ -1,12 +1,8 @@
 load(
-    "//ruby/private:constants.bzl",
-    "DEFAULT_GEM_PATH",
-    "RUBYGEMS_SOURCES",
-    "RULES_RUBY_WORKSPACE_NAME",
-    "TEMPLATE_GEM_AS_BINARY",
-    "TEMPLATE_GEM_AS_LIBRARY",
+    "//ruby/private/rubygems:shared.bzl",
+    "DEFAULT_BUNDLER_VERSION",
     "TOOLS_RUBY_GEMSET",
-    "TOOLS_RUBY_SHARED",
+    "rubygems_sources_csv",
 )
 
 # Installs arbitrary gem/version combo to any location specified by gem_home
@@ -16,17 +12,26 @@ def install_gem(
         interpreter,
         gem_name,
         gem_version,
-        gem_home = DEFAULT_GEM_PATH,
-        environment = {}):
+        gem_home,
+        rubygems_sources,
+        environment = {},
+        # If true, gem is installed under #{gem_home}/ruby/#{ruby_version}/gems/#{gem-name}-#{gem-version}
+        # If false, gem is installed under #{gem_home} directly.
+        use_nested_path = True):
     args = [
         interpreter,
         TOOLS_RUBY_GEMSET,
         gem_name + ":" + gem_version,
         "-g",
         gem_home,
-        "-p",
-        "-d",
+        "-s",
+        rubygems_sources_csv(rubygems_sources),
     ]
+
+    if use_nested_path:
+        args.append("-p")
+
+    # print("installing gem with args\n", args)
 
     result = ctx.execute(
         args,
@@ -42,86 +47,70 @@ def install_gem(
         )
         fail(message)
 
-def _ruby_gemset(ctx):
-    ctx.symlink(ctx.attr._tools_gemset, TOOLS_RUBY_GEMSET)
-    ctx.symlink(ctx.attr._tools_shared, TOOLS_RUBY_SHARED)
-    ctx.symlink(ctx.attr._template_gem_as_library, TEMPLATE_GEM_AS_LIBRARY)
-    ctx.symlink(ctx.attr._template_gem_as_binary, TEMPLATE_GEM_AS_BINARY)
-
-    repo = ctx.attr.name
-    gems = ctx.attr.gems
-    gem_home = repo + "/" + ctx.attr.gem_home
-    rubygems_sources = ctx.attr.rubygems_sources
-    ruby = ctx.attr.ruby_interpreter
-    interpreter_path = ctx.path(ruby)
-
-    environment = {"RUBYOPT": "--enable-gems", "GEM_HOME": gem_home, "GEM_PATH": gem_home}
-
+def install_gems(
+        ctx,
+        interpreter,
+        gems,
+        gem_home,
+        rubygems_sources,
+        environment = {}):
     for gem_name, gem_version in [(gem_name, gem_version) for gem_name, gem_version in ctx.attr.gems.items()]:
         result = install_gem(
             ctx,
-            interpreter_path,
+            interpreter,
             gem_name,
             gem_version,
             gem_home,
+            rubygems_sources,
             environment,
         )
 
+        gem_info = "gem {} (v{}): %s%s".format(gem_name, gem_version)
         if result.return_code:
-            fail("Failed to create build file: %s%s" % (result.stdout, result.stderr))
+            fail("Failed to install " % (gem_info, result.stdout, result.stderr))
         else:
-            print("Gem %s (%s) installed successfully" % (gem_name, gem_version))
+            print("%s installed successfully" % (gem_info))
 
-ruby_gemset = repository_rule(
-    attrs = {
-        "ruby_sdk": attr.string(
-            default = "@org_ruby_lang_ruby_toolchain",
-        ),
-        "ruby_interpreter": attr.label(
-            default = "@org_ruby_lang_ruby_toolchain//:ruby",
-        ),
-        "gems": attr.string_dict(
-            mandatory = True,
-        ),
-        "gem_home": attr.string(
-            default = DEFAULT_GEM_PATH,
-            doc = "Relative path for GEM_HOME where bundler installs gems. Can be '.' or eg 'vendor/bundle'",
-        ),
-        "rubygems_sources": attr.string_list(
-            default = RUBYGEMS_SOURCES,
-        ),
-        "excludes": attr.string_list_dict(
-            doc = "List of glob patterns per gem to be excluded from the library",
-        ),
-        "_tools_ruby_gemset": attr.label(
-            default = "%s//ruby/private/rubygems:%s" % (
-                RULES_RUBY_WORKSPACE_NAME,
-                TOOLS_RUBY_GEMSET,
-            ),
-            allow_single_file = True,
-        ),
-        "_tools_shared": attr.label(
-            default = "%s//ruby/private/rubygems:%s" % (
-                RULES_RUBY_WORKSPACE_NAME,
-                TOOLS_RUBY_SHARED,
-            ),
-            doc = "Generates the BUILD file for the entire bundle",
-            allow_single_file = True,
-        ),
-        "_template_gem_as_binary": attr.label(
-            default = "%s//ruby/private/rubygems:%s" % (
-                RULES_RUBY_WORKSPACE_NAME,
-                TEMPLATE_GEM_AS_BINARY,
-            ),
-            allow_single_file = True,
-        ),
-        "_template_gem_as_library": attr.label(
-            default = "%s//ruby/private/rubygems:%s" % (
-                RULES_RUBY_WORKSPACE_NAME,
-                TEMPLATE_GEM_AS_LIBRARY,
-            ),
-            allow_single_file = True,
-        ),
-    },
-    implementation = _ruby_gemset,
-)
+def install_bundler(
+        ctx,
+        interpreter,
+        gem_home,
+        rubygems_sources,
+        environment):
+    if "bundler" in ctx.attr.gems.keys():
+        bundler_version = ctx.attr.gems["bundler"]
+    else:
+        bundler_version = DEFAULT_BUNDLER_VERSION
+
+    print("Installing BUNDLER version", bundler_version)
+
+    install_gem(
+        ctx,
+        interpreter,
+        "bundler",
+        bundler_version,
+        gem_home,
+        rubygems_sources,
+        environment,
+        False,
+    )
+
+def generate_gemfile(
+        ctx,
+        gems,
+        rubygems_sources,
+        gemfile):
+    content = "# frozen_string_literal: true\n\n"
+    for source in rubygems_sources:
+        content += "source \"%s\"\n" % (source)
+
+    content += "\n\n"
+
+    for gem_name, gem_version in [(gem_name, gem_version) for gem_name, gem_version in gems.items()]:
+        content += "gem '%s', '~> %s'\n" % (gem_name, gem_version)
+
+    print("writing Gemfile: \n", content)
+    ctx.file(
+        gemfile,
+        content,
+    )

@@ -52,18 +52,16 @@ module RulesRuby
   class BuildifierFailedError < BundleError; end
   # @formatter:on
 
+
   # Various Shared Helpers
   module Helpers
     class << self
       def included(base)
-        base.extend(self)
-
         base.include(Output)
-        base.extend(Output)
-
+        base.include(BuildifierHelpers)
         base.instance_eval do
           class << self
-            def tool_name(value = nil)
+            def component(value = nil)
               @tool_name = value if value
               @tool_name
             end
@@ -72,42 +70,95 @@ module RulesRuby
       end
     end
 
-    def buildify!(build_file)
-      # Once it's saved, let's run buildifier on it, because why not.
-      Buildifier.new(build_file).run!
-    rescue BuildifierFailedError => e
-      print_warning("ERROR: buildifier error — BUILD file is invalid: #{e.message.yellow}")
-      raise
-    rescue BuildifierCantRunError => e
-      print_warning("WARNING: couldn't run buildifier: #{e.message.yellow}")
-    end
-
-    def ruby_version(ruby_version = RUBY_VERSION)
-      @ruby_version ||= (ruby_version.split('.')[0..1] << 0).join('.')
-    end
-
-    # Path where the gem sources can be found — eg. "ruby/2.6.0/gems/rubocop-0.78.0"
-    def relative_gem_path(gem_tuple)
-      @relative_gem_path ||= "ruby/#{ruby_version}/gems/#{gem_tuple.name}-#{gem_tuple.version}"
-    end
-
     module Output
-      def print_header(class_or_instance)
-        puts "\n\n"
-        puts self.class.tool_name.light_blue + " ❬ #{class_or_instance.is_a?(Class) ? class_or_instance.name : class_or_instance.class.name} ❭ ".red
+      def print_header(class_or_instance = self)
+        puts "\n———————————————————————————————————————————————————————————————————".green
+        puts component_name + " ❬ #{class_or_instance.is_a?(Class) ? class_or_instance.name : class_or_instance.class.name} ❭ ".red
       end
 
       def print_info(*args)
-        puts Helpers.tool_name.light_blue + ' ❬ ' + args.map(&:to_s).join(' ').to_s + ' ❭ '
+        puts component_name + ' ❬ ' + args.map(&:to_s).join(' ').to_s + ' ❭ '
       end
 
       def print_warning(*args)
-        puts Helpers.tool_name.yellow + ' ❬ ' + args.map(&:to_s).join(' ').to_s.red + ' ❭ '
+        puts component_name + ' ❬ ' + args.map(&:to_s).join(' ').to_s.red + ' ❭ '
+      end
+
+      def component_name
+        (self.class.component || 'rubygems-installer').yellow
+      end
+    end
+
+
+    module BuildifierHelpers
+      def buildify!(build_file)
+        # Once it's saved, let's run buildifier on it, because why not.
+        Buildifier.new(build_file).run!
+      rescue BuildifierFailedError => e
+        print_warning("ERROR: buildifier error — BUILD file is invalid: #{e.message.yellow}")
+        raise
+      rescue BuildifierCantRunError => e
+        print_warning("WARNING: couldn't run buildifier: #{e.message.yellow}")
+      end
+
+      def ruby_version(ruby_version = RUBY_VERSION)
+        @ruby_version ||= (ruby_version.split('.')[0..1] << 0).join('.')
+      end
+
+      # Path where the gem sources can be found — eg. "ruby/2.6.0/gems/rubocop-0.78.0"
+      def relative_gem_path(gem_tuple)
+        @relative_gem_path ||= "ruby/#{ruby_version}/gems/#{gem_tuple.name}-#{gem_tuple.version}"
       end
     end
   end
 
-  class GemInfo < Struct.new(:name, :version, :gem_home, :sources, :use_nested_path)
+
+  class Buildifier
+    include Helpers
+    attr_reader :build_file, :output_file
+    component 'ruby-build-buildifier'
+
+    def initialize(build_file)
+      @build_file = build_file
+
+      # For capturing buildifier output
+      @output_file = ::Tempfile.new("/tmp/#{File.dirname(File.absolute_path(build_file))}/#{build_file}.stdout").path
+    end
+
+    def run!
+      raise BuildifierCantRunError, 'Can\'t find the BUILD file' unless File.exist?(build_file)
+
+      # see if we can find buildifier on the filesystem
+      buildifier = `bash -c 'command -v buildifier'`.strip
+
+      raise BuildifierCantRunError, 'Can\'t find buildifier' unless buildifier && File.executable?(buildifier)
+
+      command = "#{buildifier} -v #{File.absolute_path(build_file)}"
+      system("/usr/bin/env bash -c '#{command} 1>#{output_file} 2>&1'")
+      code = $?
+
+      output = File.read(output_file).strip.gsub(Dir.pwd, '.').yellow
+      begin
+        FileUtils.rm_f(output_file)
+      rescue StandardError
+        nil
+      end
+
+      if code == 0
+        print_info 'Buildifier gave 👍 '.green + (output ? " and said: #{output}" : '')
+      else
+        raise BuildifierFailedError,
+              'Generated BUILD file failed buildifier, with error — '.red + "\n\n" +
+                  File.read(output_file).yellow
+      end
+    end
+  end
+
+  class GemInfo < Struct.new(:name,
+                             :version,
+                             :gem_home,
+                             :sources,
+                             :use_nested_path)
     include Helpers
 
     def initialize(*args)

@@ -1,4 +1,5 @@
 **/.idea
 **/.bundle
 **/vendor/bundle/**
+bin/
 **/.DS_Store

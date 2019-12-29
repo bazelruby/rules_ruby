@@ -16,9 +16,11 @@ require_relative '../rules_ruby'
 #
 # NOTE: this file does not run bundle install, that happens in Bazel.
 #
-# What this file does is parse the Gemfile.lock file, and generating a
+# What this file does is parse the Gemfile.lock file, and it generates a
 # single aggregated BUILD.bazel file that contains both the Bundler itself
-# and the install gems as ruby_libraries and sometimes ruby_binaries.
+# and the installed gems, as well as the `bin` folder for binstubs.
+#
+# If gems were installed by Bundler, it should be ran with the following flags:
 #
 # You can later reference the sources by using the label you gave to the
 # ruby_bundle rule.
@@ -36,7 +38,7 @@ module RulesRuby
   class Bundle
     include RulesRuby::Helpers
 
-    tool_name 'generate-bundle-build-file'
+    component 'bundle-build-generator'
 
     # This is the list of our attributes that are set via command line flags
     # and passed in as a hash. We use shortcuts to mass-assign them to keep it DRY.
@@ -47,7 +49,7 @@ module RulesRuby
         :gemfile_lock_file, # name and optional path of the Gemfile.lock to be read
         :generated_build_file, # path or name of the generated build file
         :repo_name, # name of the current repo, used as a subdirectory under $RUNFILES_DIR
-        :verbose, # if true, extra info is printed, including stack traces
+        :debug, # if true, extra info is printed, including stack traces
         :workspace_name,
     ].freeze
 
@@ -264,48 +266,6 @@ module RulesRuby
     end
   end
 
-  class Buildifier
-    include Helpers
-    attr_reader :build_file, :output_file
-
-    def initialize(build_file)
-      @build_file = build_file
-
-      # For capturing buildifier output
-      @output_file = ::Tempfile.new("/tmp/#{File.dirname(File.absolute_path(build_file))}/#{build_file}.stdout").path
-    end
-
-    def run!
-      raise BuildifierCantRunError, 'Can\'t find the BUILD file' unless File.exist?(build_file)
-
-      # see if we can find buildifier on the filesystem
-      buildifier = `bash -c 'command -v buildifier'`.strip
-
-      raise BuildifierCantRunError, 'Can\'t find buildifier' unless buildifier && File.executable?(buildifier)
-
-      command = "#{buildifier} -v #{File.absolute_path(build_file)}"
-      system("/usr/bin/env bash -c '#{command} 1>#{output_file} 2>&1'")
-      code = $?
-
-      output = File.read(output_file).strip.gsub(Dir.pwd, '.').yellow
-      begin
-        FileUtils.rm_f(output_file)
-      rescue StandardError
-        nil
-      end
-
-      print_info "buildifier said: #{output}" if output
-
-      if code == 0
-        print_info 'Buildifier gave 👍'.green
-      else
-        raise BuildifierFailedError,
-              'Generated BUILD file failed buildifier, with error — '.red + "\n\n" +
-                  File.read(output_file).yellow
-      end
-    end
-  end
-
 
   class Parser
     USAGE = <<~HELP
@@ -330,7 +290,7 @@ module RulesRuby
           options.excludes             = {}
           options.gemfile_lock_file    = DEFAULT_GEMFILE_LOCK
           options.generated_build_file = DEFAULT_BUILD_FILE
-          options.verbose              = false
+          options.debug                = ENV['DEBUG']
           ::OptionParser.new do |opts|
             opts.banner = Parser::USAGE
             opts.separator ' '
@@ -370,8 +330,8 @@ module RulesRuby
               exit 1
             end
 
-            opts.on('-v', '--verbose', 'Print verbose info') do |_n|
-              options.verbose = true
+            opts.on('-d', '--debug', 'Print debug info') do |_n|
+              options.debug = true
             end
 
             opts.on('-h', '--help', 'Prints this help') do
@@ -397,10 +357,10 @@ end
 #         "[]"
 
 if $0 == __FILE__
-  verbose = !(ARGV & %w(-v --verbose)).empty?
+  debug = !(ARGV & %w(-v --debug)).empty?
   begin
     options = RulesRuby::Parser.parse_argv(ARGV.empty? ? ['-h'] : ARGV.dup)
-    if options.verbose
+    if options.debug
       puts 'PARSED ARGUMENTS > begin ——————————————'.yellow
       pp options.to_h
       puts 'PARSED ARGUMENTS > end   ——————————————'.yellow
@@ -409,7 +369,7 @@ if $0 == __FILE__
     RulesRuby::Bundle.new(**options.to_h).generate_bazel_build_file!
   rescue StandardError => e
     puts 'ERROR — '.red + e.message.yellow
-    if verbose
+    if debug
       puts 'STACKTRACE: '
       puts e.backtrace.join("\n").red
     end

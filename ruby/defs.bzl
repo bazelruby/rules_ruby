@@ -14,9 +14,6 @@ load(
 load(
     "@bazelruby_ruby_rules//ruby/private/rubygems:bundle.bzl",
     _bundle = "ruby_bundle",
-)
-load(
-    "@bazelruby_ruby_rules//ruby/private/rubygems:gemset.bzl",
     _gemset = "ruby_gemset",
 )
 

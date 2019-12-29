@@ -95,7 +95,6 @@ load("@//ruby:defs.bzl", "ruby_bundle")
 
 ruby_bundle(
     name = "bundle",
-    bundler_version = "2.0.2",
     excludes = {
         "mini_portile": ["test/**/*"],
     },

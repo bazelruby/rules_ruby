@@ -71,20 +71,22 @@ module RulesRuby
 
     def_delegators :@gem_info, :name, :version, :gem_home, :sources, :use_nested_path
 
-    attr_reader :spec, :errors, :result, :sources, :name_tuple, :debug
+    attr_reader :spec, :gem_info, :errors, :result, :sources, :name_tuple, :debug
 
     include ::RulesRuby::Helpers
-    tool_name  'ruby-install-gem'
+
+    component 'rules-ruby-gemset-installer'
 
     def initialize(gem_info, debug = false)
-      pp gem_info if debug
-      @debug             = debug
-      @gem_info          = gem_info
-      @name_tuple        = Gem::NameTuple.new(name, version)
-      @sources           = gem_info.sources.map { |uri| Gem::Source.new(uri) }
-      @source            = source # fetch from sources
+      @debug      = debug
+      @gem_info   = gem_info
+      @name_tuple = Gem::NameTuple.new(name, version)
+      @sources    = gem_info.sources.map { |uri| Gem::Source.new(uri) }
+      @source     = source # fetch from sources
 
-      @gem_info.gem_home = gem_home + '/' + relative_gem_path(gem_info) if gem_info.use_nested_path
+      @gem_home = gem_info.use_nested_path ?
+                      gem_home + '/' + relative_gem_path(gem_info) :
+                      gem_info.gem_home
 
       if @source.nil?
         raise GemfileNotFound, "Gem #{gem_info} was not found in #{sources}"
@@ -93,11 +95,14 @@ module RulesRuby
       @spec   = source&.fetch_spec(Gem::NameTuple.new(name, version))
       @result = nil
       @errors = []
+
+      print_header
     end
 
     # Primary public method of this class
     # Unpacks the gem contents into a given library.
     def install!
+      print_info '———'.yellow + " attempting to download #{gem_info.to_s.strip}" if debug
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) { source.download(spec) }
         gem_spec   = "#{name}-#{version}.gem"
@@ -106,17 +111,19 @@ module RulesRuby
         Gem::Package.new(downloaded).extract_files(gem_home)
 
         print_info ' OK: '.green + "extracted #{gem_spec.red} to #{gem_home.blue}"
-        print_info 'CWD: ' + File.absolute_path(gem_home).red
+        print_info 'CWD: ' + File.absolute_path(gem_home).red if debug
       end
 
       @result = true
       exit(0)
     rescue StandardError => e
-      warn "Exception while attempting to unpack gem #{name} (#{version}) to #{gem_path}: ".red
+      warn "Exception while attempting to unpack gem #{name} (#{version}) to #{gem_home}: ".red
       warn " • #{e.message}"
+      warn "\n\n • Stacktrace:\n\n".yellow + e.backtrace.reverse.join("\n")
       @result = false
       @errors << e.message
-      STDERR.pp @errors
+      pp @errors
+
       exit(0)
     end
 
@@ -146,8 +153,9 @@ module RulesRuby
     attr_accessor :options, :gem_info
 
     include ::RulesRuby::Helpers
+    include ::RulesRuby::Helpers::Output
 
-    tool_name  'ruby-install-gem-cli'
+    component 'ruby-install-gem-cli'
 
     def initialize(cli_options)
       @options  = cli_options
@@ -196,7 +204,7 @@ module RulesRuby
           options.sources         = %w(https://rubygems.org)
           options.gem_home        = ENV['GEM_HOME'] || '.'
           options.use_nested_path = false
-          options.debug           = false
+          options.debug           = ENV['DEBUG']
 
           opt_parser = OptionParser.new do |opts|
             opts.banner = USAGE + "\n" + EXAMPLES
