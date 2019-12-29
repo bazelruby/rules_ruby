@@ -381,7 +381,7 @@ ruby_library(
 ```
 
 <pre>
-ruby_bundle_install(name, gemfile, gemfile_lock)
+ruby_bundle(name, gemfile, gemfile_lock)
 </pre>
 <table class="table table-condensed table-bordered table-params">
   <colgroup>

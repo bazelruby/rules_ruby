@@ -11,9 +11,9 @@
 #    ./install_gem.rb -n nokogiri:1.8.7.1 -g ~/.gems -p
 #
 #
-# ❯ ruby ruby_install_gem.rb -h
+# ❯ ruby rules_ruby_gem.rb -h
 # USAGE:
-#    ruby_install_gem.rb [gem[:version]] [ options ]
+#    rules_ruby_gem.rb [gem[:version]] [ options ]
 #
 # DESCRIPTION
 #    Downloads and Install a gem in the repository or in the Bazel's build folder,
@@ -21,10 +21,10 @@
 #
 # EXAMPLE:
 #    # This will install to ./vendor/bundle/rspec-3.2.0
-#    ruby_install_gem.rb rspec:3.2.0 -g vendor/bundle -s https://rubygems.org
+#    rules_ruby_gem.rb rspec:3.2.0 -g vendor/bundle -s https://rubygems.org
 #
 #    # This will install to ~/.gems/ruby/2.5.0/gems/sym-2.8.1
-#    ruby_install_gem.rb -n sym -v 2.8.1 -g ~/.gems -p
+#    rules_ruby_gem.rb -n sym -v 2.8.1 -g ~/.gems -p
 #
 # OPTIONS:
 #
@@ -58,7 +58,7 @@ require 'forwardable'
 require 'optparse'
 require 'ostruct'
 
-require_relative 'ruby_helpers'
+require_relative '../rules_ruby'
 
 DEFAULT_BUNDLER_VERSION  = '2.1.2'
 DEFAULT_BUNDLER_GEM_HOME = 'vendor/bundle'
@@ -66,7 +66,7 @@ DEFAULT_BUNDLER_GEM_HOME = 'vendor/bundle'
 DEBUG = ENV['DEBUG']
 
 module RulesRuby
-  class GemInstall
+  class GemSet
     extend Forwardable
 
     def_delegators :@gem_info, :name, :version, :gem_home, :sources, :use_nested_path
@@ -74,15 +74,15 @@ module RulesRuby
     attr_reader :spec, :errors, :result, :sources, :name_tuple, :debug
 
     include ::RulesRuby::Helpers
-    Helpers.prog_name = 'ruby-install-gem'
+    tool_name  'ruby-install-gem'
 
     def initialize(gem_info, debug = false)
       pp gem_info if debug
-      @debug      = debug
-      @gem_info   = gem_info
-      @name_tuple = Gem::NameTuple.new(name, version)
-      @sources    = gem_info.sources.map { |uri| Gem::Source.new(uri) }
-      @source     = source # fetch from sources
+      @debug             = debug
+      @gem_info          = gem_info
+      @name_tuple        = Gem::NameTuple.new(name, version)
+      @sources           = gem_info.sources.map { |uri| Gem::Source.new(uri) }
+      @source            = source # fetch from sources
 
       @gem_info.gem_home = gem_home + '/' + relative_gem_path(gem_info) if gem_info.use_nested_path
 
@@ -100,13 +100,13 @@ module RulesRuby
     def install!
       Dir.mktmpdir do |dir|
         Dir.chdir(dir) { source.download(spec) }
-        gem_spec = "#{name}-#{version}.gem"
+        gem_spec   = "#{name}-#{version}.gem"
         downloaded = File.join(dir, gem_spec)
 
         Gem::Package.new(downloaded).extract_files(gem_home)
 
-        inf ' OK: '.green + "extracted #{gem_spec.red} to #{gem_home.blue}"
-        inf 'CWD: ' + File.absolute_path(gem_home).red
+        print_info ' OK: '.green + "extracted #{gem_spec.red} to #{gem_home.blue}"
+        print_info 'CWD: ' + File.absolute_path(gem_home).red
       end
 
       @result = true
@@ -146,22 +146,23 @@ module RulesRuby
     attr_accessor :options, :gem_info
 
     include ::RulesRuby::Helpers
-    Helpers.prog_name = 'ruby-install-gem-cli'
+
+    tool_name  'ruby-install-gem-cli'
 
     def initialize(cli_options)
       @options  = cli_options
       @gem_info = cli_options.tuple
 
-      hdr
+      print_header
 
-      installer = GemInstall.new(gem_info).install!
+      installer = GemSet.new(gem_info).install!
 
       if installer.result
-        inf 'OK  : ', gem_info.to_s
-        inf 'ROOT: ', Dir.pwd.to_s.pink
+        print_info 'OK  : ', gem_info.to_s
+        print_info 'ROOT: ', Dir.pwd.to_s.pink
         exit(0)
       else
-        wrn "Error installing #{self}:\n#{@errors.join(', ')}".red
+        print_warning "Error installing #{self}:\n#{@errors.join(', ')}".red
         exit(1)
       end
     end
@@ -185,8 +186,8 @@ module RulesRuby
 
       def parse_argv(argv = ARGV.dup)
         OpenStruct.new.tap do |options|
-          options.gem_name        = nil
-          options.gem_version     = nil
+          options.gem_name                      = nil
+          options.gem_version                   = nil
           #
           # Accept first argument as the gem:version in addition to flags.
           options.gem_name, options.gem_version = argv.first.split(':') \
@@ -225,7 +226,7 @@ module RulesRuby
               options.gem_home = n
             end
 
-            opts.on('-d', '--debug', 
+            opts.on('-d', '--debug',
                     'Add debugging information') do |*|
               options.debug = true
             end
@@ -279,9 +280,9 @@ end
 if $0 == __FILE__
   module RulesRuby
     CLI.class_eval do
-      options = parse_argv(ARGV)
+      options  = parse_argv(ARGV)
       gem_info = transform_options(options)
-      ::RulesRuby::GemInstall.new(gem_info, options.debug).install!
+      ::RulesRuby::GemSet.new(gem_info, options.debug).install!
     end
   end
 end

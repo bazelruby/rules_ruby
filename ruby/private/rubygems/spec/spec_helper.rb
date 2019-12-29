@@ -3,9 +3,9 @@
 require 'rspec'
 require 'rspec/its'
 
-require_relative '../ruby/private/rubygems/ruby_helpers'
-require_relative '../ruby/private/rubygems/ruby_bundle.rb'
-require_relative '../ruby/private/rubygems/lib/rules_ruby/gemset.rb'
+require_relative '../lib/rules_ruby'
+require_relative '../lib/rules_ruby/bundle'
+require_relative '../lib/rules_ruby/gemset'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|

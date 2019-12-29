@@ -10,7 +10,7 @@ require 'ostruct'
 require 'tempfile'
 require 'fileutils'
 
-require_relative 'ruby_helpers'
+require_relative '../rules_ruby'
 
 # README PLEASE
 #
@@ -21,7 +21,7 @@ require_relative 'ruby_helpers'
 # and the install gems as ruby_libraries and sometimes ruby_binaries.
 #
 # You can later reference the sources by using the label you gave to the
-# ruby_bundle_install rule.
+# ruby_bundle rule.
 #
 module RulesRuby
   # This class generates the Bundle's workspace together with the BUILD file.
@@ -33,10 +33,10 @@ module RulesRuby
   # NOTE: we use StringIO to aggregate all output and then write it to a file
   #       all at once, this is done via the +@output_stream+ variable
   #
-  class BundleInstall
+  class Bundle
     include RulesRuby::Helpers
 
-    Helpers.prog_name = 'generate-bundle-build-file'
+    tool_name 'generate-bundle-build-file'
 
     # This is the list of our attributes that are set via command line flags
     # and passed in as a hash. We use shortcuts to mass-assign them to keep it DRY.
@@ -60,7 +60,7 @@ module RulesRuby
     attr_reader :binstubs, :gem_prefix
 
     def initialize(**opts)
-      hdr(self)
+      print_header(self)
 
       args = []
       BUNDLE_ATTRS.each do |attr|
@@ -89,7 +89,6 @@ module RulesRuby
       binstubs_build_file.puts render_template(templates.header,
                                                attribute_map_global)
 
-
       generated_binstub_build_file = File.dirname(generated_build_file) + '/bin/BUILD.bazel'
 
       # Before we parse the Gemfile, remove the section that freezes bundler version
@@ -101,8 +100,8 @@ module RulesRuby
       gem_count        = bundle_lock_file.specs.size
 
       bundle_lock_file.specs.each(&method(:generate_gems_targets))
-      inf "BUILD file for a total of #{gem_count} is #{output_stream.string.size} bytes long."
-      inf 'BUILD file\'s full path is: [' + File.absolute_path(generated_build_file).red + ']'
+      print_info "BUILD file for a total of #{gem_count} is #{output_stream.string.size} bytes long."
+      print_info 'BUILD file\'s full path is: [' + File.absolute_path(generated_build_file).red + ']'
 
       # binstubs_build_file.puts %%\n\nexports_files(#{binstubs.keys.to_s})%
 
@@ -111,34 +110,21 @@ module RulesRuby
       ::File.open(generated_binstub_build_file, 'w') { |f| f.puts binstubs_build_file.string }
 
       # save and run buildifier all at once.
-      buildify!(generated_build_file)
-      buildify!(generated_binstub_build_file)
+      buildify!(generated_build_file) if run_buildifier?
+      buildify!(generated_binstub_build_file) if run_buildifier?
 
-      inf 'OK — BUILD file for '.green + gem_count.to_s.yellow + ' gems is generated'.green
+      print_info 'OK — BUILD file for '.green + gem_count.to_s.yellow + ' gems is generated'.green
     end
 
     private
 
-    def buildify!(build_file)
-      # Once it's saved, let's run buildifier on it, because why not.
-      if run_buildifier?
-        begin
-          Buildifier.new(build_file).run!
-        rescue BuildifierFailedError => ef
-          wrn("ERROR: buildifier error — BUILD file is invalid: #{e.message.yellow}")
-          raise
-        rescue BuildifierCantRunError => e
-          wrn("WARNING: couldn't run buildifier: #{e.message.yellow}")
-        end
-      end
-    end
 
     # This method scans the contents of the Gemfile.lock and if it finds BUNDLED WITH
     # it strips that line + the line below it, so that any version of bundler would work.
     def remove_bundler_version!
       contents = File.read(gemfile_lock_file)
       unless contents !~ /BUNDLED WITH/
-        inf 'Removing BUNDLED WITH from the Gemfile.lock...'.pink
+        print_info 'Removing BUNDLED WITH from the Gemfile.lock...'.pink
         temp_lock_file = "#{gemfile_lock_file}.no-bundle-version"
         system %(sed -n '/BUNDLED WITH/q;p' "#{gemfile_lock_file}" > #{temp_lock_file})
         ::FileUtils.rm_f(gemfile_lock_file) if File.symlink?(gemfile_lock_file) # it's just a symlink
@@ -178,7 +164,7 @@ module RulesRuby
     end
 
     def generate_gems_targets(spec)
-      inf "adding gem #{spec.name.to_s.red} v#{spec.version.to_s.green}"
+      print_info "adding gem #{spec.name.to_s.red} v#{spec.version.to_s.green}"
 
       gems_attrs = attribute_map_for_gem(spec)
 
@@ -193,22 +179,21 @@ module RulesRuby
         # save this file for binstubs
         binstubs[gem_executable.file] = spec
 
-        #output_stream.puts(
+        # output_stream.puts(
         #    render_template(
         #        templates.gem_binary,
         #        gems_attrs.merge(label:     gem_executable.label,
         #                         full_path: package_path(gem_executable.full_path),
         #                         deps:      spec_deps(spec).append(":#{spec.name}"))
         #    )
-        #)
+        # )
 
         binstubs_build_file.puts(
             render_template(
                 templates.gem_binary,
                 gems_attrs.merge(label:     gem_executable.file,
                                  full_path: gem_executable.file,
-                                 deps:      bin_spec_deps(spec)
-                )
+                                 deps:      bin_spec_deps(spec))
             )
         )
       end
@@ -309,10 +294,10 @@ module RulesRuby
         nil
       end
 
-      inf "buildifier said: #{output}" if output
+      print_info "buildifier said: #{output}" if output
 
       if code == 0
-        inf 'Buildifier gave 👍'.green
+        print_info 'Buildifier gave 👍'.green
       else
         raise BuildifierFailedError,
               'Generated BUILD file failed buildifier, with error — '.red + "\n\n" +
@@ -321,53 +306,11 @@ module RulesRuby
     end
   end
 
-# @gem_spec is the spec generated from the Gemfile.lock.
-# @gem_path is the relative path to the gem's top level folder (one that contains lib)
-# @full_path is the full path to the discovered binary. It's a superset of @gem_path
-  class GemExecutable < Struct.new(:gem_path, :full_path)
-    # Label is generated for the build files. Eg, rspec-exe
-    def label
-      @label ||= "#{file}.bin"
-    end
-
-    def short_path
-      @short_path ||= full_path.sub(gem_path, '')[1..-1]
-    end
-
-    def file
-      @file ||= File.basename(full_path)
-    end
-  end
-
-  class BuildTemplates < Struct.new(:bundler, :gem_library, :gem_binary, :header)
-    def valid?
-      [bundler, gem_library, gem_binary, header].all? { |t| t.length > 100 }
-    end
-
-    class << self
-      attr_reader :templates
-
-      def load_templates!
-        return @templates if @templates&.valid?
-
-        @templates ||= new
-
-        templates.header      = File.read(File.expand_path('../BUILD.header.tpl', __FILE__))
-        templates.bundler     = File.read(File.expand_path('../BUILD.bundler.tpl', __FILE__))
-        templates.gem_library = File.read(File.expand_path('../BUILD.gem.library.tpl', __FILE__))
-        templates.gem_binary  = File.read(File.expand_path('../BUILD.gem.binary.tpl', __FILE__))
-
-        raise ArgumentError, 'Unable to parse BUILD file templates as DATA' unless templates.valid?
-      end
-    end
-  end
-
-  BuildTemplates.load_templates!
 
   class Parser
     USAGE = <<~HELP
       #{'USAGE'.help_header}
-        ruby_bundle_install.rb [options]
+        ruby_bundle.rb [options]
 
       #{'DESCRIPTION'.help_header}
         This utility reads a Gemfile.lock passed in as an argument,
@@ -445,7 +388,7 @@ end
 
 # Running this script:
 #
-# ruby ./ruby_bundle_install.rb
+# ruby ./ruby_bundle.rb
 #         -l  Gemfile.lock \
 #         -r  repo_name \
 #         -w "workspace_name"
@@ -463,7 +406,7 @@ if $0 == __FILE__
       puts 'PARSED ARGUMENTS > end   ——————————————'.yellow
     end
 
-    RulesRuby::BundleInstall.new(**options.to_h).generate_bazel_build_file!
+    RulesRuby::Bundle.new(**options.to_h).generate_bazel_build_file!
   rescue StandardError => e
     puts 'ERROR — '.red + e.message.yellow
     if verbose

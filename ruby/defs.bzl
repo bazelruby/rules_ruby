@@ -12,17 +12,17 @@ load(
     _test = "ruby_test",
 )
 load(
-    "@bazelruby_ruby_rules//ruby/private/bundle:bundle.bzl",
-    _bundle_install = "ruby_bundle_install",
+    "@bazelruby_ruby_rules//ruby/private/rubygems:bundle.bzl",
+    _bundle = "ruby_bundle",
 )
 load(
-    "@bazelruby_ruby_rules//ruby/private/bundle:gems.bzl",
-    _gems_install = "ruby_gems_install",
+    "@bazelruby_ruby_rules//ruby/private/rubygems:gemset.bzl",
+    _gemset = "ruby_gemset",
 )
 
 ruby_binary = _binary
-ruby_bundle_install = _bundle_install
-ruby_gems_install = _gems_install
+ruby_bundle = _bundle
+ruby_gemset = _gemset
 ruby_library = _library
 ruby_test = _test
 ruby_toolchain = _toolchain

@@ -1,9 +1,9 @@
-## Ruby GTo
+## RulesRuby Toolking for RubyGems and Bundler
 
 
 
 USAGE:
-    ruby_install_gem.rb [gem[:version]] [ options ]
+    rules_ruby_gem.rb [gem[:version]] [ options ]
 
 DESCRIPTION
     Downloads and Install a gem in the repository or in the Bazel's
@@ -11,10 +11,10 @@ DESCRIPTION
 
 EXAMPLE:
     # This will install to ./vendor/bundle/rspec-3.2.0
-    ruby_install_gem.rb rspec:3.2.0 -g vendor/bundle -s https://rubygems.org
+    rules_ruby_gem.rb rspec:3.2.0 -g vendor/bundle -s https://rubygems.org
 
     # This will install to ~/.gems/ruby/2.5.0/gems/sym-2.8.1
-    ruby_install_gem.rb -n sym -v 2.8.1 -g ~/.gems -p
+    lib/rules_ruby/gemset.rb -n sym -v 2.8.1 -g ~/.gems -p
 
 OPTIONS:
 
@@ -34,7 +34,7 @@ OPTIONS:
 
 
 USAGE:
-  ruby_bundle_install.rb [options]
+  ruby_bundle.rb [options]
 
 DESCRIPTION:
   This utility reads a Gemfile.lock passed in as an argument,

@@ -21,7 +21,7 @@ load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
 bazel_skylib_workspace()
 
-ruby_bundle_install(
+ruby_bundle(
     name = "bundle",
     bundler_version = "2.1.2",
     gemfile = "//:Gemfile",

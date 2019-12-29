@@ -91,9 +91,9 @@ container_pull(
     repository = "library/ruby",
 )
 
-load("@//ruby/private/bundle:bundle.bzl", "ruby_bundle_install")
+load("@//ruby:defs.bzl", "ruby_bundle")
 
-ruby_bundle_install(
+ruby_bundle(
     name = "bundle",
     bundler_version = "2.0.2",
     excludes = {
@@ -101,5 +101,4 @@ ruby_bundle_install(
     },
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
-    rubygems_sources = ["https://rubygems.org"],
 )

@@ -36,12 +36,11 @@ rules_pkg_dependencies()
 
 load(
     "@bazelruby_ruby_rules//ruby:defs.bzl",
-    "ruby_bundle_install",
-    "ruby_gems_install",
+    "ruby_gemset",
 )
 
-ruby_gems_install(
-    name = "simple-gem-set",
+ruby_gemset(
+    name = "gem_set",
     gem_home = "lib/gems",
     gems = {
         "awesome_print": "1.8.0",
@@ -53,13 +52,9 @@ ruby_gems_install(
     rubygems_sources = ["https://rubygems.org"],
 )
 
-ruby_bundle_install(
+ruby_bundle(
     name = "bundle",
     bundler_version = "2.1.2",
-    excludes = {
-        "mini_portile": ["test/**/*"],
-    },
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
-    rubygems_sources = ["https://rubygems.org"],
 )
