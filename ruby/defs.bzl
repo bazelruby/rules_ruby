@@ -15,9 +15,14 @@ load(
     "@bazelruby_ruby_rules//ruby/private:bundle.bzl",
     _bundle_install = "bundle_install",
 )
+load(
+    "@bazelruby_ruby_rules//ruby/private/package:ruby_package.bzl",
+    _ruby_package_zip = "ruby_package_zip",
+)
 
 ruby_toolchain = _toolchain
 ruby_library = _library
 ruby_binary = _binary
 ruby_test = _test
 bundle_install = _bundle_install
+ruby_package_zip = _ruby_package_zip

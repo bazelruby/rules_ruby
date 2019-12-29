@@ -1,0 +1,34 @@
+workspace(name = "bazelruby_ruby_rules_example")
+
+# Importing rules_ruby from the parent directory for developing
+# rules_ruby itself...
+local_repository(
+    name = "bazelruby_ruby_rules",
+    path = "../..",
+)
+
+load(
+    "@bazelruby_ruby_rules//ruby:deps.bzl",
+    "ruby_register_toolchains",
+    "ruby_rules_dependencies",
+)
+
+ruby_rules_dependencies()
+
+ruby_register_toolchains(version = "2.6.5")
+
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+
+bazel_skylib_workspace()
+
+load("@bazelruby_ruby_rules//ruby:defs.bzl", "bundle_install")
+
+bundle_install(
+    name = "bundle",
+    excludes = {
+        "mini_portile": ["test/**/*"],
+    },
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+    version = "2.1.2",
+)

@@ -2,7 +2,7 @@ load("//ruby/private:constants.bzl", "RULES_RUBY_WORKSPACE_NAME")
 
 def install_bundler(ctx, interpreter, install_bundler, dest, version):
     args = [interpreter, install_bundler, version, dest]
-    environment = {"RUBYOPT": "--disable-gems"}
+    environment = {"RUBYOPT": "--enable-gems"}
 
     result = ctx.execute(args, environment = environment)
     if result.return_code:
@@ -38,7 +38,7 @@ def bundle_install_impl(ctx):
     # Install the Gems into the workspace
     args = [
         ctx.path(ruby),  # ruby
-        "--disable-gems",  # prevent the addition of gem installation directories to the default load path
+        "--enable-gems",  # prevent the addition of gem installation directories to the default load path
         "-I",  # Used to tell Ruby where to load the library scripts
         "bundler/lib",
         "bundler/exe/bundler",  # run
@@ -57,7 +57,7 @@ def bundle_install_impl(ctx):
     # Create the BUILD file to expose the gems to the WORKSPACE
     args = [
         ctx.path(ruby),  # ruby interpreter
-        "--disable-gems",  # prevent the addition of gem installation directories to the default load path
+        "--enable-gems",  # prevent the addition of gem installation directories to the default load path
         "-I",  # -I lib (adds this folder to $LOAD_PATH where ruby searchesf for things)
         "bundler/lib",
         "create_bundle_build_file.rb",  # The template used to created bundle file
