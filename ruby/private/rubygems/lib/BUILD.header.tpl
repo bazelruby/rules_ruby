@@ -29,10 +29,10 @@
 #—————————————————————————————————————————————————————————————————————————————————
 
 load(
-  "{workspace_name}//ruby:defs.bzl",
-  "ruby_library",
-  "ruby_binary",
-  "ruby_test",
+    "{workspace_name}//ruby:defs.bzl",
+    "ruby_binary",
+    "ruby_library",
+    "ruby_test",
 )
 
 package(default_visibility = ["//visibility:public"])

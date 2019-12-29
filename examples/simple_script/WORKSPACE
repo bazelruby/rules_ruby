@@ -36,6 +36,7 @@ rules_pkg_dependencies()
 
 load(
     "@bazelruby_ruby_rules//ruby:defs.bzl",
+    "ruby_bundle",
     "ruby_gemset",
 )
 
