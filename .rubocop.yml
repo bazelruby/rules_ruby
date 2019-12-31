@@ -6,7 +6,7 @@ AllCops:
     - "**/rubocop"
     - "examples/**/*"
     - "bazel-*/**/*"
-    - "**/external/**/*"
+    - "external/**/*"
     - "**/vendor/bundle/**/*"
 
 

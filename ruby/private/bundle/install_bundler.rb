@@ -16,6 +16,8 @@ def unpack_gem(name, version, dest = Dir.pwd)
     downloaded = File.join(dir, "#{name}-#{version}.gem")
     Gem::Package.new(downloaded).extract_files dest
   }
+
+  `gem install bundler --no-doc`
 end
 
 def main

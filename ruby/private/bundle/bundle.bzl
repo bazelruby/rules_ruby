@@ -6,6 +6,26 @@ BUNDLE_BINARY = "bundler/exe/bundler"
 # TODO: do not hard-code this
 GEM_HOME = "lib/ruby/2.5.0/"
 
+def upgrade_bundler(ctx, interpreter, environment):
+    # Now we are running bundle install
+    args = [
+        interpreter,  # ruby
+        "--enable=gems",  # bundler must run with rubygems enabled
+        "",
+        ".",
+        "-I",  # Used to tell Ruby where to load the library scripts
+        "lib",  # Add vendor/bundle to the list of resolvers
+        BUNDLE_BINARY,  # our binary
+    ] + extra_args
+
+    # print("running bundler with args\n", args)
+
+    result = ctx.execute(
+        args,
+        quiet = False,
+    )
+
+    return result
 def run_bundler(ctx, interpreter, environment, extra_args):
     # Now we are running bundle install
     args = [
@@ -79,10 +99,6 @@ def bundle_install_impl(ctx):
     ctx.symlink(ctx.attr.gemfile_lock, "Gemfile.lock")
     ctx.symlink(ctx.attr._create_bundle_build_file, "create_bundle_build_file.rb")
     ctx.symlink(ctx.attr._install_bundler, "install_bundler.rb")
-
-    # TODO(kig) Make Gemspec reference from Gemfile actually work
-    if ctx.attr.gemspec:
-        ctx.symlink(ctx.attr.gemspec, ctx.path(ctx.attr.gemspec).basename)
 
     environment = {"RUBYOPT": "--enable-gems", "GEM_HOME": GEM_HOME}
 

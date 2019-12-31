@@ -49,14 +49,29 @@ ruby_library(
 require "bundler"
 require 'json'
 
+# This method scans the contents of the Gemfile.lock and if it finds BUNDLED WITH
+# it strips that line + the line below it, so that any version of bundler would work.
+def remove_bundler_version!(gemfile_lock_file)
+  contents = File.read(gemfile_lock_file)
+  unless contents !~ /BUNDLED WITH/
+    temp_lock_file = "#{gemfile_lock_file}.no-bundle-version"
+    system %(sed -n '/BUNDLED WITH/q;p' "#{gemfile_lock_file}" > #{temp_lock_file})
+    ::FileUtils.rm_f(gemfile_lock_file) if File.symlink?(gemfile_lock_file) # it's just a symlink
+    ::FileUtils.move(temp_lock_file, gemfile_lock_file, force: true)
+  end
+end
+
 def create_bundle_build_file(build_out_file, lock_file, repo_name, excludes, workspace_name)
   # TODO: properly calculate path/ruby version here
   # ruby_version = RUBY_VERSION # doesnt work because verion is 2.5.5 path is 2.5.0
   ruby_version = "*"
 
   template_out = TEMPLATE.gsub("{workspace_name}", workspace_name)
-                         .gsub("{repo_name}", repo_name)
-                         .gsub("{ruby_version}", ruby_version)
+    .gsub("{repo_name}", repo_name)
+    .gsub("{ruby_version}", ruby_version)
+
+  # strip bundler version so we can process this file
+  remove_bunder_version!(lock_file)
 
   # Append to the end specific gem libraries and dependencies
   bundle = Bundler::LockfileParser.new(Bundler.read_file(lock_file))
@@ -70,11 +85,11 @@ def create_bundle_build_file(build_out_file, lock_file, repo_name, excludes, wor
     exclude_array += ["**/* *.*", "**/* */*"]
 
     template_out += GEM_TEMPLATE.gsub("{exclude}", exclude_array.to_s)
-                                .gsub("{name}", spec.name)
-                                .gsub("{version}", spec.version.to_s)
-                                .gsub("{deps}", deps.to_s)
-                                .gsub("{repo_name}", repo_name)
-                                .gsub("{ruby_version}", ruby_version)
+      .gsub("{name}", spec.name)
+      .gsub("{version}", spec.version.to_s)
+      .gsub("{deps}", deps.to_s)
+      .gsub("{repo_name}", repo_name)
+      .gsub("{ruby_version}", ruby_version)
   }
 
   # Write the actual BUILD file
