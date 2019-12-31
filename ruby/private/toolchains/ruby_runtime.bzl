@@ -88,14 +88,19 @@ def _install_ruby(ctx, ruby):
 
 def host_ruby_is_correct_version(ctx, version):
     interpreter_path = ctx.which("ruby")
+
     if not interpreter_path:
+        print("Can't find ruby interpreter in the PATH")
         return False
 
-    ruby_version = ctx.execute(["ruby", "--version"]).stdout
-    version_string = "ruby %sp" % version
+    ruby_version = ctx.execute(["ruby", "-e", "print RUBY_VERSION"]).stdout
 
-    print("Checking for version '%s' in '%s'" % (version_string, ruby_version))
-    return version_string in ruby_version
+    have_ruby_version = (version == ruby_version)
+
+    if have_ruby_version:
+        print("Found local Ruby SDK version '%s' which matches requested version '%s'" % (ruby_version, version))
+
+    return have_ruby_version
 
 def _ruby_runtime_impl(ctx):
     # If the current version of ruby is correct use that
