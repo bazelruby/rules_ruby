@@ -1,5 +1,6 @@
+#!/usr/bin/env ruby 
 # frozen_string_literal: true
-
+#
 require 'rubygems'
 require 'rubygems/name_tuple'
 require 'rubygems/package'
@@ -21,9 +22,13 @@ def unpack_gem(name, version, dest = Dir.pwd)
 end
 
 def main
-  version = ARGV[0]
-  dir = ARGV[1] || Dir.pwd
-  unpack_gem('bundler', version, dir)
+  gem_name, gem_version, dir, _ = *ARGV
+  dir ||= Dir.pwd
+  unless gem_name && gem_version
+    puts "USAGE: #{$0} gem-name gem-version destination-folder"
+    exit 1
+  end 
+  unpack_gem(gem_name, gem_version, dir)
 end
 
 if $0 == __FILE__

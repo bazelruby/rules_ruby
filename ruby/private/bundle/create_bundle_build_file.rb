@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 TEMPLATE = 'load(
@@ -71,7 +72,7 @@ def create_bundle_build_file(build_out_file, lock_file, repo_name, excludes, wor
     .gsub("{ruby_version}", ruby_version)
 
   # strip bundler version so we can process this file
-  remove_bunder_version!(lock_file)
+  remove_bundler_version!(lock_file)
 
   # Append to the end specific gem libraries and dependencies
   bundle = Bundler::LockfileParser.new(Bundler.read_file(lock_file))

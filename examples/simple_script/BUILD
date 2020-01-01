@@ -4,6 +4,7 @@ load(
     "@bazelruby_ruby_rules//ruby:defs.bzl",
     "ruby_binary",
     "ruby_library",
+    "ruby_rspec_test",
     "ruby_test",
 )
 
@@ -32,17 +33,19 @@ ruby_binary(
 )
 
 ruby_test(
-    name = "rspec",
+    name = "all-specs",
     timeout = "short",
-    srcs = [
+    srcs = glob([
         "script.rb",
-        "spec/lib/foo_spec.rb",
-        "spec/script_spec.rb",
-        "spec/spec_helper.rb",
-        "@bundle//:bin/rspec",
-    ],
+        "spec/**/*.rb",
+        "lib/**/*.rb",
+    ]),
     args = [
-        "spec",
+        "--format documentation",
+        "--force-color",
+        "spec/spec_helper.rb",
+        "spec/script_spec.rb",
+        "spec/lib/foo_spec.rb",
     ],
     includes = [
         ".",
@@ -50,6 +53,7 @@ ruby_test(
         "spec",
     ],
     main = "spec/spec_helper.rb",
+    rubyopt = ["-rrspec/autorun"],
     deps = [
         "//lib:foo",
         "@bundle//:awesome_print",
@@ -59,7 +63,25 @@ ruby_test(
     ],
 )
 
-# TODO: not the best way of defining this, should make `rubocop` rule like `buildifier`
+ruby_rspec_test(
+    name = "all-rspecs",
+    srcs = [
+        "script.rb",
+        "spec/lib/foo_spec.rb",
+        "spec/script_spec.rb",
+        "spec/spec_helper.rb",
+    ],
+    rubyopt = ["-rrspec/autorun"],
+    spec_target = "spec/script_spec.rb",
+    deps = [
+        "//lib:foo",
+        "@bundle//:awesome_print",
+        "@bundle//:colored2",
+        "@bundle//:rspec",
+        "@bundle//:rspec-its",
+    ],
+)
+
 ruby_binary(
     name = "rubocop",
     srcs = [

@@ -11,5 +11,3 @@ def oss_rand
 end
 
 puts Foo.aha + ' ' + oss_rand
-
-ap Class.to_s

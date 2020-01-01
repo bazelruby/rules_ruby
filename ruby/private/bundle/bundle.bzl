@@ -1,54 +1,40 @@
-load("//ruby/private:constants.bzl", "RULES_RUBY_WORKSPACE_NAME")
+load(
+    "//ruby/private:constants.bzl",
+    "BUNDLE_ATTRS",
+    "RULES_RUBY_WORKSPACE_NAME",
+)
+load("//ruby/private:providers.bzl", "RubyRuntimeContext")
+load("//ruby/private/tools:deprecations.bzl", "deprecated_attribute")
 
 BUNDLE_INSTALL_PATH = "lib"
 BUNDLE_BINARY = "bundler/exe/bundler"
+SCRIPT_INSTALL_GEM = "install_bundler.rb"
+SCRIPT_BUILD_FILE_GENERATOR = "create_bundle_build_file.rb"
 
-# TODO: do not hard-code this
-GEM_HOME = "lib/ruby/2.5.0/"
-
-def upgrade_bundler(ctx, interpreter, environment):
+def run_bundler(runtime_ctx, extra_args):
     # Now we are running bundle install
     args = [
-        interpreter,  # ruby
-        "--enable=gems",  # bundler must run with rubygems enabled
-        "",
-        ".",
-        "-I",  # Used to tell Ruby where to load the library scripts
-        "lib",  # Add vendor/bundle to the list of resolvers
-        BUNDLE_BINARY,  # our binary
-    ] + extra_args
-
-    # print("running bundler with args\n", args)
-
-    result = ctx.execute(
-        args,
-        quiet = False,
-    )
-
-    return result
-def run_bundler(ctx, interpreter, environment, extra_args):
-    # Now we are running bundle install
-    args = [
-        interpreter,  # ruby
+        runtime_ctx.interpreter,  # ruby
         "--enable=gems",  # bundler must run with rubygems enabled
         "-I",
         ".",
         "-I",  # Used to tell Ruby where to load the library scripts
-        "lib",  # Add vendor/bundle to the list of resolvers
+        BUNDLE_INSTALL_PATH,  # Add vendor/bundle to the list of resolvers
         BUNDLE_BINARY,  # our binary
     ] + extra_args
 
     # print("running bundler with args\n", args)
 
-    result = ctx.execute(
+    result = runtime_ctx.ctx.execute(
         args,
         quiet = False,
+        environment = runtime_ctx.environment,
     )
 
     return result
 
 # Sets local bundler config values
-def set_bundler_config(ctx, interpreter, environment):
+def set_bundler_config(runtime_ctx):
     # Bundler is deprecating various flags in favor of the configuration.
     # HOWEVER — for reasons I can't explain, Bazel runs "bundle install" *prior*
     # to setting these flags. So the flags are then useless until we can force the
@@ -67,14 +53,9 @@ def set_bundler_config(ctx, interpreter, environment):
     }
 
     for option, value in [(option, value) for option, value in bundler_config.items()]:
-        args = [
-            "config",
-            "--local",
-            option,
-            value,
-        ]
+        args = ["config", "--local", value, option]
 
-        result = run_bundler(ctx, interpreter, environment, args)
+        result = run_bundler(runtime_ctx, args)
         if result.return_code:
             message = "Failed to set bundle config {} to {}: {}".format(
                 option,
@@ -83,49 +64,37 @@ def set_bundler_config(ctx, interpreter, environment):
             )
             fail(message)
 
-def install_bundler(ctx, interpreter, install_bundler, dest, version, environment):
-    args = [interpreter, install_bundler, version, dest]
-
-    result = ctx.execute(args, environment = environment)
+def install_pure_ruby_gem(runtime_ctx, gem_name, gem_version, folder):
+    # USAGE: ./install_bundler.rb gem-name gem-version destination-folder
+    args = [
+        runtime_ctx.interpreter,
+        SCRIPT_INSTALL_GEM,
+        gem_name,
+        gem_version,
+        folder,
+    ]
+    result = runtime_ctx.ctx.execute(args, environment = runtime_ctx.environment)
     if result.return_code:
-        message = "Failed to evaluate ruby snippet with {}: {}".format(
-            interpreter,
+        message = "Failed to install gem {}-{} to {} with {}: {}".format(
+            gem_name,
+            gem_version,
+            folder,
+            runtime_ctx.interpreter,
             result.stderr,
         )
         fail(message)
 
-def bundle_install_impl(ctx):
-    ctx.symlink(ctx.attr.gemfile, "Gemfile")
-    ctx.symlink(ctx.attr.gemfile_lock, "Gemfile.lock")
-    ctx.symlink(ctx.attr._create_bundle_build_file, "create_bundle_build_file.rb")
-    ctx.symlink(ctx.attr._install_bundler, "install_bundler.rb")
-
-    environment = {"RUBYOPT": "--enable-gems", "GEM_HOME": GEM_HOME}
-
-    ruby = ctx.attr.ruby_interpreter
-    interpreter = ctx.path(ruby)
-
-    install_bundler(
-        ctx,
-        interpreter,
-        "install_bundler.rb",
+def install_bundler(runtime_ctx, bundler_version):
+    return install_pure_ruby_gem(
+        runtime_ctx,
         "bundler",
-        ctx.attr.version,
-        environment,
-    )
-    bundler = Label("//:" + BUNDLE_BINARY)
-
-    # Set Bundler config in the .bundle/config file
-    set_bundler_config(
-        ctx,
-        interpreter,
-        environment,
+        bundler_version,
+        "bundler",
     )
 
+def bundle_install(runtime_ctx):
     result = run_bundler(
-        ctx,
-        interpreter,
-        environment,
+        runtime_ctx,
         [
             "install",  #   > bundle install
             "--standalone",  # Makes a bundle that can work without depending on Rubygems or Bundler at runtime.
@@ -135,72 +104,59 @@ def bundle_install_impl(ctx):
     )
 
     if result.return_code:
-        fail("Failed to install gems: %s%s" % (result.stdout, result.stderr))
+        fail("bundle install failed: %s%s" % (result.stdout, result.stderr))
 
+def generate_bundle_build_file(runtime_ctx):
     # Create the BUILD file to expose the gems to the WORKSPACE
     args = [
-        ctx.path(ruby),  # ruby interpreter
+        runtime_ctx.interpreter,  # ruby interpreter
         "--enable=gems",  # prevent the addition of gem installation directories to the default load path
         "-I",  # -I lib (adds this folder to $LOAD_PATH where ruby searchesf for things)
         "bundler/lib",
-        "create_bundle_build_file.rb",  # The template used to created bundle file
+        SCRIPT_BUILD_FILE_GENERATOR,  # The template used to created bundle file
         "BUILD.bazel",  # Bazel build file (can be empty)
         "Gemfile.lock",  # Gemfile.lock where we list all direct and transitive dependencies
-        ctx.name,  # Name of the target
-        repr(ctx.attr.excludes),
+        runtime_ctx.ctx.name,  # Name of the target
+        repr(runtime_ctx.ctx.attr.excludes),
         RULES_RUBY_WORKSPACE_NAME,
     ]
-    result = ctx.execute(args, quiet = False)
 
+    result = runtime_ctx.ctx.execute(args, quiet = False)
     if result.return_code:
-        fail("Failed to create build file: %s%s" % (result.stdout, result.stderr))
+        fail("build file generation failed: %s%s" % (result.stdout, result.stderr))
 
-        ctx.template(
-            "BUILD.bazel",
-            ctx.attr._buildfile_template,
-            substitutions = {
-                "{repo_name}": ctx.name,
-                "{workspace_name}": RULES_RUBY_WORKSPACE_NAME,
-            },
-        )
+def bundle_install_impl(ctx):
+    ctx.symlink(ctx.attr.gemfile, "Gemfile")
+    ctx.symlink(ctx.attr.gemfile_lock, "Gemfile.lock")
+    ctx.symlink(ctx.attr._create_bundle_build_file, SCRIPT_BUILD_FILE_GENERATOR)
+    ctx.symlink(ctx.attr._install_bundler, SCRIPT_INSTALL_GEM)
+
+    # version is too generic for this operation
+    deprecated_attribute(ctx, "version", "bundler_version")
+
+    # Setup this provider that we pass around between functions for convenience
+    runtime_ctx = RubyRuntimeContext(
+        ctx = ctx,
+        interpreter = ctx.path(ctx.attr.ruby_interpreter),
+        environment = {"RUBYOPT": "--enable-gems"},
+    )
+
+    # 1. Install the right version of the Bundler Gem
+    install_bundler(runtime_ctx, ctx.attr.bundler_version)
+
+    # Create label for the Bundler executable
+    bundler = Label("//:" + BUNDLE_BINARY)
+
+    # 2. Set Bundler config in the .bundle/config file
+    set_bundler_config(runtime_ctx)
+
+    # 3. Run bundle install
+    bundle_install(runtime_ctx)
+
+    # 4. Generate the BUILD file for the bundle
+    generate_bundle_build_file(runtime_ctx)
 
 ruby_bundle = repository_rule(
     implementation = bundle_install_impl,
-    attrs = {
-        "ruby_sdk": attr.string(
-            default = "@org_ruby_lang_ruby_toolchain",
-        ),
-        "ruby_interpreter": attr.label(
-            default = "@org_ruby_lang_ruby_toolchain//:ruby",
-        ),
-        "gemfile": attr.label(
-            allow_single_file = True,
-            mandatory = True,
-        ),
-        "gemfile_lock": attr.label(
-            allow_single_file = True,
-        ),
-        "version": attr.string(
-            default = "2.1.2",
-        ),
-        "gemspec": attr.label(
-            allow_single_file = True,
-        ),
-        "excludes": attr.string_list_dict(
-            doc = "List of glob patterns per gem to be excluded from the library",
-        ),
-        "_install_bundler": attr.label(
-            default = "%s//ruby/private/bundle:install_bundler.rb" % (
-                RULES_RUBY_WORKSPACE_NAME
-            ),
-            allow_single_file = True,
-        ),
-        "_create_bundle_build_file": attr.label(
-            default = "%s//ruby/private/bundle:create_bundle_build_file.rb" % (
-                RULES_RUBY_WORKSPACE_NAME
-            ),
-            doc = "Creates the BUILD file",
-            allow_single_file = True,
-        ),
-    },
+    attrs = BUNDLE_ATTRS,
 )
