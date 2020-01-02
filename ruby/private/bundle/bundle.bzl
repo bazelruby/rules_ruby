@@ -6,12 +6,17 @@ load(
 load("//ruby/private:providers.bzl", "RubyRuntimeContext")
 load("//ruby/private/tools:deprecations.bzl", "deprecated_attribute")
 
-BUNDLE_INSTALL_PATH = "lib"
+BUNDLE_BIN_PATH = "bin"
+BUNDLE_PATH = "lib"
 BUNDLE_BINARY = "bundler/exe/bundler"
 SCRIPT_INSTALL_GEM = "install_bundler.rb"
 SCRIPT_BUILD_FILE_GENERATOR = "create_bundle_build_file.rb"
 
-def run_bundler(runtime_ctx, extra_args):
+# Runs bundler with arbitrary arguments
+#
+# eg: run_bundler(runtime_ctx, [ "lock", " --gemfile", "Gemfile.rails5" ])
+#
+def run_bundler(runtime_ctx, bundler_arguments):
     # Now we are running bundle install
     args = [
         runtime_ctx.interpreter,  # ruby
@@ -19,22 +24,25 @@ def run_bundler(runtime_ctx, extra_args):
         "-I",
         ".",
         "-I",  # Used to tell Ruby where to load the library scripts
-        BUNDLE_INSTALL_PATH,  # Add vendor/bundle to the list of resolvers
+        BUNDLE_PATH,  # Add vendor/bundle to the list of resolvers
         BUNDLE_BINARY,  # our binary
-    ] + extra_args
+    ] + bundler_arguments
 
-    # print("running bundler with args\n", args)
+    # print("Bundler Command:\n\n", args)
 
-    result = runtime_ctx.ctx.execute(
+    return runtime_ctx.ctx.execute(
         args,
         quiet = False,
         environment = runtime_ctx.environment,
     )
 
-    return result
-
-# Sets local bundler config values
-def set_bundler_config(runtime_ctx):
+#
+# Sets local bundler config values by calling
+#
+# $ bundler config --local | --global config-option config-value
+#
+# @config_category can be either 'local' or 'global'
+def set_bundler_config(runtime_ctx, config_category = "local"):
     # Bundler is deprecating various flags in favor of the configuration.
     # HOWEVER — for reasons I can't explain, Bazel runs "bundle install" *prior*
     # to setting these flags. So the flags are then useless until we can force the
@@ -43,17 +51,17 @@ def set_bundler_config(runtime_ctx):
     #
     # Set local configuration options for bundler
     bundler_config = {
-        "binstubs": "bin",
+        "binstubs": BUNDLE_BIN_PATH,
         "deployment": "'true'",
         "standalone": "'true'",
         "frozen": "'true'",
         "without": "development,test",
-        "path": "lib",
+        "path": BUNDLE_PATH,
         "jobs": "20",
     }
 
     for option, value in [(option, value) for option, value in bundler_config.items()]:
-        args = ["config", "--local", value, option]
+        args = ["config", "--%s" % (config_category), option, value]
 
         result = run_bundler(runtime_ctx, args)
         if result.return_code:
@@ -98,8 +106,8 @@ def bundle_install(runtime_ctx):
         [
             "install",  #   > bundle install
             "--standalone",  # Makes a bundle that can work without depending on Rubygems or Bundler at runtime.
-            "--binstubs=bin",  # Creates a directory and place any executables from the gem there.
-            "--path={}".format(BUNDLE_INSTALL_PATH),  # The location to install the specified gems to.
+            "--binstubs={}".format(BUNDLE_BIN_PATH),  # Creates a directory and place any executables from the gem there.
+            "--path={}".format(BUNDLE_PATH),  # The location to install the specified gems to.
         ],
     )
 
@@ -108,6 +116,7 @@ def bundle_install(runtime_ctx):
 
 def generate_bundle_build_file(runtime_ctx):
     # Create the BUILD file to expose the gems to the WORKSPACE
+    # USAGE: ./create_bundle_build_file.rb BUILD.bazel Gemfile.lock repo-name [excludes-json] workspace-name
     args = [
         runtime_ctx.interpreter,  # ruby interpreter
         "--enable=gems",  # prevent the addition of gem installation directories to the default load path

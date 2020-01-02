@@ -3,7 +3,11 @@ load("@bazel_skylib//lib:dicts.bzl", "dicts")
 
 RULES_RUBY_WORKSPACE_NAME = "@bazelruby_ruby_rules"
 TOOLCHAIN_TYPE_NAME = "%s//ruby:toolchain_type" % RULES_RUBY_WORKSPACE_NAME
+
 DEFAULT_BUNDLER_VERSION = "2.1.2"
+DEFAULT_RSPEC_ARGS = {"--format": "documentation", "--force-color": None}
+DEFAULT_RSPEC_GEMS = ["rspec", "rspec-its"]
+DEFAULT_BUNDLE_NAME = "@bundle//"
 
 RUBY_ATTRS = {
     "srcs": attr.label_list(
@@ -32,21 +36,17 @@ RUBY_ATTRS = {
 
 _RSPEC_ATTRS = {
     "bundle": attr.string(
-        default = "@bundle//",
+        default = DEFAULT_BUNDLE_NAME,
         doc = "Name of the bundle where the rspec gem can be found, eg @bundle//",
     ),
     "rspec_args": attr.string_list(
-        default = ["--format documentation", "--force-color", "-p2"],
+        default = [],
         doc = "Arguments passed to rspec executable",
     ),
-    "spec_executable": attr.label(
-        default = "@bundle//:bin/rspec",
+    "rspec_executable": attr.label(
+        default = "%s:bin/rspec" % (DEFAULT_BUNDLE_NAME),
         allow_single_file = True,
-        doc = "RSpec executable",
-    ),
-    "spec_target": attr.label(
-        allow_single_file = True,
-        doc = "Directory or local file to tests",
+        doc = "RSpec Executable Label",
     ),
 }
 

@@ -61,32 +61,9 @@ jobs:
             /usr/bin/env bash bin/setup
 
       - run:
-          name: "Show Bazel Info"
+          name: "Bazel Build & Test Example"
           command: |
-            /usr/bin/env bash bin/test-suite bazel-info
-
-      - run:
-          name: "Bazel Simple Script Example Build"
-          command: |
-            cd examples/simple_script && bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- :all
-
-      - run:
-          name: "Bazel Simple Script Example Rubocop Check"
-          command: |
-            cd examples/simple_script && bazel ${BAZEL_OPTS} run ${BAZEL_BUILD_OPTS} -- :rubocop || true
-
-      - run:
-          name: "Bazel Simple Script Example Test"
-          command: |
-            cd examples/simple_script
-            bazel ${BAZEL_OPTS} test -s --verbose_failures --sandbox_debug \
-              --test_output=streamed --test_verbose_timeout_warnings :all-specs
-
-      - run:
-          name: "Print output log"
-          command: |
-            cat /home/circleci/.cache/bazel/_bazel_circleci/86ef9d8d260271208b18f4c01debfa13/execroot/bazelruby_ruby_rules_example/bazel-out/k8-fastbuild/testlogs/all-specs/test.log
-
+            /usr/bin/env bash bin/test-suite simple-script
 
   buildifier:
     <<: *bazel_defaults

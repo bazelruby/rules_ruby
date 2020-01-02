@@ -8,11 +8,23 @@ TEMPLATE = 'load(
 
 package(default_visibility = ["//visibility:public"])
 
-filegroup(
-  name = "binstubs",
-  srcs = glob(["bin/**/*"]),
-  data = [":libs"],
-)
+#exports_files(
+#    {binaries},
+#    visibility = ["//visibility:public"],
+#)
+#
+#filegroup(
+#  name = "libs",
+#  srcs = glob(["lib/**/*"]),
+#  data = [":libs"],
+#)
+#
+#
+#filegroup(
+#  name = "binstubs",
+#  srcs = glob(["bin/**/*"]),
+#  data = [":libs"],
+#)
 
 ruby_library(
   name = "bundler_setup",
@@ -39,6 +51,7 @@ ruby_library(
   srcs = glob(
     include = [
       "lib/ruby/{ruby_version}/gems/{name}-{version}/**/*",
+      "bin/*"
     ],
     exclude = {exclude},
   ),
@@ -47,29 +60,44 @@ ruby_library(
 )
 '
 
-require "bundler"
+BIN_TEMPLATE = '
+exports_files(
+    {binaries},
+    visibility = ["//visibility:public"],
+)
+'
+
+require 'bundler'
 require 'json'
+require 'stringio'
 
 # This method scans the contents of the Gemfile.lock and if it finds BUNDLED WITH
 # it strips that line + the line below it, so that any version of bundler would work.
 def remove_bundler_version!(gemfile_lock_file)
   contents = File.read(gemfile_lock_file)
-  unless contents !~ /BUNDLED WITH/
-    temp_lock_file = "#{gemfile_lock_file}.no-bundle-version"
-    system %(sed -n '/BUNDLED WITH/q;p' "#{gemfile_lock_file}" > #{temp_lock_file})
-    ::FileUtils.rm_f(gemfile_lock_file) if File.symlink?(gemfile_lock_file) # it's just a symlink
-    ::FileUtils.move(temp_lock_file, gemfile_lock_file, force: true)
-  end
+  return unless contents =~ /BUNDLED WITH/
+
+  temp_lock_file = "#{gemfile_lock_file}.no-bundle-version"
+  system %(sed -n '/BUNDLED WITH/q;p' "#{gemfile_lock_file}" > #{temp_lock_file})
+  ::FileUtils.rm_f(gemfile_lock_file) if File.symlink?(gemfile_lock_file) # it's just a symlink
+  ::FileUtils.move(temp_lock_file, gemfile_lock_file, force: true)
+end
+
+def ruby_version(ruby_version = RUBY_VERSION)
+  @ruby_version ||= (ruby_version.split('.')[0..1] << 0).join('.')
 end
 
 def create_bundle_build_file(build_out_file, lock_file, repo_name, excludes, workspace_name)
-  # TODO: properly calculate path/ruby version here
-  # ruby_version = RUBY_VERSION # doesnt work because verion is 2.5.5 path is 2.5.0
-  ruby_version = "*"
+  template_out = StringIO.new
 
-  template_out = TEMPLATE.gsub("{workspace_name}", workspace_name)
-    .gsub("{repo_name}", repo_name)
-    .gsub("{ruby_version}", ruby_version)
+  bin_folder = File.expand_path('bin', __dir__)
+  binaries   = Dir.glob("#{bin_folder}/*").map { |binary| 'bin/' + File.basename(binary) if File.executable?(binary) }
+
+  template_out.puts TEMPLATE
+    .gsub('{workspace_name}', workspace_name)
+    .gsub('{repo_name}', repo_name)
+    .gsub('{ruby_version}', ruby_version)
+    .gsub('{binaries}', binaries.to_s)
 
   # strip bundler version so we can process this file
   remove_bundler_version!(lock_file)
@@ -79,40 +107,34 @@ def create_bundle_build_file(build_out_file, lock_file, repo_name, excludes, wor
 
   bundle.specs.each { |spec|
     deps = spec.dependencies.map(&:name)
-    deps += [":bundler_setup"]
+    deps += [':bundler_setup']
 
     exclude_array = excludes[spec.name] || []
     # We want to exclude files and folder with spaces in them
-    exclude_array += ["**/* *.*", "**/* */*"]
+    exclude_array += ['**/* *.*', '**/* */*']
 
-    template_out += GEM_TEMPLATE.gsub("{exclude}", exclude_array.to_s)
-      .gsub("{name}", spec.name)
-      .gsub("{version}", spec.version.to_s)
-      .gsub("{deps}", deps.to_s)
-      .gsub("{repo_name}", repo_name)
-      .gsub("{ruby_version}", ruby_version)
+    template_out.puts GEM_TEMPLATE
+      .gsub('{exclude}', exclude_array.to_s)
+      .gsub('{name}', spec.name)
+      .gsub('{version}', spec.version.to_s)
+      .gsub('{deps}', deps.to_s)
+      .gsub('{repo_name}', repo_name)
+      .gsub('{ruby_version}', ruby_version)
   }
 
-  # Write the actual BUILD file
-  ::File.open(build_out_file, 'w') { |f|
-    f.puts template_out
-  }
+  ::File.open(build_out_file, 'w') { |f| f.puts template_out.string }
+
+  #::File.open(File.dirname(build_out_file) + '/bin/BUILD.bazel', 'w') { |f| f.puts BIN_TEMPLATE.gsub('{binaries}', binaries.to_s) }
 end
 
 # ruby ./create_bundle_build_file.rb "BUILD.bazel" "Gemfile.lock" "repo_name" "[]" "wsp_name"
 if $0 == __FILE__
   if ARGV.length != 5
-    fmt.Println("BUILD FILE ARGS not 5")
+    warn("USAGE: #{$0} BUILD.bazel Gemfile.lock repo-name [excludes-json] workspace-name")
     exit(1)
   end
 
-  build_out_file = ARGV[0]
-  lock_file = ARGV[1]
-  repo_name = ARGV[2]
+  build_out_file, lock_file, repo_name, excludes, workspace_name, * = *ARGV
 
-  excludes = JSON.parse(ARGV[3])
-
-  workspace_name = ARGV[4]
-
-  create_bundle_build_file(build_out_file, lock_file, repo_name, excludes, workspace_name)
+  create_bundle_build_file(build_out_file, lock_file, repo_name, JSON.parse(excludes), workspace_name)
 end
