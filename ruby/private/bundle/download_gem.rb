@@ -12,13 +12,11 @@ def unpack_gem(name, version, dest = Dir.pwd)
   source = Gem::Source.new('https://rubygems.org')
   spec = source.fetch_spec Gem::NameTuple.new(name, version)
 
-  Dir.mktmpdir { |dir|
+  Dir.mktmpdir do |dir|
     Dir.chdir(dir) { source.download(spec) }
     downloaded = File.join(dir, "#{name}-#{version}.gem")
-    Gem::Package.new(downloaded).extract_files dest
-  }
-
-  `gem install bundler --no-doc`
+    Gem::Package.new(downloaded).extract_files(dest)
+  end
 end
 
 def main

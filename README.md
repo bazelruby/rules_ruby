@@ -122,14 +122,14 @@ ruby_binary(
 )
 
 ruby_test(
-    name = "foo_test",
+    name = "foo-test",
     srcs = ["test/foo_test.rb"],
     deps = [":foo"],
 )
 
 ruby_rspec(
-    name = "foo_spec",
-    specs = glob(["spec/**/*.rb]),
+    name = "foo-spec",
+    specs = glob(["spec/**/*.rb"]),
     rspec_args = { "--format": "progress" },
     deps = [":foo"]
 }

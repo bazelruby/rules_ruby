@@ -1,5 +1,4 @@
 load(":providers.bzl", "RubyLibrary")
-load("@bazel_skylib//lib:dicts.bzl", "dicts")
 
 RULES_RUBY_WORKSPACE_NAME = "@bazelruby_ruby_rules"
 TOOLCHAIN_TYPE_NAME = "%s//ruby:toolchain_type" % RULES_RUBY_WORKSPACE_NAME
@@ -8,6 +7,13 @@ DEFAULT_BUNDLER_VERSION = "2.1.2"
 DEFAULT_RSPEC_ARGS = {"--format": "documentation", "--force-color": None}
 DEFAULT_RSPEC_GEMS = ["rspec", "rspec-its"]
 DEFAULT_BUNDLE_NAME = "@bundle//"
+
+BUNDLE_BIN_PATH = "bin"
+BUNDLE_PATH = "lib"
+BUNDLE_BINARY = "bundler/exe/bundler"
+
+SCRIPT_INSTALL_GEM = "download_gem.rb"
+SCRIPT_BUILD_FILE_GENERATOR = "create_bundle_build_file.rb"
 
 RUBY_ATTRS = {
     "srcs": attr.label_list(
@@ -50,7 +56,10 @@ _RSPEC_ATTRS = {
     ),
 }
 
-RSPEC_ATTRS = dicts.add(RUBY_ATTRS, _RSPEC_ATTRS)
+RSPEC_ATTRS = {}
+
+RSPEC_ATTRS.update(RUBY_ATTRS)
+RSPEC_ATTRS.update(_RSPEC_ATTRS)
 
 BUNDLE_ATTRS = {
     "ruby_sdk": attr.string(
@@ -79,14 +88,16 @@ BUNDLE_ATTRS = {
         doc = "List of glob patterns per gem to be excluded from the library",
     ),
     "_install_bundler": attr.label(
-        default = "%s//ruby/private/bundle:install_bundler.rb" % (
-            RULES_RUBY_WORKSPACE_NAME
+        default = "%s//ruby/private/bundle:%s" % (
+            RULES_RUBY_WORKSPACE_NAME,
+            SCRIPT_INSTALL_GEM,
         ),
         allow_single_file = True,
     ),
     "_create_bundle_build_file": attr.label(
-        default = "%s//ruby/private/bundle:create_bundle_build_file.rb" % (
-            RULES_RUBY_WORKSPACE_NAME
+        default = "%s//ruby/private/bundle:%s" % (
+            RULES_RUBY_WORKSPACE_NAME,
+            SCRIPT_BUILD_FILE_GENERATOR,
         ),
         doc = "Creates the BUILD file",
         allow_single_file = True,

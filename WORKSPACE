@@ -1,6 +1,6 @@
 workspace(name = "bazelruby_ruby_rules")
 
-load("@//ruby/private:dependencies.bzl", "ruby_rules_dependencies")
+load("@//ruby:deps.bzl", "ruby_rules_dependencies")
 
 ruby_rules_dependencies()
 
@@ -97,10 +97,10 @@ load("@bazelruby_ruby_rules//ruby:defs.bzl", "bundle_install")
 
 bundle_install(
     name = "bundle",
+    bundler_version = "2.1.2",
     excludes = {
         "mini_portile": ["test/**/*"],
     },
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
-    version = "2.0.2",
 )

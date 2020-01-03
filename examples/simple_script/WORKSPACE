@@ -8,26 +8,18 @@ local_repository(
 )
 
 load(
-    "@bazelruby_ruby_rules//ruby/private:dependencies.bzl",
+    "@bazelruby_ruby_rules//ruby:deps.bzl",
+    "ruby_register_toolchains",
     "ruby_rules_dependencies",
 )
 
 ruby_rules_dependencies()
 
-load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
-
-bazel_skylib_workspace()
-
-load(
-    "@bazelruby_ruby_rules//ruby:deps.bzl",
-    "ruby_register_toolchains",
-)
-
 ruby_register_toolchains(version = "2.6.5")
 
-load("@bazelruby_ruby_rules//ruby:defs.bzl", "bundle_install")
+load("@bazelruby_ruby_rules//ruby:defs.bzl", "ruby_bundle")
 
-bundle_install(
+ruby_bundle(
     name = "bundle",
     excludes = {
         "mini_portile": ["test/**/*"],

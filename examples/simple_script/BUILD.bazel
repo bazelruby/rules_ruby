@@ -47,6 +47,17 @@ ruby_binary(
     ],
 )
 
+ruby_binary(
+    name = "bin-all",
+    srcs = ["script.rb"],
+    main = "script.rb",
+    deps = [
+        ":lib",
+        "//lib:foo",
+        "@bundle//:gems",
+    ],
+)
+
 # This is an example of the RSpec definition that uses autorun
 # and points to spec_helper as the main spec file. It specifies
 # which specs to run using the args.
@@ -87,9 +98,8 @@ ruby_test(
     args = [
         "--format documentation",
         "--force-color",
-    ] + glob([
-        "spec/**/*.rb",
-    ]),
+        "spec",
+    ],
     main = "@bundle//:bin/rspec",
     deps = [
         "@bundle//:awesome_print",
@@ -110,6 +120,10 @@ ruby_rspec(
         ":sources",
         ":spec_sources",
     ],
+    rspec_args = {
+        # NOTE: the output is only visible with --test_output=streamed flag
+        "--format": "progress",  # this is how we can override rspec output format
+    },
     specs = glob([
         "spec/**/*.rb",
     ]),

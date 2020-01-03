@@ -5,7 +5,10 @@ load(
     "ruby_test",
 )
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
-load("@io_bazel_rules_docker//container:container.bzl", "container_image")
+load(
+    "@io_bazel_rules_docker//container:container.bzl",
+    "container_image",
+)
 
 # Checks if args are correctly passed to the ruby script.
 ruby_test(

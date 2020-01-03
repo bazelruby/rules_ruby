@@ -7,21 +7,31 @@ load(
     "TOOLCHAIN_TYPE_NAME",
 )
 load(":binary.bzl", "ruby_binary_macro")
-load("@bazel_skylib//lib:dicts.bzl", "dicts")
 
 def ruby_rspec(
         name,
-        srcs = [],
-        specs = [],
-        deps = [],
+        srcs,
+        specs,
+        deps = None,
         size = "small",
-        rspec_args = {},
+        rspec_args = None,  # This is expected to be a dictionary
         bundle = DEFAULT_BUNDLE_NAME,
         visibility = None,
         **kwargs):
+    if specs == None:
+        specs = []
+
+    if srcs == None:
+        srcs = []
+
+    if rspec_args == None:
+        rspec_args = {}
+
     args_list = []
 
-    args_dict = dicts.add(DEFAULT_RSPEC_ARGS, rspec_args)
+    args_dict = {}
+    args_dict.update(DEFAULT_RSPEC_ARGS)
+    args_dict.update(rspec_args)
 
     # We pass the respec_args as a dictionary so that you can overwrite
     # the default rspec arguments with custom ones.
@@ -48,13 +58,9 @@ def ruby_rspec(
     )
 
 def _ruby_rspec_test_impl(ctx):
-    bundle = ctx.attr.bundle
-
-    rspec_executable = ctx.file.rspec_executable
-
     return ruby_binary_macro(
         ctx,
-        rspec_executable,
+        ctx.file.rspec_executable,
         ctx.attr.srcs,
     )
 
