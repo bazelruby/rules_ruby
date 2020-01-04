@@ -1,12 +1,36 @@
 inherit_from: .relaxed-rubocop-2.4.yml
 
 AllCops:
-  TargetRubyVersion: 2.6.5
+  TargetRubyVersion: 2.6
+  UseCache: true
+  DefaultFormatter: progress
+  DisplayStyleGuide: true
+  DisplayCopNames: true
   Exclude:
-    - "**/rubocop"
-    - "examples/**/*"
+    - "external*/**/*"
     - "bazel-*/**/*"
-    - "**/external/**/*"
+    - "**/examples/**/*"
+    - "**/BUILD"
+    - "**/*.bazel"
+    - "**/*.bzl"
+    - "**/rubocop"
     - "**/vendor/bundle/**/*"
+  Include:
+    - '**/*.rb'
+    - '**/*.gemfile'
+    - '**/*.gemspec'
+    - '**/*.rake'
+    - '**/*.ru'
+    - '**/Gemfile'
+    - '**/Rakefile'
 
+Layout/HashAlignment:
+  Enabled: true
+  EnforcedColonStyle: table
+  
+Style/Dir:
+  Enabled: false
 
+Layout/MultilineMethodCallIndentation:
+  Enabled: true
+  EnforcedStyle: indented_relative_to_receiver

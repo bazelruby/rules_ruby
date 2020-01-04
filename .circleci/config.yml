@@ -61,24 +61,9 @@ jobs:
             /usr/bin/env bash bin/setup
 
       - run:
-          name: "Show Bazel Info"
+          name: "Bazel Build & Test Example"
           command: |
-            /usr/bin/env bash bin/test-suite bazel-info
-
-      - run:
-          name: "Bazel Simple Script Example Build"
-          command: |
-            cd examples/simple_script && bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //...
-
-      - run:
-          name: "Bazel Simple Script Example Test"
-          command: |
-            cd examples/simple_script && bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //...
-
-      - run:
-          name: "Bazel Simple Script Example Rubocop Check"
-          command: |
-            cd examples/simple_script && bazel ${BAZEL_OPTS} run ${BAZEL_BUILD_OPTS} -- :rubocop
+            /usr/bin/env bash bin/test-suite simple-script
 
   buildifier:
     <<: *bazel_defaults

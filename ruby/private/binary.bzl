@@ -1,5 +1,4 @@
-load(":constants.bzl", "TOOLCHAIN_TYPE_NAME")
-load(":providers.bzl", "RubyLibrary")
+load(":constants.bzl", "RUBY_ATTRS", "TOOLCHAIN_TYPE_NAME")
 load(
     "//ruby/private/tools:deps.bzl",
     _transitive_deps = "transitive_deps",
@@ -11,14 +10,19 @@ def _to_manifest_path(ctx, file):
     else:
         return ("%s/%s" % (ctx.workspace_name, file.short_path))
 
-def _ruby_binary_impl(ctx):
+# Having this function allows us to override otherwise frozen attributes
+# such as main, srcs and deps. We use this in ruby_rspec_test rule by
+# adding rspec as a main, and sources, and rspec gem as a dependency.
+#
+# There could be similar situations in the future where we might want
+# to create a rule (eg, rubocop) that does exactly the same.
+def ruby_binary_macro(ctx, main, srcs):
     sdk = ctx.toolchains[TOOLCHAIN_TYPE_NAME].ruby_runtime
     interpreter = sdk.interpreter[DefaultInfo].files_to_run.executable
 
-    main = ctx.file.main
     if not main:
         expected_name = "%s.rb" % ctx.attr.name
-        for f in ctx.attr.srcs:
+        for f in srcs:
             if f.label.name == expected_name:
                 main = f.files.to_list()[0]
                 break
@@ -30,6 +34,7 @@ def _ruby_binary_impl(ctx):
         )
 
     executable = ctx.actions.declare_file(ctx.attr.name)
+
     deps = _transitive_deps(
         ctx,
         extra_files = [executable],
@@ -49,47 +54,30 @@ def _ruby_binary_impl(ctx):
         },
     )
 
-    return [DefaultInfo(
+    info = DefaultInfo(
         executable = executable,
-        default_runfiles = deps.default_files,
-        data_runfiles = deps.data_files,
-    )]
+        runfiles = deps.default_files.merge(deps.data_files),
+    )
 
-_ATTRS = {
-    "srcs": attr.label_list(
-        allow_files = True,
-    ),
-    "deps": attr.label_list(
-        providers = [RubyLibrary],
-    ),
-    "includes": attr.string_list(),
-    "rubyopt": attr.string_list(),
-    "data": attr.label_list(
-        allow_files = True,
-    ),
-    "main": attr.label(
-        allow_single_file = True,
-    ),
-    "_wrapper_template": attr.label(
-        allow_single_file = True,
-        default = "binary_wrapper.tpl",
-    ),
-    "_misc_deps": attr.label_list(
-        allow_files = True,
-        default = ["@bazel_tools//tools/bash/runfiles"],
-    ),
-}
+    return [info]
+
+def ruby_binary_impl(ctx):
+    return ruby_binary_macro(
+        ctx,
+        ctx.file.main,
+        ctx.attr.srcs,
+    )
 
 ruby_binary = rule(
-    implementation = _ruby_binary_impl,
-    attrs = _ATTRS,
+    implementation = ruby_binary_impl,
+    attrs = RUBY_ATTRS,
     executable = True,
     toolchains = [TOOLCHAIN_TYPE_NAME],
 )
 
 ruby_test = rule(
-    implementation = _ruby_binary_impl,
-    attrs = _ATTRS,
+    implementation = ruby_binary_impl,
+    attrs = RUBY_ATTRS,
     test = True,
     toolchains = [TOOLCHAIN_TYPE_NAME],
 )

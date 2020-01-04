@@ -17,13 +17,9 @@ ruby_rules_dependencies()
 
 ruby_register_toolchains(version = "2.6.5")
 
-load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+load("@bazelruby_ruby_rules//ruby:defs.bzl", "ruby_bundle")
 
-bazel_skylib_workspace()
-
-load("@bazelruby_ruby_rules//ruby:defs.bzl", "bundle_install")
-
-bundle_install(
+ruby_bundle(
     name = "bundle",
     excludes = {
         "mini_portile": ["test/**/*"],

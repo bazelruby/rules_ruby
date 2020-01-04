@@ -148,7 +148,9 @@ test::simple-script() {
   __test::exec simple-script "
     cd examples/simple_script
     ${Bazel__BuildSteps}
-    bazel ${BAZEL_OPTS} run ${BAZEL_BUILD_OPTS} -- :rubocop ;
+    echo run :bin;        bazel ${BAZEL_OPTS} run   ${BAZEL_BUILD_OPTS} :bin
+    echo run :rubocop;    bazel ${BAZEL_OPTS} run   ${BAZEL_BUILD_OPTS} :rubocop
+
   "
 }
 

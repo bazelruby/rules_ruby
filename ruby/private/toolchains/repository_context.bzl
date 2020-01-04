@@ -9,7 +9,7 @@ def _eval_ruby(ruby, script, options = None):
         arguments.extend(options)
     arguments.extend(["-e", script])
 
-    environment = {"RUBYOPT": "--disable-gems"}
+    environment = {"RUBYOPT": "--enable=gems"}
 
     result = ruby._ctx.execute(arguments, environment = environment)
     if result.return_code:

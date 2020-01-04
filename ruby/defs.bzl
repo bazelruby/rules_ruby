@@ -13,11 +13,19 @@ load(
 )
 load(
     "@bazelruby_ruby_rules//ruby/private:bundle.bzl",
-    _bundle_install = "bundle_install",
+    _ruby_bundle = "ruby_bundle",
+)
+load(
+    "@bazelruby_ruby_rules//ruby/private:rspec.bzl",
+    _ruby_rspec = "ruby_rspec",
+    _ruby_rspec_test = "ruby_rspec_test",
 )
 
 ruby_toolchain = _toolchain
 ruby_library = _library
 ruby_binary = _binary
 ruby_test = _test
-bundle_install = _bundle_install
+ruby_rspec_test = _ruby_rspec_test
+ruby_rspec = _ruby_rspec
+bundle_install = _ruby_bundle
+ruby_bundle = _ruby_bundle

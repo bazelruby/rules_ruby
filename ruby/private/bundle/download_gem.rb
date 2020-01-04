@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 # frozen_string_literal: true
 
 require 'rubygems'
@@ -11,17 +12,21 @@ def unpack_gem(name, version, dest = Dir.pwd)
   source = Gem::Source.new('https://rubygems.org')
   spec = source.fetch_spec Gem::NameTuple.new(name, version)
 
-  Dir.mktmpdir { |dir|
+  Dir.mktmpdir do |dir|
     Dir.chdir(dir) { source.download(spec) }
     downloaded = File.join(dir, "#{name}-#{version}.gem")
-    Gem::Package.new(downloaded).extract_files dest
-  }
+    Gem::Package.new(downloaded).extract_files(dest)
+  end
 end
 
 def main
-  version = ARGV[0]
-  dir = ARGV[1] || Dir.pwd
-  unpack_gem('bundler', version, dir)
+  gem_name, gem_version, dir, = *ARGV
+  dir ||= Dir.pwd
+  unless gem_name && gem_version
+    puts "USAGE: #{$0} gem-name gem-version destination-folder"
+    exit 1
+  end
+  unpack_gem(gem_name, gem_version, dir)
 end
 
 if $0 == __FILE__

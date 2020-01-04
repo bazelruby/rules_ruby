@@ -1,12 +1,13 @@
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
-* [Status:](#status)
 * [Usage](#usage)
+  * [WORKSPACE File](#workspace-file)
+  * [BUILD.bazel files](#buildbazel-files)
 * [Rules](#rules)
   * [ruby_library](#ruby_library)
   * [ruby_binary](#ruby_binary)
   * [ruby_test](#ruby_test)
-  * [bundle_install](#bundle_install)
+  * [ruby_bundle](#ruby_bundle)
 * [What's coming next](#whats-coming-next)
 * [Contributing](#contributing)
   * [Setup](#setup)
@@ -35,13 +36,13 @@
 
 Ruby rules for [Bazel](https://bazel.build).
 
-## Status:
+** Current Status:** *Work in progress.*
 
-**Work in progress.**
-
-We have a guide on [Building your first Ruby Project](https://github.com/bazelruby/rules_ruby/wiki/Build-your-ruby-project) on the Wiki. We encourage you to check it out.
+Note: we have a short guide on [Building your first Ruby Project](https://github.com/bazelruby/rules_ruby/wiki/Build-your-ruby-project) on the Wiki. We encourage you to check it out.
 
 ## Usage
+
+### `WORKSPACE` File
 
 Add `ruby_rules_dependencies` and `ruby_register_toolchains` into your `WORKSPACE` file.
 
@@ -65,6 +66,33 @@ ruby_rules_dependencies()
 ruby_register_toolchains()
 ```
 
+Next, add any external Gem dependencies you may have via `ruby_bundle` command.
+The name of the bundle becomes a reference to this particular Gemfile.lock.
+
+Install external gems that can be later referenced as `@<bundle-name>//:<gem-name>`,
+and the executables from each gem can be accessed as `@<bundle-name//:bin/<gem-binary-name>`
+for instance, `@bundle//:bin/rubocop`.
+
+You can install more than one bundle per WORKSPACE, but that's not recommended.
+
+```python
+ruby_bundle(
+  name = "bundle",
+  gemfile = ":Gemfile",
+  gemfile_lock = ":Gemfile.lock",
+  bundler_version = "2.1.2",
+)
+
+ruby_bundle(
+  name = "bundle_app_shopping",
+  gemfile = "//apps/shopping:Gemfile",
+  gemfile_lock = "//apps/shopping:Gemfile.lock",
+  bundler_version = "2.1.2",
+)
+```
+
+### `BUILD.bazel` files
+
 Add `ruby_library`, `ruby_binary` or `ruby_test` into your `BUILD.bazel` files.
 
 ```python
@@ -73,12 +101,18 @@ load(
     "ruby_binary",
     "ruby_library",
     "ruby_test",
+    "ruby_rspec",
 )
 
 ruby_library(
     name = "foo",
-    srcs = ["lib/foo.rb"],
+    srcs = glob(["lib/**/*.rb"]),
     includes = ["lib"],
+    deps = [
+      "@bundle//:activesupport",
+      "@bundle//:awesome_print",
+      "@bundle//:rubocop",
+    ]
 )
 
 ruby_binary(
@@ -88,10 +122,18 @@ ruby_binary(
 )
 
 ruby_test(
-    name = "foo_test",
+    name = "foo-test",
     srcs = ["test/foo_test.rb"],
     deps = [":foo"],
 )
+
+ruby_rspec(
+    name = "foo-spec",
+    specs = glob(["spec/**/*.rb"]),
+    rspec_args = { "--format": "progress" },
+    deps = [":foo"]
+}
+
 ```
 
 ## Rules
@@ -338,7 +380,7 @@ ruby_test(name, deps, srcs, data, main, compatible_with, deprecation, distribs, 
   </tbody>
 </table>
 
-### `bundle_install`
+### `ruby_bundle`
 
 Installs gems with Bundler, and make them available as a `ruby_library`.
 
@@ -361,9 +403,9 @@ ruby_rules_dependencies()
 
 ruby_register_toolchains()
 
-load("@bazelruby_ruby_rules//ruby:defs.bzl", "bundle_install")
+load("@bazelruby_ruby_rules//ruby:defs.bzl", "ruby_bundle")
 
-bundle_install(
+ruby_bundle(
     name = "gems",
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
@@ -376,12 +418,24 @@ Example: `lib/BUILD.bazel`:
 ruby_library(
     name = "foo",
     srcs = ["foo.rb"],
-    deps = ["@gems//:libs"],
+    deps = ["@gems//:all"],
+)
+```
+
+Or declare many gems in your `Gemfile`, and only use some of them in each ruby library:
+
+```python
+ruby_binary(
+    name = "rubocop",
+    srcs = [":foo", ".rubocop.yml"],
+    args = ["-P", "-D", "-c" ".rubocop.yml"],
+    main = "@gems//:bin/rubocop",
+    deps = ["@gems//:rubocop"],
 )
 ```
 
 <pre>
-bundle_install(name, gemfile, gemfile_lock)
+ruby_bundle(name, gemfile, gemfile_lock, bundler_version = "2.1.2")
 </pre>
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
@@ -415,6 +469,14 @@ bundle_install(name, gemfile, gemfile_lock)
       <td>
         <code>Label, required</code>
           <p>The <code>Gemfile.lock</code> which Bundler runs with.</p>
+          <p>NOTE: This rule never updates the <code>Gemfile.lock</code>. It is your responsibility to generate/update <code>Gemfile.lock</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>bundler_version</code></td>
+      <td>
+        <code>String, optional</code>
+          <p>The Version of Bundler to use. Defaults to 2.1.2.</p>
           <p>NOTE: This rule never updates the <code>Gemfile.lock</code>. It is your responsibility to generate/update <code>Gemfile.lock</code></p>
       </td>
     </tr>

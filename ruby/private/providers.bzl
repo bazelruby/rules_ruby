@@ -5,3 +5,12 @@ RubyLibrary = provider(
         "rubyopt",
     ],
 )
+
+RubyRuntimeContext = provider(
+    doc = "Carries info required to execute Ruby Scripts",
+    fields = [
+        "ctx",
+        "interpreter",
+        "environment",
+    ],
+)
