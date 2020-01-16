@@ -9,7 +9,7 @@ fi
 
 # check if we are running without access to Docker Server (eg, on CI
 # within its own Docker container) and if so — skip this test.
-if [[ -n "$(docker info 2>/dev/null | grep 'Cannot connect')" ]]; then
+if [[ -z $(command -v docker) || -n "$(docker info 2>/dev/null | grep 'Cannot connect')" ]]; then
   echo "No Docker runtime detected, skipping tests."
   exit 0
 else

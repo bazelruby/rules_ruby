@@ -47,14 +47,14 @@ GEM_TEMPLATE
 ALL_GEMS = <<~ALL_GEMS
   ruby_library(
     name = "gems",
-    srcs = glob([{gems_lib_files}]) + glob(["bin/*"]),
-    includes = {gems_lib_paths},
+    srcs = glob([{bundle_lib_files}]) + glob(["bin/*"]),
+    includes = {bundle_lib_paths},
   )
 
   ruby_library(
     name = "bin",
     srcs = glob(["bin/*"]),
-    deps = {gems_with_binaries}
+    deps = {bundle_with_binaries}
   )
 ALL_GEMS
 
@@ -180,20 +180,20 @@ class BundleBuildFileGenerator
     remove_bundler_version!
 
     # Append to the end specific gem libraries and dependencies
-    bundle        = Bundler::LockfileParser.new(Bundler.read_file(gemfile_lock))
-    gem_lib_paths = []
-    gems_binaries = {} # gem-name => [ gem's binaries ], ...
-    gems          = bundle.specs.map(&:name)
+    bundle           = Bundler::LockfileParser.new(Bundler.read_file(gemfile_lock))
+    bundle_lib_paths = []
+    bundle_binaries  = {} # gem-name => [ gem's binaries ], ...
+    gems             = bundle.specs.map(&:name)
 
-    bundle.specs.each { |spec| register_gem(spec, template_out, gem_lib_paths, gems_binaries) }
+    bundle.specs.each { |spec| register_gem(spec, template_out, bundle_lib_paths, bundle_binaries) }
 
     template_out.puts ALL_GEMS
-                        .gsub('{gems_lib_files}', to_flat_string(gem_lib_paths.map { |p| "#{p}/**/*" }))
-                        .gsub('{gems_binaries}', gems_binaries.values.flatten.to_s)
-                        .gsub('{gems_lib_paths}', gem_lib_paths.to_s)
+                        .gsub('{bundle_lib_files}', to_flat_string(bundle_lib_paths.map { |p| "#{p}/**/*" }))
+                        .gsub('{bundle_with_binaries}', bundle_binaries.keys.map { |g| ":#{g}" }.to_s)
+                        .gsub('{bundle_binaries}', bundle_binaries.values.flatten.to_s)
+                        .gsub('{bundle_lib_paths}', bundle_lib_paths.to_s)
                         .gsub('{bundler_setup}', bundler_setup_require)
-                        .gsub('{gems_deps}', gems.map { |g| ":#{g}" }.to_s)
-                        .gsub('{gems_with_binaries}', gems_binaries.keys.map { |g| ":#{g}" }.to_s)
+                        .gsub('{bundle_deps}', gems.map { |g| ":#{g}" }.to_s)
                         .gsub('{exclude}', DEFAULT_EXCLUDES.to_s)
 
     ::File.open(build_file, 'w') { |f| f.puts template_out.string }
@@ -221,17 +221,17 @@ class BundleBuildFileGenerator
     ::FileUtils.move(temp_gemfile_lock, gemfile_lock, force: true)
   end
 
-  def register_gem(spec, template_out, gem_lib_paths, gems_binaries)
+  def register_gem(spec, template_out, bundle_lib_paths, bundle_binaries)
     gem_path = GEM_PATH[ruby_version, spec.name, spec.version]
-    gem_lib_paths << gem_lib_path = gem_path + '/lib'
+    bundle_lib_paths << gem_lib_path = gem_path + '/lib'
 
     # paths to search for executables
-    gem_binaries             = find_gems_binaries(gem_path)
-    gems_binaries[spec.name] = gem_binaries unless gem_binaries.nil? || gem_binaries.empty?
+    gem_binaries               = find_bundle_binaries(gem_path)
+    bundle_binaries[spec.name] = gem_binaries unless gem_binaries.nil? || gem_binaries.empty?
 
     deps = spec.dependencies.map { |d| ":#{d.name}" }
 
-    warn("registering gem #{spec.name} with binaries: #{gem_binaries}") if gems_binaries.key?(spec.name)
+    warn("registering gem #{spec.name} with binaries: #{gem_binaries}") if bundle_binaries.key?(spec.name)
 
     template_out.puts GEM_TEMPLATE
                         .gsub('{gem_lib_path}', gem_lib_path)
@@ -246,7 +246,7 @@ class BundleBuildFileGenerator
                         .gsub('{bundler_setup}', bundler_setup_require)
   end
 
-  def find_gems_binaries(gem_path)
+  def find_bundle_binaries(gem_path)
     gem_bin_paths = %W(#{gem_path}/bin #{gem_path}/exe)
 
     gem_bin_paths
