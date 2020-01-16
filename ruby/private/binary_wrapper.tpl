@@ -98,7 +98,7 @@ def main(args)
   loadpaths = create_loadpath_entries(custom_loadpaths, runfiles)
   loadpaths += get_repository_imports(runfiles)
   loadpaths += ENV['RUBYLIB'].split(':') if ENV.key?('RUBYLIB')
-  ENV['RUBYLIB'] = loadpaths.join(':')
+  ENV['RUBYLIB'] = loadpaths.sort.uniq.join(':')
 
   runfiles_envkey, runfiles_envvalue = runfiles_envvar(runfiles)
   ENV[runfiles_envkey] = runfiles_envvalue if runfiles_envkey

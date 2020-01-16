@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-TEMPLATE = <<~MAIN_TEMPLATE
+BUILD_HEADER = <<~MAIN_TEMPLATE
   load(
     "{workspace_name}//ruby:defs.bzl",
     "ruby_library",
@@ -33,30 +33,33 @@ GEM_TEMPLATE = <<~GEM_TEMPLATE
     name = "{name}",
     srcs = glob(
       include = [
-        "lib/ruby/{ruby_version}/gems/{name}-{version}/**/*",
-        "bin/*"
+        ".bundle/config",
+        "{gem_lib_files}",
+        {gem_binaries}
       ],
       exclude = {exclude},
     ),
     deps = {deps},
     includes = ["lib/ruby/{ruby_version}/gems/{name}-{version}/lib"],
-    rubyopt = ["{bundler_setup}"],
   )
 GEM_TEMPLATE
 
 ALL_GEMS = <<~ALL_GEMS
   ruby_library(
     name = "gems",
-    srcs = glob(
-      {gems_lib_files},
-    ),
-    includes = {gems_lib_paths},
-    rubyopt = ["{bundler_setup}"],
+    srcs = glob([{bundle_lib_files}]) + glob(["bin/*"]),
+    includes = {bundle_lib_paths},
+  )
+
+  ruby_library(
+    name = "bin",
+    srcs = glob(["bin/*"]),
+    deps = {bundle_with_binaries}
   )
 ALL_GEMS
 
-GEM_LIB_PATH = ->(ruby_version, gem_name, gem_version) do
-  "lib/ruby/#{ruby_version}/gems/#{gem_name}-#{gem_version}/lib"
+GEM_PATH = ->(ruby_version, gem_name, gem_version) do
+  "lib/ruby/#{ruby_version}/gems/#{gem_name}-#{gem_version}"
 end
 
 require 'bundler'
@@ -84,7 +87,7 @@ class String
 
   def light_blue;   colorize(36); end
 
-  def orange;       colorize(41); end
+  def orange;       colorize(52); end
   # @formatter:on
 end
 
@@ -117,6 +120,8 @@ class Buildifier
     system("/usr/bin/env bash -c '#{command} 1>#{output_file} 2>&1'")
     code = $?
 
+    return unless File.exist?(output_file)
+
     output = File.read(output_file).strip.gsub(Dir.pwd, '.').yellow
     begin
       FileUtils.rm_f(output_file)
@@ -129,7 +134,7 @@ class Buildifier
     else
       raise BuildifierFailedError,
             'Generated BUILD file failed buildifier, with error — '.red + "\n\n" +
-            File.read(output_file).yellow
+            output.yellow
     end
   end
 end
@@ -141,6 +146,10 @@ class BundleBuildFileGenerator
               :gemfile_lock,
               :excludes,
               :ruby_version
+
+  DEFAULT_EXCLUDES = ['**/* *.*', '**/* */*'].freeze
+
+  EXCLUDED_EXECUTABLES = %w(console setup).freeze
 
   def initialize(workspace_name:,
                  repo_name:,
@@ -161,35 +170,31 @@ class BundleBuildFileGenerator
   def generate!
     # when we append to a string many times, using StringIO is more efficient.
     template_out = StringIO.new
-
-    # In Bazel we want to use __FILE__ because __dir__points to the actual sources, and we are
-    # using symlinks here.
-    #
-    # rubocop:disable Style/ExpandPathArguments
-    bin_folder = File.expand_path('../bin', __FILE__)
-    binaries   = Dir.glob("#{bin_folder}/*").map do |binary|
-      'bin/' + File.basename(binary) if File.executable?(binary)
-    end
-    # rubocop:enable Style/ExpandPathArguments
-
-    template_out.puts TEMPLATE
+    template_out.puts BUILD_HEADER
                         .gsub('{workspace_name}', workspace_name)
                         .gsub('{repo_name}', repo_name)
                         .gsub('{ruby_version}', ruby_version)
-                        .gsub('{binaries}', binaries.to_s)
                         .gsub('{bundler_setup}', bundler_setup_require)
 
     # strip bundler version so we can process this file
     remove_bundler_version!
+
     # Append to the end specific gem libraries and dependencies
-    bundle        = Bundler::LockfileParser.new(Bundler.read_file(gemfile_lock))
-    gem_lib_paths = []
-    bundle.specs.each { |spec| register_gem(spec, template_out, gem_lib_paths) }
+    bundle           = Bundler::LockfileParser.new(Bundler.read_file(gemfile_lock))
+    bundle_lib_paths = []
+    bundle_binaries  = {} # gem-name => [ gem's binaries ], ...
+    gems             = bundle.specs.map(&:name)
+
+    bundle.specs.each { |spec| register_gem(spec, template_out, bundle_lib_paths, bundle_binaries) }
 
     template_out.puts ALL_GEMS
-                        .gsub('{gems_lib_files}', gem_lib_paths.map { |p| "#{p}/**/*.rb" }.to_s)
-                        .gsub('{gems_lib_paths}', gem_lib_paths.to_s)
+                        .gsub('{bundle_lib_files}', to_flat_string(bundle_lib_paths.map { |p| "#{p}/**/*" }))
+                        .gsub('{bundle_with_binaries}', bundle_binaries.keys.map { |g| ":#{g}" }.to_s)
+                        .gsub('{bundle_binaries}', bundle_binaries.values.flatten.to_s)
+                        .gsub('{bundle_lib_paths}', bundle_lib_paths.to_s)
                         .gsub('{bundler_setup}', bundler_setup_require)
+                        .gsub('{bundle_deps}', gems.map { |g| ":#{g}" }.to_s)
+                        .gsub('{exclude}', DEFAULT_EXCLUDES.to_s)
 
     ::File.open(build_file, 'w') { |f| f.puts template_out.string }
   end
@@ -216,23 +221,53 @@ class BundleBuildFileGenerator
     ::FileUtils.move(temp_gemfile_lock, gemfile_lock, force: true)
   end
 
-  def register_gem(spec, template_out, gem_lib_paths)
-    gem_lib_paths << GEM_LIB_PATH[ruby_version, spec.name, spec.version]
-    deps = spec.dependencies.map { |d| ":#{d.name}" }
-    deps += [':bundler_setup']
+  def register_gem(spec, template_out, bundle_lib_paths, bundle_binaries)
+    gem_path = GEM_PATH[ruby_version, spec.name, spec.version]
+    bundle_lib_paths << gem_lib_path = gem_path + '/lib'
 
-    exclude_array = excludes[spec.name] || []
-    # We want to exclude files and folder with spaces in them
-    exclude_array += ['**/* *.*', '**/* */*']
+    # paths to search for executables
+    gem_binaries               = find_bundle_binaries(gem_path)
+    bundle_binaries[spec.name] = gem_binaries unless gem_binaries.nil? || gem_binaries.empty?
+
+    deps = spec.dependencies.map { |d| ":#{d.name}" }
+
+    warn("registering gem #{spec.name} with binaries: #{gem_binaries}") if bundle_binaries.key?(spec.name)
 
     template_out.puts GEM_TEMPLATE
-                        .gsub('{exclude}', exclude_array.to_s)
+                        .gsub('{gem_lib_path}', gem_lib_path)
+                        .gsub('{gem_lib_files}', gem_lib_path + '/**/*')
+                        .gsub('{gem_binaries}', to_flat_string(gem_binaries))
+                        .gsub('{exclude}', exclude_array(spec.name).to_s)
                         .gsub('{name}', spec.name)
                         .gsub('{version}', spec.version.to_s)
                         .gsub('{deps}', deps.to_s)
                         .gsub('{repo_name}', repo_name)
                         .gsub('{ruby_version}', ruby_version)
                         .gsub('{bundler_setup}', bundler_setup_require)
+  end
+
+  def find_bundle_binaries(gem_path)
+    gem_bin_paths = %W(#{gem_path}/bin #{gem_path}/exe)
+
+    gem_bin_paths
+      .map do |bin_path|
+      Dir # grab all files under bin/ and exe/ inside the gem folder
+        .glob("#{bin_path}/*") # convert to File object
+        .map { |b| f = File.new(b); File.executable?(f) ? f : nil }
+        .compact # remove non-executables, take basename, minus binary defaults
+        .map { |f| File.basename(f.path) } - EXCLUDED_EXECUTABLES # that bundler installs with bundle gem <name
+    end.flatten
+      .compact
+      .sort
+      .map { |binary| 'bin/' + binary }
+  end
+
+  def exclude_array(gem_name)
+    (excludes[gem_name] || []) + DEFAULT_EXCLUDES
+  end
+
+  def to_flat_string(array)
+    array.to_s.gsub(/[\[\]]/, '')
   end
 end
 
@@ -249,13 +284,12 @@ if $0 == __FILE__
                                gemfile_lock:   gemfile_lock,
                                repo_name:      repo_name,
                                excludes:       JSON.parse(excludes),
-                               workspace_name: workspace_name)
-                               .generate!
+                               workspace_name: workspace_name).generate!
 
   begin
     Buildifier.new(build_file).buildify!
     puts("Buildifier successful on file #{build_file} ")
   rescue Buildifier::BuildifierError => e
-    warn("ERROR running buildifier on the generated build file [#{build_file}] ➔ \n#{e.message.orange}")
+    warn("ERROR running buildifier on the generated build file [#{build_file}] ➔ #{e.message.orange}")
   end
 end

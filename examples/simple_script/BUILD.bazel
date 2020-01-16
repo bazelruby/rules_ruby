@@ -54,7 +54,7 @@ ruby_binary(
     deps = [
         ":lib",
         "//lib:foo",
-        "@bundle//:gems",
+        "@bundle//:bin",
     ],
 )
 
@@ -77,10 +77,7 @@ ruby_test(
     main = "spec/spec_helper.rb",
     rubyopt = ["-rrspec/autorun"],
     deps = [
-        "@bundle//:awesome_print",
-        "@bundle//:colored2",
-        "@bundle//:rspec",
-        "@bundle//:rspec-its",
+        "@bundle//:gems",
     ],
 )
 
@@ -103,6 +100,7 @@ ruby_test(
     main = "@bundle//:bin/rspec",
     deps = [
         "@bundle//:awesome_print",
+        "@bundle//:bin",
         "@bundle//:colored2",
         "@bundle//:rspec",
         "@bundle//:rspec-its",
@@ -138,7 +136,6 @@ ruby_binary(
     srcs = [
         ".relaxed-rubocop-2.4.yml",
         ".rubocop.yml",
-        "@bundle//:bin/rubocop",
     ],
     args = [
         "-c",
@@ -150,6 +147,6 @@ ruby_binary(
     deps = [
         ":lib",
         "//lib:foo",
-        "@bundle//:rubocop",
+        "@bundle//:bin",
     ],
 )
