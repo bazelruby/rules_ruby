@@ -14,3 +14,11 @@ RubyRuntimeContext = provider(
         "environment",
     ],
 )
+
+RubyGem = provider(
+    doc = "Carries info required to package a ruby gem",
+    fields = [
+        "ctx",
+        "version",
+    ],
+)

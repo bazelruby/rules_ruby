@@ -1,4 +1,7 @@
 exports_files(
-    ["binary_wrapper.tpl"],
+    [
+        "binary_wrapper.tpl",
+        "gemspec_template.tpl",
+    ],
     visibility = ["//visibility:public"],
 )

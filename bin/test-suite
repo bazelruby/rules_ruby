@@ -147,10 +147,17 @@ test::buildifier() {
 test::simple-script() {
   __test::exec simple-script "
     cd examples/simple_script
-    ${Bazel__BuildSteps}
+    ${Bazel__BuildSteps}  
     echo run :bin;        bazel ${BAZEL_OPTS} run   ${BAZEL_BUILD_OPTS} :bin
     echo run :rubocop;    bazel ${BAZEL_OPTS} run   ${BAZEL_BUILD_OPTS} :rubocop
+  "
+}
 
+# Builds and runs workspace inside examples/simple_script
+test::example-gem() {
+  __test::exec example-gem "
+    cd examples/example_gem
+    echo bazel ${BAZEL_OPTS} build ...:all; bazel ${BAZEL_OPTS} build ...:all
   "
 }
 
