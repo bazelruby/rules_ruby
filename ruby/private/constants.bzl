@@ -30,6 +30,9 @@ RUBY_ATTRS = {
     "main": attr.label(
         allow_single_file = True,
     ),
+    "force_gem_pristine": attr.string_list(
+        doc = "Jank hack. Run gem pristine on some gems that don't handle symlinks well",
+    ),
     "_wrapper_template": attr.label(
         allow_single_file = True,
         default = "binary_wrapper.tpl",

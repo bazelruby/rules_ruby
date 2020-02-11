@@ -33,10 +33,17 @@ GEM_TEMPLATE = <<~GEM_TEMPLATE
     name = "{name}",
     srcs = glob(
       include = [
+<<<<<<< HEAD
         ".bundle/config",
         "{gem_lib_files}",
         "lib/ruby/{ruby_version}/specifications/{name}-{version}.gemspec",
         {gem_binaries}
+=======
+        "lib/ruby/{ruby_version}/gems/{name}-{version}*/**",
+        "lib/ruby/{ruby_version}/specifications/{name}-{version}*.gemspec",
+        "lib/ruby/{ruby_version}/cache/{name}-{version}*.gem",
+        "bin/*"
+>>>>>>> eeab881... Add force_gem_pristine attr to rb_binary (#11)
       ],
       exclude = {exclude},
     ),

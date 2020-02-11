@@ -91,6 +91,13 @@ def find_ruby_binary
   )
 end
 
+def find_gem_binary
+  File.join(
+    RbConfig::CONFIG['bindir'],
+    'gem',
+  )
+end
+
 def main(args)
   custom_loadpaths = {loadpaths}
   runfiles = find_runfiles
@@ -104,6 +111,7 @@ def main(args)
   ENV[runfiles_envkey] = runfiles_envvalue if runfiles_envkey
 
   ENV["GEM_PATH"] = File.join(runfiles, "{gem_path}") if "{gem_path}"
+  ENV["GEM_HOME"] = File.join(runfiles, "{gem_path}") if "{gem_path}"
 
   ruby_program = find_ruby_binary
 
@@ -119,6 +127,17 @@ def main(args)
       end
     end
   end
+
+  # This is a jank hack because some of our gems are having issues with how
+  # they are being installed. Most gems are fine, but this fixes the ones that
+  # aren't. Put it here instead of in the library because we want to fix the
+  # underlying issue and then tear this out.
+  if {should_gem_pristine} then
+    gem_program = find_gem_binary
+    puts "Running pristine on {gems_to_pristine}"
+    system(gem_program + " pristine {gems_to_pristine}")
+  end
+
   exec(ruby_program, *rubyopt, main, *args)
   # TODO(yugui) Support windows
 end
