@@ -1,7 +1,18 @@
 #!/usr/bin/env bash
 
-set -ex
+set -e
 
-docker build . -t bazelruby/ruby-2.6.5
-docker push       bazelruby/ruby-2.6.5
+[[ -d .circleci ]] && cd .circleci
+
+RUBY_VERSION=$(cat ../.ruby-version)
+
+echo
+echo "Ruby version is $RUBY_VERSION"
+echo
+
+set -x 
+
+docker build . -t bazelruby/ruby-$RUBY_VERSION
+
+docker push       bazelruby/ruby-$RUBY_VERSION
 

@@ -5,7 +5,7 @@ jobs:
     working_directory: /home/circleci/repo
     resource_class: medium
     docker:
-      - image: bazelruby/ruby-2.6.5
+      - image: bazelruby/ruby-2.7.0
     environment:
       PATH: "/usr/local/bin:/usr/bin:/sbin:/opt/bin:/home/circleci/repo/bin:/bin:/sbin:/usr/sbin"
       BUNDLE_PATH: /home/circleci/.bundle_cache

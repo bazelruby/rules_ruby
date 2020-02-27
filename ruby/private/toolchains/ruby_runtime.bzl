@@ -4,9 +4,9 @@ load("//ruby/private/toolchains:repository_context.bzl", "ruby_repository_contex
 def _install_ruby_version(ctx, version):
     print("download and extract ruby-build")
     ctx.download_and_extract(
-        url = "https://github.com/rbenv/ruby-build/archive/v20191205.tar.gz",
-        sha256 = "d8ffe806a215b3afacead72e766f293ce380c78a143911b84cdb5f33e20a5284",
-        stripPrefix = "ruby-build-20191205",
+        url = "https://github.com/rbenv/ruby-build/archive/v20200224.tar.gz",
+        sha256 = "dc3799a1c784c9a0f214a3c0c861a0bb798cd40ee2df49bce95b4c95adf6fc79",
+        stripPrefix = "ruby-build-20200224",
     )
 
     install_path = "./build"
@@ -39,7 +39,7 @@ def _relativate(path):
 
 def _list_libdirs(ruby):
     """List the LOAD_PATH of the ruby"""
-    paths = ruby.eval(ruby, 'print $:.join("\\n")')
+    paths = ruby.eval(ruby, "print $:.join(\"\\n\")")
     paths = sorted(paths.split("\n"))
     rel_paths = [_relativate(path) for path in paths]
     return (paths, rel_paths)
