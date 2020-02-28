@@ -1,107 +1,43 @@
-package(default_visibility = ["//:__subpackages__"])
-
 load(
     "@bazelruby_ruby_rules//ruby:defs.bzl",
     "ruby_binary",
-    "ruby_library",
     "ruby_rspec",
+    "ruby_rubocop",
     "ruby_test",
 )
 
-filegroup(
-    name = "sources",
-    srcs = glob([
-        "script.rb",
-        "lib/*.rb",
-    ]),
-)
-
-filegroup(
-    name = "spec_sources",
-    srcs = glob([
-        "spec/**/*.rb",
-    ]),
-)
-
-ruby_library(
-    name = "lib",
-    srcs = [
-        ":sources",
-        ":spec_sources",
-    ],
-    deps = [
-        "@bundle//:awesome_print",
-        "@bundle//:colored2",
-    ],
-)
+package(default_visibility = ["//:__subpackages__"])
 
 ruby_binary(
     name = "bin",
     srcs = ["script.rb"],
     main = "script.rb",
     deps = [
-        ":lib",
         "//lib:foo",
         "@bundle//:awesome_print",
-        "@bundle//:colored2",
-    ],
-)
-
-ruby_binary(
-    name = "bin-all",
-    srcs = ["script.rb"],
-    main = "script.rb",
-    deps = [
-        ":lib",
-        "//lib:foo",
-        "@bundle//:bin",
     ],
 )
 
 # This is an example of the RSpec definition that uses autorun
 # and points to spec_helper as the main spec file. It specifies
 # which specs to run using the args.
+
 ruby_test(
-    name = "rspec-autorun",
+    name = "all-specs",
     timeout = "short",
     srcs = [
-        ":sources",
-        ":spec_sources",
-    ],
-    args = [
-        "--format documentation",
-        "--force-color",
+        "script.rb",
+        "//lib:foo",
     ] + glob([
         "spec/**/*.rb",
     ]),
-    main = "spec/spec_helper.rb",
-    rubyopt = ["-rrspec/autorun"],
-    deps = [
-        "@bundle//:gems",
-    ],
-)
-
-# This is a similar example, except instead of using rubyopt to load
-# rspec, we execute rspec executable located in the bin folder under
-# the bundle, accessible via @bundle//:bin/rspec
-ruby_test(
-    name = "rspec-binary",
-    timeout = "short",
-    srcs = [
-        ":sources",
-        ":spec_sources",
-        "@bundle//:bin/rspec",
-    ],
     args = [
-        "--format documentation",
-        "--force-color",
         "spec",
     ],
     main = "@bundle//:bin/rspec",
     deps = [
         "@bundle//:awesome_print",
         "@bundle//:bin",
-        "@bundle//:colored2",
         "@bundle//:rspec",
         "@bundle//:rspec-its",
     ],
@@ -115,8 +51,8 @@ ruby_test(
 ruby_rspec(
     name = "ruby-rspec-test",
     srcs = [
-        ":sources",
-        ":spec_sources",
+        "script.rb",
+        "//lib:foo",
     ],
     rspec_args = {
         # NOTE: the output is only visible with --test_output=streamed flag
@@ -127,26 +63,34 @@ ruby_rspec(
     ]),
     deps = [
         "@bundle//:awesome_print",
-        "@bundle//:colored2",
     ],
 )
 
 ruby_binary(
-    name = "rubocop",
+    name = "rubocop-bin",
     srcs = [
-        ".relaxed-rubocop-2.4.yml",
-        ".rubocop.yml",
-    ],
+        "script.rb",
+        "//lib:foo",
+    ] + glob([
+        "spec/**/*.rb",
+    ]),
     args = [
-        "-c",
-        ".rubocop.yml",
-        "-P",
-        "-D",
+        "-- *.rb spec/*.rb lib/*.rb -a",
     ],
     main = "@bundle//:bin/rubocop",
     deps = [
-        ":lib",
         "//lib:foo",
         "@bundle//:bin",
+    ],
+)
+
+# Rubocop rule
+# To check
+# bazel run rubocop -- -a
+ruby_rubocop(
+    name = "rubocop",
+    bin = "@bundle//:bin/rubocop",
+    deps = [
+        "@bundle//:rubocop",
     ],
 )

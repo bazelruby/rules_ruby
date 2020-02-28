@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'colored2'
 require 'openssl'
 require 'awesome_print'
 

@@ -91,9 +91,9 @@ container_pull(
     repository = "library/ruby",
 )
 
-load("@bazelruby_ruby_rules//ruby:defs.bzl", "bundle_install")
+load("@bazelruby_ruby_rules//ruby:defs.bzl", "ruby_bundle")
 
-bundle_install(
+ruby_bundle(
     name = "bundle",
     bundler_version = "2.1.2",
     excludes = {

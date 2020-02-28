@@ -35,10 +35,12 @@ GEM_TEMPLATE = <<~GEM_TEMPLATE
       include = [
         ".bundle/config",
         "{gem_lib_files}",
+        "lib/ruby/{ruby_version}/specifications/{name}-{version}.gemspec",
         {gem_binaries}
       ],
       exclude = {exclude},
     ),
+    rubyopt = ["{bundler_setup}"],
     deps = {deps},
     includes = ["lib/ruby/{ruby_version}/gems/{name}-{version}/lib"],
   )
@@ -49,6 +51,7 @@ ALL_GEMS = <<~ALL_GEMS
     name = "gems",
     srcs = glob([{bundle_lib_files}]) + glob(["bin/*"]),
     includes = {bundle_lib_paths},
+    rubyopt = ["{bundler_setup}"],
   )
 
   ruby_library(

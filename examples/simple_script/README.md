@@ -15,5 +15,5 @@ bundle lock --update
 Run rubocop with:
 
 ```
-bazel run :rubocop -- $(pwd)/* -a
+bazel run //:rubocop
 ```

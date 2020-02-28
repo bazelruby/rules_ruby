@@ -1,6 +1,17 @@
-build  --verbose_failures --spawn_strategy=standalone --strategy=Genrule=standalone --show_timestamps --show_progress --show_progress_rate_limit 0.5
-test --spawn_strategy=standalone
+# Common options
 common --color=yes
-startup --max_idle_secs=1
-test --verbose_failures --test_output=errors --test_verbose_timeout_warnings --show_progress --show_progress_rate_limit 0.5
-run --verbose_failures --show_progress --show_progress_rate_limit 0.5
+common --verbose_failures
+common --show_progress
+common --show_progress_rate_limit=0.5
+
+# Build options
+build --spawn_strategy=standalone
+build --strategy=Genrule=standalone
+build --show_timestamps
+build --curses=no
+build --jobs=10
+
+# Test options
+test --spawn_strategy=standalone
+test --test_output=all
+test --test_verbose_timeout_warnings
