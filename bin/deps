@@ -27,7 +27,7 @@ __version::detect() {
 
 # Application Constants
 export RulesRuby__RulesVersion=$(__version::detect .rules_version)
-export RulesRuby__RubyVersion=$(__version::detect .ruby_version)
+export RulesRuby__RubyVersion=2.7.0
 export RulesRuby__BazelVersion=$(__version::detect .bazelversion)
 
 bazel-sha() {

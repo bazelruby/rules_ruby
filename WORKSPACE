@@ -1,6 +1,6 @@
 workspace(name = "bazelruby_ruby_rules")
 
-load("@//ruby:deps.bzl", "ruby_rules_dependencies")
+load("@//ruby:deps.bzl", "ruby_register_toolchains", "ruby_rules_dependencies")
 
 ruby_rules_dependencies()
 
@@ -11,8 +11,6 @@ bazel_skylib_workspace()
 load("@bazel_skylib//lib:versions.bzl", "versions")
 
 versions.check("1.2.1")
-
-load("@//ruby:deps.bzl", "ruby_register_toolchains")
 
 ruby_register_toolchains()
 
