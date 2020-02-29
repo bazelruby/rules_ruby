@@ -1,0 +1,6 @@
+package(default_visibility = ["//ruby/private:__pkg__"])
+
+exports_files(
+    ["runner.sh.tpl"],
+    visibility = ["//visibility:public"],
+)

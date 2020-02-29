@@ -10,6 +10,17 @@ def _to_manifest_path(ctx, file):
     else:
         return ("%s/%s" % (ctx.workspace_name, file.short_path))
 
+def _get_gem_path(incpaths):
+    """
+    incpaths is a list of `<bundle_name>/lib/ruby/<version>/gems/<gemname>-<gemversion>/lib`
+    The gem_path is `<bundle_name>/lib/ruby/<version>` so we can go from an incpath to the
+    gem_path pretty easily without much additional work.
+    """
+    if len(incpaths) == 0:
+        return ""
+    incpath = incpaths[0]
+    return incpath.rsplit("/", 3)[0]
+
 # Having this function allows us to override otherwise frozen attributes
 # such as main, srcs and deps. We use this in ruby_rspec_test rule by
 # adding rspec as a main, and sources, and rspec gem as a dependency.
@@ -41,6 +52,10 @@ def ruby_binary_macro(ctx, main, srcs):
         extra_deps = ctx.attr._misc_deps,
     )
 
+    gem_path = _get_gem_path(deps.incpaths.to_list())
+
+    gems_to_pristine = ctx.attr.force_gem_pristine
+
     rubyopt = reversed(deps.rubyopt.to_list())
 
     ctx.actions.expand_template(
@@ -51,6 +66,9 @@ def ruby_binary_macro(ctx, main, srcs):
             "{rubyopt}": repr(rubyopt),
             "{main}": repr(_to_manifest_path(ctx, main)),
             "{interpreter}": _to_manifest_path(ctx, interpreter),
+            "{gem_path}": gem_path,
+            "{should_gem_pristine}": str(len(gems_to_pristine) > 0).lower(),
+            "{gems_to_pristine}": " ".join(gems_to_pristine),
         },
     )
 

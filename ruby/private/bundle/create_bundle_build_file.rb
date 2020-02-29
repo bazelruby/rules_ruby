@@ -22,7 +22,6 @@ BUILD_HEADER = <<~MAIN_TEMPLATE
         "bundler/**/*",
       ],
     ),
-    rubyopt = ["{bundler_setup}"],
   )
 
   # PULL EACH GEM INDIVIDUALLY
@@ -35,6 +34,7 @@ GEM_TEMPLATE = <<~GEM_TEMPLATE
       include = [
         ".bundle/config",
         "{gem_lib_files}",
+        "lib/ruby/{ruby_version}/specifications/{name}-{version}.gemspec",
         {gem_binaries}
       ],
       exclude = {exclude},

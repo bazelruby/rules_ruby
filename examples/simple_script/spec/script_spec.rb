@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require_relative '../script'
+require 'script'
 
 describe 'oss_rand' do
   it 'generates a String' do

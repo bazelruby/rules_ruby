@@ -8,6 +8,7 @@
   * [ruby_binary](#ruby_binary)
   * [ruby_test](#ruby_test)
   * [ruby_bundle](#ruby_bundle)
+  * [ruby_gem](#rb_gem)
 * [What's coming next](#whats-coming-next)
 * [Contributing](#contributing)
   * [Setup](#setup)
@@ -483,11 +484,88 @@ ruby_bundle(name, gemfile, gemfile_lock, bundler_version = "2.1.2")
   </tbody>
 </table>
 
+## rb_gem
+Used to generate a zipped gem containing its srcs, dependencies and a gemspec.
+
+<pre>
+rb_gem(name, gem_name, version, srcs, authors, deps, data, includes)
+</pre>
+<table class="table table-condensed table-bordered table-params">
+  <colgroup>
+    <col class="col-param" />
+    <col class="param-description" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th colspan="2">Attributes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>name</code></td>
+      <td>
+        <code>Name, required</code>
+        <p>A unique name for this rule.</p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>gem_name</code></td>
+      <td>
+        <code>Name of the gem, required</code>
+        <p>The name of the gem to be generated.</p>
+      </td>
+    </tr>
+    <tr>
+    <tr>
+      <td><code>version</code></td>
+      <td>
+        <code>Label, required</code>
+        <p>
+          The version of the gem. Is used to name the output file,
+          which becomes <code>name-version.zip</code>, and also
+          included in the Gemspec.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>authors</code></td>
+      <td>
+        <code>List of Strings, required</code>
+        <p>
+          List of human readable names of the gem authors.
+          Required to generate a valid gemspec.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>srcs</code></td>
+      <td>
+        <code>List of Labels, optional</code>
+        <p>
+          List of <code>.rb</code> files.
+        </p>
+        <p>At least <code>srcs</code> or <code>deps</code> must be present</p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>deps</code></td>
+      <td>
+        <code>List of labels, optional</code>
+        <p>
+          List of targets that are required by the <code>srcs</code> Ruby
+          files.
+        </p>
+        <p>At least <code>srcs</code> or <code>deps</code> must be present</p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 ## What's coming next
 
 1. Building native extensions in gems with Bazel
 2. Using a specified version of Ruby.
-3. Building and releasing your gems with Bazel
+3. Releasing your gems with Bazel
 
 ## Contributing
 

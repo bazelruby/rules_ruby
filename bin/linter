@@ -104,7 +104,7 @@ lint::all() {
     hr
     echo
     info "ACTION: ${bldylw}Please add any respective files to the commit and retry."
-    retrn 1
+    return 1
   else
     echo
     success "No changes detected, changes passed linter inspection."
