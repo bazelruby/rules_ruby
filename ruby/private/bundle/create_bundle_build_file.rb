@@ -22,7 +22,6 @@ BUILD_HEADER = <<~MAIN_TEMPLATE
         "bundler/**/*",
       ],
     ),
-    rubyopt = ["{bundler_setup}"],
   )
 
   # PULL EACH GEM INDIVIDUALLY
@@ -33,21 +32,13 @@ GEM_TEMPLATE = <<~GEM_TEMPLATE
     name = "{name}",
     srcs = glob(
       include = [
-<<<<<<< HEAD
         ".bundle/config",
         "{gem_lib_files}",
         "lib/ruby/{ruby_version}/specifications/{name}-{version}.gemspec",
         {gem_binaries}
-=======
-        "lib/ruby/{ruby_version}/gems/{name}-{version}*/**",
-        "lib/ruby/{ruby_version}/specifications/{name}-{version}*.gemspec",
-        "lib/ruby/{ruby_version}/cache/{name}-{version}*.gem",
-        "bin/*"
->>>>>>> eeab881... Add force_gem_pristine attr to rb_binary (#11)
       ],
       exclude = {exclude},
     ),
-    rubyopt = ["{bundler_setup}"],
     deps = {deps},
     includes = ["lib/ruby/{ruby_version}/gems/{name}-{version}/lib"],
   )
@@ -58,7 +49,6 @@ ALL_GEMS = <<~ALL_GEMS
     name = "gems",
     srcs = glob([{bundle_lib_files}]) + glob(["bin/*"]),
     includes = {bundle_lib_paths},
-    rubyopt = ["{bundler_setup}"],
   )
 
   ruby_library(

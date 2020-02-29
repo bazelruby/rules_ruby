@@ -1,6 +1,5 @@
 # Common options
 common --color=yes
-common --verbose_failures
 common --show_progress
 common --show_progress_rate_limit=0.5
 
@@ -15,3 +14,4 @@ build --jobs=10
 test --spawn_strategy=standalone
 test --test_output=all
 test --test_verbose_timeout_warnings
+test --verbose_failures
