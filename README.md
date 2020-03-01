@@ -1,14 +1,20 @@
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
+* [Rules Development Status](#rules-development-status)
 * [Usage](#usage)
-  * [WORKSPACE File](#workspace-file)
-  * [BUILD.bazel files](#buildbazel-files)
+  * [`WORKSPACE` File](#workspace-file)
+  * [`BUILD.bazel` files](#buildbazel-files)
 * [Rules](#rules)
-  * [ruby_library](#ruby_library)
-  * [ruby_binary](#ruby_binary)
-  * [ruby_test](#ruby_test)
-  * [ruby_bundle](#ruby_bundle)
-  * [ruby_gem](#rb_gem)
+  * [`ruby_library`](#ruby_library)
+  * [`ruby_binary`](#ruby_binary)
+  * [`ruby_test`](#ruby_test)
+  * [`ruby_bundle`](#ruby_bundle)
+    * [Limitations](#limitations)
+    * [Conventions](#conventions)
+      * [Example: `WORKSPACE`:](#example-workspace)
+      * [Example: `lib/BUILD.bazel`:](#example-libbuildbazel)
+  * [`ruby_rspec`](#ruby_rspec)
+  * [`ruby_gem`](#ruby_gem)
 * [What's coming next](#whats-coming-next)
 * [Contributing](#contributing)
   * [Setup](#setup)
@@ -27,17 +33,22 @@
 
 | Build | Status |
 |---------:	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
-| CircleCI Develop: 	| [![CircleCI](https://circleci.com/gh/bazelruby/rules_ruby/tree/develop.svg?style=svg)](https://circleci.com/gh/bazelruby/rules_ruby/tree/develop) 	|
-| CircleCI Default: 	| [![CircleCI](https://circleci.com/gh/bazelruby/rules_ruby.svg?style=svg)](https://circleci.com/gh/bazelruby/rules_ruby) 	|
-| Develop: 	| [![Build Status](https://travis-ci.org/bazelruby/rules_ruby.svg?branch=develop)](https://travis-ci.org/bazelruby/rules_ruby) 	|
-| Master: 	| [![Build Status](https://travis-ci.org/bazelruby/rules_ruby.svg?branch=master)](https://travis-ci.org/bazelruby/rules_ruby) 	|
+| CircleCI | [![CircleCI](https://circleci.com/gh/bazelruby/rules_ruby/tree/develop.svg?style=svg)](https://circleci.com/gh/bazelruby/rules_ruby/tree/develop) 	|
+| TravisCI | [![Build Status](https://travis-ci.org/bazelruby/rules_ruby.svg?branch=develop)](https://travis-ci.org/bazelruby/rules_ruby) 	|
 
 
 # Rules Ruby
 
-Ruby rules for [Bazel](https://bazel.build).
+This is the README for Ruby Rules for the [Bazel Build](https://bazel.build) system.
 
-** Current Status:** *Work in progress.*
+## Rules Development Status
+
+| **Readiness** | **Types of Applications**	|
+|:-------------------------------------------------------------------------------| :----------|
+| ![Ready](docs/img/status-ready.svg) | ruby apps, ruby gems, micro-services, ideally in a mono-repo |
+| ![Wait](docs/img/status-wait.svg) | medium-sized Ruby on Rails apps, ideally in a mono-repo |
+| ![Not Ready](docs/img/status-not-ready.svg) | complex Ruby on Rails monoliths, single-repo |
+
 
 Note: we have a short guide on [Building your first Ruby Project](https://github.com/bazelruby/rules_ruby/wiki/Build-your-ruby-project) on the Wiki. We encourage you to check it out.
 
@@ -45,26 +56,26 @@ Note: we have a short guide on [Building your first Ruby Project](https://github
 
 ### `WORKSPACE` File
 
-Add `ruby_rules_dependencies` and `ruby_register_toolchains` into your `WORKSPACE` file.
+Add `ruby_rules_dependencies` and `ruby_rules_toolchains` into your `WORKSPACE` file.
 
 ```python
 # To get the latest, grab the 'develop' branch.
 
 git_repository(
-    name = "bazelruby_ruby_rules",
+    name = "bazelruby_rules_ruby",
     remote = "https://github.com/bazelruby/rules_ruby.git",
     branch = "develop",
 )
 
 load(
-    "@bazelruby_ruby_rules//ruby:deps.bzl",
-    "ruby_register_toolchains",
+    "@bazelruby_rules_ruby//ruby:deps.bzl",
+    "ruby_rules_toolchains",
     "ruby_rules_dependencies",
 )
 
 ruby_rules_dependencies()
 
-ruby_register_toolchains()
+ruby_rules_toolchains()
 ```
 
 Next, add any external Gem dependencies you may have via `ruby_bundle` command.
@@ -98,7 +109,7 @@ Add `ruby_library`, `ruby_binary` or `ruby_test` into your `BUILD.bazel` files.
 
 ```python
 load(
-    "@bazelruby_ruby_rules//ruby:defs.bzl",
+    "@bazelruby_rules_ruby//ruby:defs.bzl",
     "ruby_binary",
     "ruby_library",
     "ruby_test",
@@ -139,10 +150,13 @@ ruby_rspec(
 
 ## Rules
 
+> NOTE: this diagram is slightly outdated.
+
 The following diagram attempts to capture the implementation behind `ruby_library` that depends on the result of `bundle install`, and a `ruby_binary` that depends on both:
 
 ![Ruby Rules](docs/img/ruby_rules.png)
 
+----
 
 ### `ruby_library`
 
@@ -218,6 +232,8 @@ ruby_library(name, deps, srcs, data, compatible_with, deprecation, distribs, fea
     </tr>
   </tbody>
 </table>
+
+----
 
 ### `ruby_binary`
 
@@ -300,6 +316,8 @@ ruby_binary(name, deps, srcs, data, main, compatible_with, deprecation, distribs
   </tbody>
 </table>
 
+----
+
 ### `ruby_test`
 
 <pre>
@@ -381,39 +399,57 @@ ruby_test(name, deps, srcs, data, main, compatible_with, deprecation, distribs, 
   </tbody>
 </table>
 
+----
+
 ### `ruby_bundle`
 
-Installs gems with Bundler, and make them available as a `ruby_library`.
+**NOTE: This is a repository rule, and can only be used in a `WORKSPACE` file.**
 
-Example: `WORKSPACE`:
+This rule installs gems defined in a Gemfile using Bundler, and exports individual gems from the bundle, as well as the entire bundle, available as a `ruby_library` that can be depended upon from other targets.
+
+#### Limitations
+
+Installing using a `Gemfile` that uses the `gemspec` keyword is not currently supported.
+
+#### Conventions
+
+`ruby_bundle` creates several targets that can be used downstream. In the examples below we assume that your `ruby_bundle` has a name `app_bundle`:
+
+ * `@app_bundle//:bundler` — references just the Bundler from the bundle.
+ * `@app_bundle//:gems` — references *all* gems in the bundle (i.e. "the entire bundle").
+ * `@app_bundle//:gem-name` — references *just the specified* gem in the bundle, eg. `@app_bundle//:awesome_print`.
+ * `@app_bundle//:bin` — references to all installed executables from this bundle, with individual executables accessible via eg. `@app_bundle//:bin/rubocop`
+
+##### Example: `WORKSPACE`:
 
 ```python
 git_repository(
-    name = "bazelruby_ruby_rules",
+    name = "bazelruby_rules_ruby",
     remote = "https://github.com/bazelruby/rules_ruby.git",
     tag = "v0.1.0",
 )
 
 load(
-    "@bazelruby_ruby_rules//ruby:deps.bzl",
-    "ruby_register_toolchains",
+    "@bazelruby_rules_ruby//ruby:deps.bzl",
+    "ruby_rules_toolchains",
     "ruby_rules_dependencies",
 )
 
 ruby_rules_dependencies()
 
-ruby_register_toolchains()
+ruby_rules_toolchains()
 
-load("@bazelruby_ruby_rules//ruby:defs.bzl", "ruby_bundle")
+load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
 
 ruby_bundle(
+    bundler_version = '2.1.2',
     name = "gems",
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
 )
 ```
 
-Example: `lib/BUILD.bazel`:
+##### Example: `lib/BUILD.bazel`:
 
 ```python
 ruby_library(
@@ -484,11 +520,105 @@ ruby_bundle(name, gemfile, gemfile_lock, bundler_version = "2.1.2")
   </tbody>
 </table>
 
-## rb_gem
+----
+
+### `ruby_rspec`
+
+<pre>
+ruby_rspec(name, deps, srcs, data, main, rspec_args, bundle, compatible_with, deprecation, distribs, features, licenses, restricted_to, tags, testonly, toolchains, visibility, args, size, timeout, flaky, local, shard_count)
+</pre>
+
+<table class="table table-condensed table-bordered table-params">
+  <colgroup>
+    <col class="col-param" />
+    <col class="param-description" />
+  </colgroup>
+  <thead>
+    <tr>
+      <th colspan="2">Attributes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>name</code></td>
+      <td>
+        <code>Name, required</code>
+        <p>A unique name for this rule.</p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>srcs</code></td>
+      <td>
+        <code>List of Labels, required</code>
+        <p>
+          List of <code>.rb</code> files.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>deps</code></td>
+      <td>
+        <code>List of labels, optional</code>
+        <p>
+          List of targets that are required by the <code>srcs</code> Ruby
+          files.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>main</code></td>
+      <td>
+        <code>Label, optional</code>
+        <p>The entrypoint file. It must be also in <code>srcs</code>.</p>
+        <p>If not specified, <code><var>$(NAME)</var>.rb</code> where <code>$(NAME)</code> is the <code>name</code> of this rule.</p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>rspec_args</code></td>
+      <td>
+        <code>List of strings, optional</code>
+        <p>Command line arguments to the <code>rspec</code> binary, eg <code>["--progress", "-p2", "-b"]</code></p>
+        <p>If not specified, the default arguments defined in `constants.bzl` are used: <code> --format=documentation --force-color</code>.</p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>includes</code></td>
+      <td>
+        <code>List of strings, optional</code>
+        <p>
+          List of paths to be added to <code>$LOAD_PATH</code> at runtime.
+          The paths must be relative to the the workspace which this rule belongs to.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>rubyopt</code></td>
+      <td>
+        <code>List of strings, optional</code>
+        <p>
+          List of options to be passed to the Ruby interpreter at runtime.
+        </p>
+        <p>
+          NOTE: <code>-I</code> option should usually go to <code>includes</code> attribute.
+        </p>
+      </td>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+      <td colspan="2">And other <a href="https://docs.bazel.build/versions/master/be/common-definitions.html#common-attributes">common attributes</a></td>
+    </tr>
+  </tbody>
+</table>
+
+----
+
+### `ruby_gem`
+
 Used to generate a zipped gem containing its srcs, dependencies and a gemspec.
 
 <pre>
-rb_gem(name, gem_name, version, srcs, authors, deps, data, includes)
+ruby_gem(name, gem_name, gem_version, srcs, authors, deps, data, includes)
 </pre>
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
@@ -517,7 +647,7 @@ rb_gem(name, gem_name, version, srcs, authors, deps, data, includes)
     </tr>
     <tr>
     <tr>
-      <td><code>version</code></td>
+      <td><code>gem_version</code></td>
       <td>
         <code>Label, required</code>
         <p>
@@ -696,3 +826,5 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
