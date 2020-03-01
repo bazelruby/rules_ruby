@@ -9,7 +9,6 @@ load(
     "SCRIPT_INSTALL_GEM",
 )
 load("//ruby/private:providers.bzl", "RubyRuntimeContext")
-load("//ruby/private/tools:deprecations.bzl", "deprecated_attribute")
 
 # Runs bundler with arbitrary arguments
 # eg: run_bundler(runtime_ctx, [ "lock", " --gemfile", "Gemfile.rails5" ])
@@ -20,7 +19,7 @@ def run_bundler(runtime_ctx, bundler_arguments, previous_result):
 
     # add --verbose to all commands except install
     if bundler_command != "install":
-        bundler_args += ["--verbose"]
+        bundler_args.append("--verbose")
 
     bundler_args += bundler_arguments[1:]
 
@@ -159,12 +158,7 @@ def _ruby_bundle_impl(ctx):
     ctx.symlink(ctx.attr._create_bundle_build_file, SCRIPT_BUILD_FILE_GENERATOR)
     ctx.symlink(ctx.attr._install_bundler, SCRIPT_INSTALL_GEM)
 
-    # version is too generic for this operation
-    deprecated_attribute(ctx, "version", "bundler_version")
-    if ctx.attr.bundler_version:
-        bundler_version = ctx.attr.bundler_version
-    else:
-        bundler_version = ctx.attr.version
+    bundler_version = ctx.attr.bundler_version
 
     # Setup this provider that we pass around between functions for convenience
     runtime_ctx = RubyRuntimeContext(
@@ -185,7 +179,7 @@ def _ruby_bundle_impl(ctx):
     # 4. Generate the BUILD file for the bundle
     generate_bundle_build_file(runtime_ctx, result)
 
-ruby_bundle = repository_rule(
+ruby_bundle_install = repository_rule(
     implementation = _ruby_bundle_impl,
     attrs = BUNDLE_ATTRS,
 )

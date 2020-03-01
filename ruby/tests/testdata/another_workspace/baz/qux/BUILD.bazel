@@ -1,6 +1,6 @@
-package(default_visibility = ["//visibility:public"])
+load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_library")
 
-load("@bazelruby_ruby_rules//ruby:defs.bzl", "ruby_library")
+package(default_visibility = ["//visibility:public"])
 
 ruby_library(
     name = "j",

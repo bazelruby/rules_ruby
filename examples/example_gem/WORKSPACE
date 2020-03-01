@@ -1,21 +1,21 @@
-workspace(name = "bazelruby_ruby_rules_example_gem")
+workspace(name = "bazelruby_rules_ruby_example_gem")
 
 # Importing rules_ruby from the parent directory for developing
 # rules_ruby itself...
 local_repository(
-    name = "bazelruby_ruby_rules",
+    name = "bazelruby_rules_ruby",
     path = "../..",
 )
 
 load(
-    "@bazelruby_ruby_rules//ruby:deps.bzl",
-    "ruby_register_toolchains",
-    "ruby_rules_dependencies",
+    "@bazelruby_rules_ruby//ruby:deps.bzl",
+    "rules_ruby_dependencies",
+    "rules_ruby_select_sdk",
 )
 
-ruby_rules_dependencies()
+rules_ruby_dependencies()
 
-ruby_register_toolchains()
+rules_ruby_select_sdk("2.7.0")
 
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 

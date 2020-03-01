@@ -1,10 +1,9 @@
-package(default_visibility = ["//:__subpackages__"])
-
 load(
-    "@bazelruby_ruby_rules//ruby:defs.bzl",
+    "@bazelruby_rules_ruby//ruby:defs.bzl",
     "ruby_binary",
-    "ruby_test",
 )
+
+package(default_visibility = ["//:__subpackages__"])
 
 ruby_binary(
     name = "server",

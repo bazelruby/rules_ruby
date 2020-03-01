@@ -1,0 +1,9 @@
+package(default_visibility = ["//ruby/private/gemspec:__pkg__"])
+
+exports_files(
+    [
+        "gemspec_template.tpl",
+        "readme_template.tpl",
+    ],
+    visibility = ["//visibility:public"],
+)

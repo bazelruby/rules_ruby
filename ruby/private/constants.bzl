@@ -1,6 +1,6 @@
 load(":providers.bzl", "RubyLibrary")
 
-RULES_RUBY_WORKSPACE_NAME = "@bazelruby_ruby_rules"
+RULES_RUBY_WORKSPACE_NAME = "@bazelruby_rules_ruby"
 TOOLCHAIN_TYPE_NAME = "%s//ruby:toolchain_type" % RULES_RUBY_WORKSPACE_NAME
 
 DEFAULT_BUNDLER_VERSION = "2.1.2"
@@ -78,14 +78,8 @@ BUNDLE_ATTRS = {
     "gemfile_lock": attr.label(
         allow_single_file = True,
     ),
-    "version": attr.string(
-        mandatory = False,
-    ),
     "bundler_version": attr.string(
         default = DEFAULT_BUNDLER_VERSION,
-    ),
-    "gemspec": attr.label(
-        allow_single_file = True,
     ),
     "excludes": attr.string_list_dict(
         doc = "List of glob patterns per gem to be excluded from the library",
@@ -104,5 +98,49 @@ BUNDLE_ATTRS = {
         ),
         doc = "Creates the BUILD file",
         allow_single_file = True,
+    ),
+}
+
+GEMSPEC_ATTRS = {
+    "gem_name": attr.string(),
+    "gem_version": attr.string(default = "0.0.1"),
+    "gem_summary": attr.string(),
+    "gem_description": attr.string(),
+    "gem_homepage": attr.string(),
+    "gem_authors": attr.string_list(),
+    "gem_author_emails": attr.string_list(),
+    "gem_runtime_dependencies": attr.string_dict(
+        allow_empty = True,
+        doc = "Key value pairs of gem dependencies (name, version) where version can be None",
+    ),
+    "gem_development_dependencies": attr.string_dict(
+        allow_empty = True,
+        default = {
+            "rspec": "",
+            "rspec-its": "",
+            "rubocop": "",
+        },
+        doc = "Key value pairs of gem dependencies (name, version) where version can be None",
+    ),
+    "srcs": attr.label_list(
+        allow_files = True,
+        default = [],
+    ),
+    "require_paths": attr.string_list(
+        default = ["lib"],
+    ),
+    "deps": attr.label_list(
+        allow_files = True,
+    ),
+    "data": attr.label_list(
+        allow_files = True,
+    ),
+    "_gemspec_template": attr.label(
+        allow_single_file = True,
+        default = "%s//ruby/private/gemspec:gemspec_template.tpl" % RULES_RUBY_WORKSPACE_NAME,
+    ),
+    "_readme_template": attr.label(
+        allow_single_file = True,
+        default = "%s//ruby/private/gemspec:readme_template.tpl" % RULES_RUBY_WORKSPACE_NAME,
     ),
 }
