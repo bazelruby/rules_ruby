@@ -1,8 +1,8 @@
-workspace(name = "bazelruby_ruby_rules")
+workspace(name = "bazelrules_ruby_ruby")
 
-load("@//ruby:deps.bzl", "ruby_register_toolchains", "ruby_rules_dependencies")
+load("@//ruby:deps.bzl", "ruby_register_toolchains", "rules_ruby_dependencies")
 
-ruby_rules_dependencies()
+rules_ruby_dependencies()
 
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
@@ -15,7 +15,7 @@ versions.check("1.2.1")
 ruby_register_toolchains()
 
 local_repository(
-    name = "bazelruby_ruby_rules_ruby_tests_testdata_another_workspace",
+    name = "bazelrules_ruby_ruby_ruby_tests_testdata_another_workspace",
     path = "ruby/tests/testdata/another_workspace",
 )
 
@@ -91,7 +91,7 @@ container_pull(
     repository = "library/ruby",
 )
 
-load("@bazelruby_ruby_rules//ruby:defs.bzl", "ruby_bundle")
+load("@bazelrules_ruby_ruby//ruby:defs.bzl", "ruby_bundle")
 
 ruby_bundle(
     name = "bundle",

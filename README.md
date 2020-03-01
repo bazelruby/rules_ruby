@@ -43,11 +43,11 @@ This is the README for Ruby Rules for the [Bazel Build](https://bazel.build) sys
 
 ## Rules Development Status
 
-| **Readiness** | **Types of Applications**	|
-|:-------------------------------------------------------------------------------| :----------|
-| ![Ready](docs/img/status-ready.svg) | ruby apps, ruby gems, micro-services, ideally in a mono-repo |
-| ![Wait](docs/img/status-wait.svg) | medium-sized Ruby on Rails apps, ideally in a mono-repo |
-| ![Not Ready](docs/img/status-not-ready.svg) | complex Ruby on Rails monoliths, single-repo |
+| **Readiness**                               | **Types of Applications**                                    |
+| :------------------------------------------ | :----------------------------------------------------------- |
+| ![Ready](docs/img/status-ready.svg)         | ruby apps, ruby gems, micro-services, ideally in a mono-repo |
+| ![Wait](docs/img/status-wait.svg)           | medium-sized Ruby on Rails apps, ideally in a mono-repo      |
+| ![Not Ready](docs/img/status-not-ready.svg) | complex Ruby on Rails monoliths, single-repo                 |
 
 
 Note: we have a short guide on [Building your first Ruby Project](https://github.com/bazelruby/rules_ruby/wiki/Build-your-ruby-project) on the Wiki. We encourage you to check it out.
@@ -56,26 +56,26 @@ Note: we have a short guide on [Building your first Ruby Project](https://github
 
 ### `WORKSPACE` File
 
-Add `ruby_rules_dependencies` and `ruby_rules_toolchains` into your `WORKSPACE` file.
+Add `rules_ruby_dependencies` and `rules_ruby_toolchains` into your `WORKSPACE` file.
 
 ```python
 # To get the latest, grab the 'develop' branch.
 
 git_repository(
-    name = "bazelruby_rules_ruby",
+    name = "bazelrules_ruby_ruby",
     remote = "https://github.com/bazelruby/rules_ruby.git",
     branch = "develop",
 )
 
 load(
-    "@bazelruby_rules_ruby//ruby:deps.bzl",
-    "ruby_rules_toolchains",
-    "ruby_rules_dependencies",
+    "@bazelrules_ruby_ruby//ruby:deps.bzl",
+    "rules_ruby_toolchains",
+    "rules_ruby_dependencies",
 )
 
-ruby_rules_dependencies()
+rules_ruby_dependencies()
 
-ruby_rules_toolchains()
+rules_ruby_toolchains()
 ```
 
 Next, add any external Gem dependencies you may have via `ruby_bundle` command.
@@ -109,7 +109,7 @@ Add `ruby_library`, `ruby_binary` or `ruby_test` into your `BUILD.bazel` files.
 
 ```python
 load(
-    "@bazelruby_rules_ruby//ruby:defs.bzl",
+    "@bazelrules_ruby_ruby//ruby:defs.bzl",
     "ruby_binary",
     "ruby_library",
     "ruby_test",
@@ -424,22 +424,22 @@ Installing using a `Gemfile` that uses the `gemspec` keyword is not currently su
 
 ```python
 git_repository(
-    name = "bazelruby_rules_ruby",
+    name = "bazelrules_ruby_ruby",
     remote = "https://github.com/bazelruby/rules_ruby.git",
     tag = "v0.1.0",
 )
 
 load(
-    "@bazelruby_rules_ruby//ruby:deps.bzl",
-    "ruby_rules_toolchains",
-    "ruby_rules_dependencies",
+    "@bazelrules_ruby_ruby//ruby:deps.bzl",
+    "rules_ruby_toolchains",
+    "rules_ruby_dependencies",
 )
 
-ruby_rules_dependencies()
+rules_ruby_dependencies()
 
-ruby_rules_toolchains()
+rules_ruby_toolchains()
 
-load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
+load("@bazelrules_ruby_ruby//ruby:defs.bzl", "ruby_bundle")
 
 ruby_bundle(
     bundler_version = '2.1.2',

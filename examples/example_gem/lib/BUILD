@@ -1,9 +1,9 @@
-package(default_visibility = ["//:__subpackages__"])
-
 load(
-    "@bazelruby_ruby_rules//ruby:defs.bzl",
+    "@bazelrules_ruby_ruby//ruby:defs.bzl",
     "rb_library",
 )
+
+package(default_visibility = ["//:__subpackages__"])
 
 rb_library(
     name = "example_gem",

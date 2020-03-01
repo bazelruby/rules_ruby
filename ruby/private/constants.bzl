@@ -1,6 +1,6 @@
 load(":providers.bzl", "RubyLibrary")
 
-RULES_RUBY_WORKSPACE_NAME = "@bazelruby_ruby_rules"
+RULES_RUBY_WORKSPACE_NAME = "@bazelrules_ruby_ruby"
 TOOLCHAIN_TYPE_NAME = "%s//ruby:toolchain_type" % RULES_RUBY_WORKSPACE_NAME
 
 DEFAULT_BUNDLER_VERSION = "2.1.2"

@@ -1,35 +1,35 @@
 load(
-    "@bazelruby_ruby_rules//ruby/private:toolchain.bzl",
+    "@bazelrules_ruby_ruby//ruby/private:toolchain.bzl",
     _toolchain = "ruby_toolchain",
 )
 load(
-    "@bazelruby_ruby_rules//ruby/private:library.bzl",
+    "@bazelrules_ruby_ruby//ruby/private:library.bzl",
     _library = "ruby_library",
 )
 load(
-    "@bazelruby_ruby_rules//ruby/private:binary.bzl",
+    "@bazelrules_ruby_ruby//ruby/private:binary.bzl",
     _binary = "ruby_binary",
     _test = "ruby_test",
 )
 load(
-    "@bazelruby_ruby_rules//ruby/private:bundle.bzl",
+    "@bazelrules_ruby_ruby//ruby/private:bundle.bzl",
     _ruby_bundle = "ruby_bundle",
 )
 load(
-    "@bazelruby_ruby_rules//ruby/private:rspec.bzl",
+    "@bazelrules_ruby_ruby//ruby/private:rspec.bzl",
     _ruby_rspec = "ruby_rspec",
     _ruby_rspec_test = "ruby_rspec_test",
 )
 load(
-    "@bazelruby_ruby_rules//ruby/private/rubocop:def.bzl",
+    "@bazelrules_ruby_ruby//ruby/private/rubocop:def.bzl",
     _rubocop = "rubocop",
 )
 load(
-    "@bazelruby_ruby_rules//ruby/private:gemspec.bzl",
+    "@bazelrules_ruby_ruby//ruby/private:gemspec.bzl",
     _gemspec = "rb_gemspec",
 )
 load(
-    "@bazelruby_ruby_rules//ruby/private:gem.bzl",
+    "@bazelrules_ruby_ruby//ruby/private:gem.bzl",
     _gem = "rb_gem",
 )
 

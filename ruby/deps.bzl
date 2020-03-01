@@ -1,13 +1,13 @@
 # Repository rules
 load(
-    "@bazelruby_ruby_rules//ruby/private:dependencies.bzl",
-    _ruby_rules_dependencies = "ruby_rules_dependencies",
+    "@bazelrules_ruby_ruby//ruby/private:dependencies.bzl",
+    _rules_ruby_dependencies = "rules_ruby_dependencies",
 )
 load(
-    "@bazelruby_ruby_rules//ruby/private:sdk.bzl",
+    "@bazelrules_ruby_ruby//ruby/private:sdk.bzl",
     _register_toolchains = "ruby_register_toolchains",
 )
 
-ruby_rules_dependencies = _ruby_rules_dependencies
+rules_ruby_dependencies = _rules_ruby_dependencies
 
 ruby_register_toolchains = _register_toolchains
