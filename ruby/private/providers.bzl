@@ -21,7 +21,7 @@ RubyGem = provider(
         "ctx",
         "gem_author_emails",
         "gem_authors",
-        "gem_dependencies",
+        "gem_runtime_dependencies",
         "gem_description",
         "gem_development_dependencies",
         "gem_homepage",

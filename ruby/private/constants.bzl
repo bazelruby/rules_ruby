@@ -78,14 +78,8 @@ BUNDLE_ATTRS = {
     "gemfile_lock": attr.label(
         allow_single_file = True,
     ),
-    "version": attr.string(
-        mandatory = False,
-    ),
     "bundler_version": attr.string(
         default = DEFAULT_BUNDLER_VERSION,
-    ),
-    "gemspec": attr.label(
-        allow_single_file = True,
     ),
     "excludes": attr.string_list_dict(
         doc = "List of glob patterns per gem to be excluded from the library",
@@ -115,7 +109,7 @@ GEMSPEC_ATTRS = {
     "gem_homepage": attr.string(),
     "gem_authors": attr.string_list(),
     "gem_author_emails": attr.string_list(),
-    "gem_dependencies": attr.string_dict(
+    "gem_runtime_dependencies": attr.string_dict(
         allow_empty = True,
         doc = "Key value pairs of gem dependencies (name, version) where version can be None",
     ),
@@ -132,7 +126,9 @@ GEMSPEC_ATTRS = {
         allow_files = True,
         default = [],
     ),
-    "require_paths": attr.string_list(),
+    "require_paths": attr.string_list(
+        default = ["lib"],
+    ),
     "deps": attr.label_list(
         allow_files = True,
     ),

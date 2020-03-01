@@ -7,6 +7,9 @@ package(default_visibility = ["//:__subpackages__"])
 
 ruby_gem(
     name = "example_gem",
+    srcs = [
+        "//lib:example_gem",
+    ],
     gem_author_emails = [
         "dev@coinbase.com",
         "bazelruby@googlegroups.com",
@@ -15,10 +18,6 @@ ruby_gem(
         "Coinbase",
         "BazelRuby",
     ],
-    gem_dependencies = {
-        "colored2": "",
-        "hashie": "",
-    },
     gem_description = "Example gem to demonstrate Bazel Gem packaging",
     gem_development_dependencies = {
         "rspec": "",
@@ -27,9 +26,10 @@ ruby_gem(
     },
     gem_homepage = "https://github.com/bazelruby/rules_ruby",
     gem_name = "example-gem",
+    gem_runtime_dependencies = {
+        "colored2": "",
+        "hashie": "",
+    },
     gem_summary = "Example gem to demonstrate Bazel Gem packaging",
     gem_version = "0.1.0",
-    deps = [
-        "//lib:example_gem",
-    ],
 )

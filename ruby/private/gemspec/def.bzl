@@ -33,7 +33,7 @@ def _unique_elems(list):
 # Converts gem name and optionally a version into a
 # gemspec line "spec.add_[development_]dependency 'gem-name', [ 'gem-version' ]"
 def _gem_dependency(name, version = "", development = False):
-    dependency_type = "spec.add_development_dependency" if development else "spec.add_dependency"
+    dependency_type = "spec.add_development_dependency" if development else "spec.add_runtime_dependency"
 
     output = "%s '%s'" % (dependency_type, name)
     if version != "":
@@ -54,13 +54,13 @@ def _markdown_ul(list = []):
 
 # Converts a dictionary (key = gem name, value = gem version or None)
 # to a string to be inserted into the gemspec.
-def _gem_dependencies(gem_dict = {}):
+def _gem_runtime_dependencies(gem_dict = {}):
     dependencies = [_gem_dependency(k, v) for k, v in gem_dict.items()]
     return ("\n  " + "\n  ".join(dependencies))
 
 # Converts a dictionary (key = gem name, value = gem version or None)
 # to a string to be inserted into the gemspec.
-def _markdown_gem_dependencies(gem_dict = {}, type = "Runtime"):
+def _markdown_gem_runtime_dependencies(gem_dict = {}, type = "Runtime"):
     dependencies = [_markdown_gem_dependency(k, v) for k, v in gem_dict.items()]
     output = "\n### %s Dependencies\n\n" % type
     output += "\n  " + "\n  ".join(dependencies) + "\n\n"
@@ -93,9 +93,9 @@ def _gem_impl(ctx):
         substitutions = {
             "{gem_author_emails}": repr(ctx.attr.gem_author_emails),
             "{gem_authors}": repr(ctx.attr.gem_authors),
-            "{gem_dependencies}": _gem_dependencies(ctx.attr.gem_dependencies),
+            "{gem_runtime_dependencies}": _gem_runtime_dependencies(ctx.attr.gem_runtime_dependencies),
             "{gem_description}": ctx.attr.gem_description if ctx.attr.gem_description else ctx.attr.gem_summary,
-            "{gem_development_dependencies}": _gem_dependencies(ctx.attr.gem_development_dependencies),
+            "{gem_development_dependencies}": _gem_runtime_dependencies(ctx.attr.gem_development_dependencies),
             "{gem_homepage}": ctx.attr.gem_homepage,
             "{gem_name}": ctx.attr.gem_name,
             "{gem_require_paths}": repr(["lib"]),
@@ -105,19 +105,19 @@ def _gem_impl(ctx):
         },
     )
 
-    _dependencies = _markdown_gem_dependencies(ctx.attr.gem_dependencies, "Runtime")
-    _dependencies += _markdown_gem_dependencies(ctx.attr.gem_development_dependencies, "Development")
+    _dependencies = _markdown_gem_runtime_dependencies(ctx.attr.gem_runtime_dependencies, "Runtime")
+    _dependencies += _markdown_gem_runtime_dependencies(ctx.attr.gem_development_dependencies, "Development")
 
     ctx.actions.expand_template(
         template = ctx.file._readme_template,
         output = gem_readme,
         substitutions = {
             "{gem_authorship}": _markdown_ul(ctx.attr.gem_authors),
-            "{gem_dependencies}": _dependencies,
+            "{gem_runtime_dependencies}": _dependencies,
             "{gem_description}": ctx.attr.gem_description if ctx.attr.gem_description else ctx.attr.gem_summary,
             "{gem_name}": ctx.attr.gem_name,
-            "{gem_title}": _gem_title,
             "{gem_summary}": ctx.attr.gem_summary,
+            "{gem_title}": _gem_title,
             "{gem_version}": ctx.attr.gem_version,
         },
     )
@@ -130,7 +130,7 @@ def _gem_impl(ctx):
             ctx = ctx,
             gem_author_emails = ctx.attr.gem_author_emails,
             gem_authors = ctx.attr.gem_authors,
-            gem_dependencies = ctx.attr.gem_dependencies,
+            gem_runtime_dependencies = ctx.attr.gem_runtime_dependencies,
             gem_description = ctx.attr.gem_description,
             gem_development_dependencies = ctx.attr.gem_development_dependencies,
             gem_homepage = ctx.attr.gem_homepage,
@@ -146,14 +146,20 @@ gemspec = rule(
     provides = [DefaultInfo, RubyGem],
 )
 
-def gem(name, gem_name, gem_version, srcs = [], **kwargs):
+def gem(
+        name,
+        gem_name,
+        gem_version,
+        srcs,
+        **kwargs):
     _zip_name = "%s-%s" % (gem_name, gem_version)
-    _gemspec_name = name + "_gemspec"
+    _gemspec_name = name + ".gemspec"
 
     gemspec(
         name = _gemspec_name,
         gem_name = gem_name,
         gem_version = gem_version,
+        srcs = srcs,
         **kwargs
     )
 

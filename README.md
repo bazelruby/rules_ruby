@@ -56,10 +56,20 @@ Note: we have a short guide on [Building your first Ruby Project](https://github
 
 ### `WORKSPACE` File
 
-Add `rules_ruby_dependencies` and `rules_ruby_toolchains` into your `WORKSPACE` file.
+#### Load dependencies, select Ruby SDK and define one or more Bundles
 
 ```python
-# To get the latest, grab the 'develop' branch.
+workspace(name = "my_ruby_project")
+
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+bazel_skylib_workspace()
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+
+#———————————————————————————————————————————————————————————————————————
+# To get the latest ruby rules, grab the 'develop' branch.
+#———————————————————————————————————————————————————————————————————————
 
 git_repository(
     name = "bazelruby_rules_ruby",
@@ -69,45 +79,58 @@ git_repository(
 
 load(
     "@bazelruby_rules_ruby//ruby:deps.bzl",
-    "rules_ruby_toolchains",
     "rules_ruby_dependencies",
+    "rules_ruby_select_sdk",
 )
 
 rules_ruby_dependencies()
 
-rules_ruby_toolchains()
-```
+#———————————————————————————————————————————————————————————————————————
+# Specify Ruby version — this will either build Ruby or use a local
+# RBENV installation if the Ruby version matches.
+#———————————————————————————————————————————————————————————————————————
 
-Next, add any external Gem dependencies you may have via `ruby_bundle` command.
-The name of the bundle becomes a reference to this particular Gemfile.lock.
+rules_ruby_select_sdk(version = "2.7.0")
 
-Install external gems that can be later referenced as `@<bundle-name>//:<gem-name>`,
-and the executables from each gem can be accessed as `@<bundle-name//:bin/<gem-binary-name>`
-for instance, `@bundle//:bin/rubocop`.
+#———————————————————————————————————————————————————————————————————————
+# Now, load the ruby_bundle rule & install gems specified in the Gemfile
+#———————————————————————————————————————————————————————————————————————
 
-You can install more than one bundle per WORKSPACE, but that's not recommended.
-
-```python
-ruby_bundle(
-  name = "bundle",
-  gemfile = ":Gemfile",
-  gemfile_lock = ":Gemfile.lock",
-  bundler_version = "2.1.2",
+load(
+    "@bazelruby_rules_ruby//ruby:defs.bzl", 
+    "ruby_bundle",
 )
 
 ruby_bundle(
-  name = "bundle_app_shopping",
-  gemfile = "//apps/shopping:Gemfile",
-  gemfile_lock = "//apps/shopping:Gemfile.lock",
-  bundler_version = "2.1.2",
+    name = "bundle",
+    excludes = {
+        "mini_portile": ["test/**/*"],
+    },
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+)
+
+# You can specify more than one bundle in the WORKSPACE file
+ruby_bundle(
+    name = "bundle_app_shopping",
+    gemfile = "//apps/shopping:Gemfile",
+    gemfile_lock = "//apps/shopping:Gemfile.lock",
 )
 ```
 
-### `BUILD.bazel` files
+### `BUILD.bazel` file(s)
 
-Add `ruby_library`, `ruby_binary` or `ruby_test` into your `BUILD.bazel` files.
+Any of the project `BUILD` files can now reference any gems included in the `Gemfile` referenced by the `ruby_bundle` rule, and defined in the project's `WORKSPACE` file.
+
+#### Define Ruby Executable, Library and an RSpec
+
+Add `ruby_library`, `ruby_binary`, `ruby_rspec` or `ruby_test` into your `BUILD.bazel` files.
 
 ```python
+#———————————————————————————————————————————————————————————————————————
+# Define Ruby executable, test, spec and package a gem
+#———————————————————————————————————————————————————————————————————————
+
 load(
     "@bazelruby_rules_ruby//ruby:defs.bzl",
     "ruby_binary",
@@ -145,10 +168,52 @@ ruby_rspec(
     rspec_args = { "--format": "progress" },
     deps = [":foo"]
 }
+```
+
+#### Package Ruby files as a Gem
+
+Use `ruby_gem` rule to package any number of ruby files or folders into a Ruby-Gem compatible ZIP archive.
+
+```python
+load(
+    "@bazelruby_rules_ruby//ruby:defs.bzl",
+    "ruby_gem",    
+)
+
+ruby_gem(
+    name            = "awesome-sauce-gem", # name of the build target
+    gem_name        = "awesome-sauce",     # name of the gem
+    gem_version     = "0.1.0",
+    gem_summary     = "Example gem to demonstrate Bazel Gem packaging",
+    gem_description = "Example gem to demonstrate Bazel Gem packaging",
+    gem_homepage    = "https://github.com/bazelruby/rules_ruby",    
+    gem_authors     = [
+        "BazelRuby",
+        "Konstantin Gredeskoul"
+    ],
+    gem_author_emails = [
+        "bazelruby@googlegroups.com",
+    ],
+    gem_runtime_dependencies = {
+        "colored2": "~> 3.1.2",
+        "hashie": "",
+    },
+    gem_development_dependencies = {
+        "rspec": "",
+        "rspec-its": "",
+        "rubocop": "",
+    },
+    srcs = [
+	 	glob("{bin,exe,lib,spec}/**/*.rb")
+    ],
+    deps = [
+        "//lib:example_gem",
+    ],
+)
 
 ```
 
-## Rules
+### Rule Dependency Diagram
 
 > NOTE: this diagram is slightly outdated.
 
@@ -156,13 +221,27 @@ The following diagram attempts to capture the implementation behind `ruby_librar
 
 ![Ruby Rules](docs/img/ruby_rules.png)
 
-----
+## Rules
 
 ### `ruby_library`
 
-<pre>
-ruby_library(name, deps, srcs, data, compatible_with, deprecation, distribs, features, licenses, restricted_to, tags, testonly, toolchains, visibility)
-</pre>
+```python
+ruby_library(
+    name, 
+    deps, 
+    srcs, 
+    data, 
+    compatible_with, 
+    deprecation, 
+    distribs, 
+    features, 
+    licenses, 
+    restricted_to, 
+    tags, 
+    testonly, 
+    toolchains, 
+    visibility)
+```
 
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
@@ -233,13 +312,29 @@ ruby_library(name, deps, srcs, data, compatible_with, deprecation, distribs, fea
   </tbody>
 </table>
 
-----
-
 ### `ruby_binary`
 
-<pre>
-ruby_binary(name, deps, srcs, data, main, compatible_with, deprecation, distribs, features, licenses, restricted_to, tags, testonly, toolchains, visibility, args, output_licenses)
-</pre>
+```python
+ruby_binary(
+    name, 
+    deps, 
+    srcs, 
+    data,
+    main, 
+    compatible_with, 
+    deprecation, 
+    distribs, 
+    features, 
+    licenses, 
+    restricted_to, 
+    tags, 
+    testonly,     
+    toolchains, 
+    visibility, 
+    args, 
+    output_licenses
+)
+```
 
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
@@ -315,14 +410,32 @@ ruby_binary(name, deps, srcs, data, main, compatible_with, deprecation, distribs
     </tr>
   </tbody>
 </table>
-
-----
 
 ### `ruby_test`
 
-<pre>
-ruby_test(name, deps, srcs, data, main, compatible_with, deprecation, distribs, features, licenses, restricted_to, tags, testonly, toolchains, visibility, args, size, timeout, flaky, local, shard_count)
-</pre>
+```python
+ruby_test(
+    name, 
+    deps, 
+    srcs, 
+    data, 
+    main, 
+    compatible_with, 
+    deprecation, 
+    distribs, 
+    features, 
+    licenses, 
+    restricted_to, 
+    tags, 
+    testonly, 
+    toolchains, 
+    visibility, 
+    args, 
+    size, 
+    timeout, 
+    flaky, 
+    local, shard_count)
+```
 
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
@@ -398,8 +511,6 @@ ruby_test(name, deps, srcs, data, main, compatible_with, deprecation, distribs, 
     </tr>
   </tbody>
 </table>
-
-----
 
 ### `ruby_bundle`
 
@@ -407,73 +518,18 @@ ruby_test(name, deps, srcs, data, main, compatible_with, deprecation, distribs, 
 
 This rule installs gems defined in a Gemfile using Bundler, and exports individual gems from the bundle, as well as the entire bundle, available as a `ruby_library` that can be depended upon from other targets.
 
-#### Limitations
-
-Installing using a `Gemfile` that uses the `gemspec` keyword is not currently supported.
-
-#### Conventions
-
-`ruby_bundle` creates several targets that can be used downstream. In the examples below we assume that your `ruby_bundle` has a name `app_bundle`:
-
- * `@app_bundle//:bundler` — references just the Bundler from the bundle.
- * `@app_bundle//:gems` — references *all* gems in the bundle (i.e. "the entire bundle").
- * `@app_bundle//:gem-name` — references *just the specified* gem in the bundle, eg. `@app_bundle//:awesome_print`.
- * `@app_bundle//:bin` — references to all installed executables from this bundle, with individual executables accessible via eg. `@app_bundle//:bin/rubocop`
-
-##### Example: `WORKSPACE`:
-
 ```python
-git_repository(
-    name = "bazelruby_rules_ruby",
-    remote = "https://github.com/bazelruby/rules_ruby.git",
-    tag = "v0.1.0",
-)
-
-load(
-    "@bazelruby_rules_ruby//ruby:deps.bzl",
-    "rules_ruby_toolchains",
-    "rules_ruby_dependencies",
-)
-
-rules_ruby_dependencies()
-
-rules_ruby_toolchains()
-
-load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
-
 ruby_bundle(
-    bundler_version = '2.1.2',
-    name = "gems",
-    gemfile = "//:Gemfile",
-    gemfile_lock = "//:Gemfile.lock",
+    name, 
+    gemfile, 
+    gemfile_lock, 
+    bundler_version = "2.1.2",
+    excludes = [],
+    ruby_sdk = "@org_ruby_lang_ruby_toolchain",
+    ruby_interpreter = "@org_ruby_lang_ruby_toolchain//:ruby",
 )
 ```
 
-##### Example: `lib/BUILD.bazel`:
-
-```python
-ruby_library(
-    name = "foo",
-    srcs = ["foo.rb"],
-    deps = ["@gems//:all"],
-)
-```
-
-Or declare many gems in your `Gemfile`, and only use some of them in each ruby library:
-
-```python
-ruby_binary(
-    name = "rubocop",
-    srcs = [":foo", ".rubocop.yml"],
-    args = ["-P", "-D", "-c" ".rubocop.yml"],
-    main = "@gems//:bin/rubocop",
-    deps = ["@gems//:rubocop"],
-)
-```
-
-<pre>
-ruby_bundle(name, gemfile, gemfile_lock, bundler_version = "2.1.2")
-</pre>
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
     <col class="col-param" />
@@ -520,13 +576,83 @@ ruby_bundle(name, gemfile, gemfile_lock, bundler_version = "2.1.2")
   </tbody>
 </table>
 
-----
+#### Limitations
+
+Installing using a `Gemfile` that uses the `gemspec` keyword is not currently supported.
+
+#### Conventions
+
+`ruby_bundle` creates several targets that can be used downstream. In the examples below we assume that your `ruby_bundle` has a name `app_bundle`:
+
+ * `@app_bundle//:bundler` — references just the Bundler from the bundle.
+ * `@app_bundle//:gems` — references *all* gems in the bundle (i.e. "the entire bundle").
+ * `@app_bundle//:gem-name` — references *just the specified* gem in the bundle, eg. `@app_bundle//:awesome_print`.
+ * `@app_bundle//:bin` — references to all installed executables from this bundle, with individual executables accessible via eg. `@app_bundle//:bin/rubocop`
+
+#### `WORKSPACE`:
+
+```python
+load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
+
+ruby_bundle(
+    name = "gems",
+    bundler_version = '2.1.2',
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+)
+```
+
+#### `BUILD.bazel`:
+
+```pythonj
+# Reference the entire bundle with :gems
+
+ruby_library(
+    name = "foo",
+    srcs = ["foo.rb"],
+    deps = ["@gems//:gems"],
+)
+
+# Or, reference specific gems from the bundle like so:
+
+ruby_binary(
+    name = "rubocop",
+    srcs = [":foo", ".rubocop.yml"],
+    args = ["-P", "-D", "-c" ".rubocop.yml"],
+    main = "@gems//:bin/rubocop",
+    deps = ["@gems//:rubocop"],
+)
+```
 
 ### `ruby_rspec`
 
-<pre>
-ruby_rspec(name, deps, srcs, data, main, rspec_args, bundle, compatible_with, deprecation, distribs, features, licenses, restricted_to, tags, testonly, toolchains, visibility, args, size, timeout, flaky, local, shard_count)
-</pre>
+```python
+ruby_rspec(
+    name, 
+    deps, 
+    srcs, 
+    data, 
+    main, 
+    rspec_args, 
+    bundle, 
+    compatible_with, 
+    deprecation, 
+    distribs, 
+    features, 
+    licenses, 
+    restricted_to, 
+    tags, 
+    testonly, 
+    toolchains, 
+    visibility, 
+    args, 
+    size, 
+    timeout, 
+    flaky, 
+    local, 
+    shard_count
+)
+```
 
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
@@ -611,15 +737,30 @@ ruby_rspec(name, deps, srcs, data, main, rspec_args, bundle, compatible_with, de
   </tbody>
 </table>
 
-----
-
 ### `ruby_gem`
 
 Used to generate a zipped gem containing its srcs, dependencies and a gemspec.
 
-<pre>
-ruby_gem(name, gem_name, gem_version, srcs, authors, deps, data, includes)
-</pre>
+```python
+ruby_gem(
+    name,
+    gem_name,
+    gem_version,
+    gem_summary,
+    gem_description,
+    gem_homepage,
+    gem_authors,
+    gem_author_emails,
+    gem_runtime_dependencies,
+    gem_development_dependencies,
+    require_paths = ["lib"],
+    srcs = srcs,
+    deps = deps,
+    data = data
+)
+```
+ 
+
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
     <col class="col-param" />
@@ -635,7 +776,7 @@ ruby_gem(name, gem_name, gem_version, srcs, authors, deps, data, includes)
       <td><code>name</code></td>
       <td>
         <code>Name, required</code>
-        <p>A unique name for this rule.</p>
+        <p>A unique name for this build target.</p>
       </td>
     </tr>
     <tr>
@@ -646,10 +787,9 @@ ruby_gem(name, gem_name, gem_version, srcs, authors, deps, data, includes)
       </td>
     </tr>
     <tr>
-    <tr>
       <td><code>gem_version</code></td>
       <td>
-        <code>Label, required</code>
+        <code>String, optional</code>
         <p>
           The version of the gem. Is used to name the output file,
           which becomes <code>name-version.zip</code>, and also
@@ -658,7 +798,28 @@ ruby_gem(name, gem_name, gem_version, srcs, authors, deps, data, includes)
       </td>
     </tr>
     <tr>
-      <td><code>authors</code></td>
+      <td><code>gem_summary</code></td>
+      <td>
+        <code>String, optional</code>
+        <p>One line summary of the gem purpose.</p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>gem_description</code></td>
+      <td>
+        <code>String, required</code>      
+        <p>Single-line, paragraph-sized description text for the gem.</p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>gem_homepage</code></td>
+      <td>
+        <code>String, optional</code>      
+        <p>Homepage URL of the gem.</p>
+      </td>
+    </tr>    
+    <tr>
+      <td><code>gem_authors</code></td>
       <td>
         <code>List of Strings, required</code>
         <p>
@@ -667,6 +828,15 @@ ruby_gem(name, gem_name, gem_version, srcs, authors, deps, data, includes)
         </p>
       </td>
     </tr>
+    <tr>
+      <td><code>gem_author_emails</code></td>
+      <td>
+        <code>List of Strings, optional</code>
+        <p>
+          List of email addresses of the authors.
+        </p>
+      </td>
+    </tr>    
     <tr>
       <td><code>srcs</code></td>
       <td>
@@ -688,6 +858,38 @@ ruby_gem(name, gem_name, gem_version, srcs, authors, deps, data, includes)
         <p>At least <code>srcs</code> or <code>deps</code> must be present</p>
       </td>
     </tr>
+    <tr>
+      <td><code>require_paths</code></td>
+      <td>
+        <code>List of Strings, optional</code>
+        <p>
+          List of paths to be added to the Ruby LOAD_PATH when using this gem.
+          Typically this value is just `lib` (which is also the default).
+        </p>
+      </td>
+    </tr>    
+    <tr>
+      <td><code>gem_runtime_dependencies</code></td>
+      <td>
+        <code>String Dictionary, optional</code>
+        <p>
+        	This is a dictionary where keys are gem names, and values are either an empty
+        	string or a <a href="https://www.devalot.com/articles/2012/04/gem-versions.html">gem version specification</a>.
+          For instance, the pessimistic version specifier <code>~> 3.0</code> means that all versions up to <code>4.0</code> are accepted.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>gem_development_dependencies</code></td>
+      <td>
+        <code>String Dictionary, optional</code>
+        <p>
+        Similar to the above, this specifies gems necessary for the development of the above gem, such as
+        testing gems, linters, code coverage and more.
+        </p>
+      </td>
+    </tr>    
+    
   </tbody>
 </table>
 

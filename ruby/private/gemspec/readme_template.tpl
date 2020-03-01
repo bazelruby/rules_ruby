@@ -1,4 +1,6 @@
-# {gem_title} (Version: {gem_version})
+# {gem_title}
+
+## Version {gem_version}
 
 > NOTE: You are reading the auto-generated README for Gem {gem_name}.
 
@@ -12,7 +14,7 @@
 
 ## Dependencies
 
-{gem_dependencies}
+{gem_runtime_dependencies}
 
 ## Author(s)
 
