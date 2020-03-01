@@ -20,6 +20,14 @@
 
 require 'rbconfig'
 
+# Ruby 2.4 and older does not have +.children+
+# So we define it.
+unless Dir.respond_to?(:children)
+  Dir.define_method :children do |dir|
+    Dir.entries(dir).reject { |entry| %w(. ..).include?(entry) }
+  end
+end
+
 def find_runfiles
   stub_filename = File.absolute_path($0)
   runfiles = "#{stub_filename}.runfiles"
