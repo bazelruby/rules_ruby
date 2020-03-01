@@ -1,11 +1,11 @@
 load(
-    "@bazelrules_ruby_ruby//ruby:defs.bzl",
-    "rb_library",
+    "@bazelruby_rules_ruby//ruby:defs.bzl",
+    "ruby_library",
 )
 
 package(default_visibility = ["//:__subpackages__"])
 
-rb_library(
+ruby_library(
     name = "example_gem",
     srcs = ["example_gem.rb"],
     deps = ["//lib/foo:default_library"],

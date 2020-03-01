@@ -1,4 +1,4 @@
-load("@bazelrules_ruby_ruby//ruby:defs.bzl", "ruby_library")
+load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_library")
 
 package(default_visibility = ["//visibility:public"])
 

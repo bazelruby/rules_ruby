@@ -120,7 +120,7 @@ ruby_binary(
     main = "load_path_in_runfiles_test.rb",
     deps = [
         "//ruby/tests/testdata:g",
-        "@bazelrules_ruby_ruby_ruby_tests_testdata_another_workspace//baz/qux:j",
+        "@bazelruby_rules_ruby_ruby_tests_testdata_another_workspace//baz/qux:j",
     ],
 )
 
@@ -137,7 +137,7 @@ ruby_test(
     main = "load_path_in_runfiles_test.rb",
     deps = [
         "//ruby/tests/testdata:g",
-        "@bazelrules_ruby_ruby_ruby_tests_testdata_another_workspace//baz/qux:j",
+        "@bazelruby_rules_ruby_ruby_tests_testdata_another_workspace//baz/qux:j",
     ],
 )
 
@@ -250,13 +250,13 @@ pkg_tar(
     include_runfiles = True,
     package_dir = "/app",
     remap_paths = {
-        "ruby": "load_path_in_runfiles.runfiles/bazelrules_ruby_ruby/ruby",
+        "ruby": "load_path_in_runfiles.runfiles/bazelruby_rules_ruby/ruby",
         ".": "load_path_in_runfiles.runfiles/",
     },
     strip_prefix = "dummy",
     symlinks = {
-        "/app/load_path_in_runfiles.runfiles/bazelrules_ruby_ruby/external": "/app/load_path_in_runfiles.runfiles",
-        "/app/load_path_in_runfiles": "/app/load_path_in_runfiles.runfiles/bazelrules_ruby_ruby/ruby/tests/load_path_in_runfiles",
+        "/app/load_path_in_runfiles.runfiles/bazelruby_rules_ruby/external": "/app/load_path_in_runfiles.runfiles",
+        "/app/load_path_in_runfiles": "/app/load_path_in_runfiles.runfiles/bazelruby_rules_ruby/ruby/tests/load_path_in_runfiles",
     },
 )
 

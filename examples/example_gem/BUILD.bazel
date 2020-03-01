@@ -1,0 +1,35 @@
+load(
+    "@bazelruby_rules_ruby//ruby:defs.bzl",
+    "ruby_gem",
+)
+
+package(default_visibility = ["//:__subpackages__"])
+
+ruby_gem(
+    name = "example_gem",
+    gem_author_emails = [
+        "dev@coinbase.com",
+        "bazelruby@googlegroups.com",
+    ],
+    gem_authors = [
+        "Coinbase",
+        "BazelRuby",
+    ],
+    gem_dependencies = {
+        "colored2": "",
+        "hashie": "",
+    },
+    gem_description = "Example gem to demonstrate Bazel Gem packaging",
+    gem_development_dependencies = {
+        "rspec": "",
+        "rspec-its": "",
+        "rubocop": "",
+    },
+    gem_homepage = "https://github.com/bazelruby/rules_ruby",
+    gem_name = "example-gem",
+    gem_summary = "Example gem to demonstrate Bazel Gem packaging",
+    gem_version = "0.1.0",
+    deps = [
+        "//lib:example_gem",
+    ],
+)

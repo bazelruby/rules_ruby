@@ -1,11 +1,11 @@
 load(
-    "@bazelrules_ruby_ruby//ruby:defs.bzl",
-    "rb_library",
+    "@bazelruby_rules_ruby//ruby:defs.bzl",
+    "ruby_library",
 )
 
 package(default_visibility = ["//:__subpackages__"])
 
-rb_library(
+ruby_library(
     name = "default_library",
     srcs = ["bar.rb"],
 )

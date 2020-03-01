@@ -19,6 +19,14 @@ RubyGem = provider(
     doc = "Carries info required to package a ruby gem",
     fields = [
         "ctx",
-        "version",
+        "gem_author_emails",
+        "gem_authors",
+        "gem_dependencies",
+        "gem_description",
+        "gem_development_dependencies",
+        "gem_homepage",
+        "gem_name",
+        "gem_summary",
+        "gem_version",
     ],
 )

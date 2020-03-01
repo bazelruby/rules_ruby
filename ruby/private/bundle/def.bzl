@@ -20,7 +20,7 @@ def run_bundler(runtime_ctx, bundler_arguments, previous_result):
 
     # add --verbose to all commands except install
     if bundler_command != "install":
-        bundler_args += ["--verbose"]
+        bundler_args.append("--verbose")
 
     bundler_args += bundler_arguments[1:]
 
@@ -185,7 +185,7 @@ def _ruby_bundle_impl(ctx):
     # 4. Generate the BUILD file for the bundle
     generate_bundle_build_file(runtime_ctx, result)
 
-ruby_bundle = repository_rule(
+ruby_bundle_install = repository_rule(
     implementation = _ruby_bundle_impl,
     attrs = BUNDLE_ATTRS,
 )

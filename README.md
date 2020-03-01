@@ -62,13 +62,13 @@ Add `rules_ruby_dependencies` and `rules_ruby_toolchains` into your `WORKSPACE` 
 # To get the latest, grab the 'develop' branch.
 
 git_repository(
-    name = "bazelrules_ruby_ruby",
+    name = "bazelruby_rules_ruby",
     remote = "https://github.com/bazelruby/rules_ruby.git",
     branch = "develop",
 )
 
 load(
-    "@bazelrules_ruby_ruby//ruby:deps.bzl",
+    "@bazelruby_rules_ruby//ruby:deps.bzl",
     "rules_ruby_toolchains",
     "rules_ruby_dependencies",
 )
@@ -109,7 +109,7 @@ Add `ruby_library`, `ruby_binary` or `ruby_test` into your `BUILD.bazel` files.
 
 ```python
 load(
-    "@bazelrules_ruby_ruby//ruby:defs.bzl",
+    "@bazelruby_rules_ruby//ruby:defs.bzl",
     "ruby_binary",
     "ruby_library",
     "ruby_test",
@@ -424,13 +424,13 @@ Installing using a `Gemfile` that uses the `gemspec` keyword is not currently su
 
 ```python
 git_repository(
-    name = "bazelrules_ruby_ruby",
+    name = "bazelruby_rules_ruby",
     remote = "https://github.com/bazelruby/rules_ruby.git",
     tag = "v0.1.0",
 )
 
 load(
-    "@bazelrules_ruby_ruby//ruby:deps.bzl",
+    "@bazelruby_rules_ruby//ruby:deps.bzl",
     "rules_ruby_toolchains",
     "rules_ruby_dependencies",
 )
@@ -439,7 +439,7 @@ rules_ruby_dependencies()
 
 rules_ruby_toolchains()
 
-load("@bazelrules_ruby_ruby//ruby:defs.bzl", "ruby_bundle")
+load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
 
 ruby_bundle(
     bundler_version = '2.1.2',
