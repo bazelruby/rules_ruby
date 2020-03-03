@@ -4,7 +4,7 @@ set -e
 # shellcheck disable=SC1091
 source "bin/deps"
 
-setup::linux() {
+setup.linux() {
   [[ -n $(command -v rvm) ]] && {
     run "rvm implode --force"
     [[ -d ${HOME}/.rvm ]] && run "rm -rf ${HOME}/.rvm"

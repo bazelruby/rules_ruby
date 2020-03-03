@@ -11,23 +11,23 @@ source "bin/deps"
 # Private Functions
 #—————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
-__setup::actions() {
+__setup.actions() {
   local sep="${1}"
-  printf "${bldylw}$(lib::array::join "${sep}" $(lib::util::functions-matching "setup::" | sed 's/ main//g'))${clr}"
+  printf "${bldylw}$(lib.array.join "${sep}" $(lib.util.functions-matching "setup." | sed 's/ main//g'))${clr}"
 }
 
 #—————————————————————————————————————————————————————————————————————————————————————————————————————————————
 # Public Functions
 #—————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
-setup::help() {
+setup.help() {
   printf "
 $(help-header USAGE)
   ${bldblk}# without any arguments runs a complete setup.${clr}
 $(help-usage "bin/setup")
 
   ${bldblk}# alternatively, a sub-setup function name can be passed:${clr}
-$(help-usage "bin/setup [ $(__setup::actions " | ") ]")
+$(help-usage "bin/setup [ $(__setup.actions " | ") ]")
 
 $(help-header DESCRIPTION:)
   Runs full setup without any arguments.
@@ -49,13 +49,13 @@ etc.
  "
 }
 
-setup::gems() {
+setup.gems() {
   for gem in rubocop relaxed-rubocop rubocop-performance; do
-    lib::gem::install ${gem}
+    lib.gem.install ${gem}
   done
 }
 
-setup::remove-git-hook() {
+setup.remove-git-hook() {
   set -e
   [[ -L .git/hooks/pre-commit ]] && {
     info 'Removing git commit hook...'
@@ -65,7 +65,7 @@ setup::remove-git-hook() {
   set +e
 }
 
-setup::git-hook() {
+setup.git-hook() {
   set -e
   if [[ ! -L .git/hooks/pre-commit ]]; then
     info 'Installing git pre-commit hook'
@@ -76,7 +76,7 @@ setup::git-hook() {
   set +e
 }
 
-setup::os-specific() {
+setup.os-specific() {
   local os=$(uname -s | tr '[:upper:]' '[:lower:]')
   local setup_script
   setup_script="./bin/setup-${os}"
@@ -86,7 +86,7 @@ setup::os-specific() {
     # shellcheck disable=SC1090
     source "${setup_script}"
     # run it's main function
-    eval "setup::${os} \"$*\""
+    eval "setup.${os} \"$*\""
     echo
     if [[ -z ${CI} ]]; then
       h2 "Please note — to print your Bazel environment run " "${bldylw}bin/show-env"
@@ -100,13 +100,13 @@ setup::os-specific() {
   return 0
 }
 
-setup::main() {
+setup.main() {
   local action="$1"
   [[ "${action}" == "-h" || ${action} == "--help" ]] && action="help"
-  local func="setup::${action}"
+  local func="setup.${action}"
 
   if [[ -n ${action} ]]; then
-    if lib::util::is-a-function "${func}"; then
+    if lib.util.is-a-function "${func}"; then
       [[ ${action} != "help" ]] && h2 "Executing partial setup for action ${bldylw}${action}"
       shift
       ${func} "$@"
@@ -115,16 +115,16 @@ setup::main() {
       [[ ${code} -ne 0 ]] && error "Error setting up ${action}"
       exit ${code}
     else
-      h1 "Invalid action provided." "Valid actions are: $(__setup::actions " | ")"
+      h1 "Invalid action provided." "Valid actions are: $(__setup.actions " | ")"
       exit 1
     fi
   else
     set +e
     h2 "Installing required development dependencies for working with rules_ruby and Bazel."
-    setup::gems
-    [[ -z ${CI} ]] && setup::git-hook
-    setup::os-specific "$@"
+    setup.gems
+    [[ -z ${CI} ]] && setup.git-hook
+    setup.os-specific "$@"
   fi
 }
 
-setup::main "$@"
+setup.main "$@"

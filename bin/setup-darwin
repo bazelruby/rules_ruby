@@ -6,7 +6,7 @@ source "bin/deps"
 
 #——————————————————————————————  OS-X SPECIFIC INSTALLERS —————————————————————————
 
-__setup::brew-validate() {
+__setup.brew-validate() {
   # Homebrew is required to install Bazel
   if ! brew help >/dev/null; then
     echo "brew is not installed, please install from https://brew.sh"
@@ -15,7 +15,7 @@ __setup::brew-validate() {
   fi
 }
 
-__setup::brew-install-jdk() {
+__setup.brew-install-jdk() {
   # The JDK homebrew cask is a required to install the java dependencies for Bazel
   if ! brew cask list | grep -q openjdk; then
     run "brew cask install homebrew/cask-versions/adoptopenjdk8"
@@ -24,23 +24,23 @@ __setup::brew-install-jdk() {
   fi
 }
 
-__setup::brew-deps() {
-  lib::brew::install::packages 'xz' 'ydiff'
+__setup.brew-deps() {
+  lib.brew.install.packages 'xz' 'ydiff'
 }
 
-__setup::is-bazelisk-installed() {
+__setup.is-bazelisk-installed() {
   /bin/ls -al "$(command -v bazel)" | grep -q bazelisk
 }
 
 #——————————————————————————————  PUBLIC INTERFACE —————————————————————————
 
-setup::brew() {
-  __setup::brew-validate
-  __setup::brew-install-jdk
-  __setup::brew-deps
+setup.brew() {
+  __setup.brew-validate
+  __setup.brew-install-jdk
+  __setup.brew-deps
 }
 
-setup::xcode-tools() {
+setup.xcode-tools() {
   # xcode command line tools are required, specifically gcc
   # if xcode already exists, this command will error, otherwise prompt the user
   if [[ -n $(xcode-select --install 2>&1) ]]; then
@@ -48,16 +48,16 @@ setup::xcode-tools() {
   fi
 }
 
-setup::bazelisk() {
-  if __setup::is-bazelisk-installed; then
+setup.bazelisk() {
+  if __setup.is-bazelisk-installed; then
     info: "Bazelisk is already installed."
   else
     run "brew install bazelbuild/tap/bazelisk"
   fi
 }
 
-setup::darwin() {
-  setup::xcode-tools
-  setup::brew
-  setup::bazelisk
+setup.darwin() {
+  setup.xcode-tools
+  setup.brew
+  setup.bazelisk
 }

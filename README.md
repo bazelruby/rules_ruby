@@ -61,9 +61,6 @@ Note: we have a short guide on [Building your first Ruby Project](https://github
 ```python
 workspace(name = "my_ruby_project")
 
-load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
-bazel_skylib_workspace()
-
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
@@ -74,7 +71,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 git_repository(
     name = "bazelruby_rules_ruby",
     remote = "https://github.com/bazelruby/rules_ruby.git",
-    branch = "develop",
+    branch = "develop"
 )
 
 load(
@@ -90,6 +87,9 @@ rules_ruby_dependencies()
 # RBENV installation if the Ruby version matches.
 #———————————————————————————————————————————————————————————————————————
 
+load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
+bazel_skylib_workspace()
+
 rules_ruby_select_sdk(version = "2.7.0")
 
 #———————————————————————————————————————————————————————————————————————
@@ -97,7 +97,7 @@ rules_ruby_select_sdk(version = "2.7.0")
 #———————————————————————————————————————————————————————————————————————
 
 load(
-    "@bazelruby_rules_ruby//ruby:defs.bzl", 
+    "@bazelruby_rules_ruby//ruby:defs.bzl",
     "ruby_bundle",
 )
 

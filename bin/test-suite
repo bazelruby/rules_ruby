@@ -24,15 +24,15 @@ export Bazel__BuildSteps="
     bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //... ;                   echo; echo
     bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //... ; echo; echo
 "
-deps::start-clock
+deps.start-clock
 
-run::set-all abort-on-error
+run.set-all abort-on-error
 
 #—————————————————————————————————————————————————————————————————————————————————————————————————————————————
 # Private Functions
 #—————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
-__test-suite::setup::environment() {
+__test-suite.setup.environment() {
   # shellcheck disable=SC2016
   grep -q 'bashmatic/init.sh' ${SHELL_INIT} || echo '[[ -d ${HOME}/.bashmatic ]] && source ${HOME}/.bashmatic/init.sh' >>"${SHELL_INIT}"
 
@@ -51,7 +51,7 @@ __test-suite::setup::environment() {
 }
 
 # Setup rbenv if needed, and install Ruby but only if needed
-__test-suite::setup::rbenv-ruby() {
+__test-suite.setup.rbenv-ruby() {
 
   if [[ ! -d ${HOME}/.rbenv || -z $(command -v rbenv) ]]; then
     [[ -d "${HOME}/.rbenv" ]] && run "mv ${HOME}/.rbenv ${HOME}/.rbenv.backup.$(date '+%s')"
@@ -66,7 +66,7 @@ __test-suite::setup::rbenv-ruby() {
     run "git clone https://github.com/rbenv/ruby-build.git ${rbenv_plugins}"
   fi
 
-  __test-suite::setup::environment
+  __test-suite.setup.environment
 
   run "source ${SHELL_INIT}"
   run "rbenv install -s ${RUBY_VERSION}"
@@ -79,12 +79,12 @@ __test-suite::setup::rbenv-ruby() {
 
 }
 
-__test::actions() {
+__test.actions() {
   local sep=', '
-  printf "${bldylw}$(lib::array::join "${sep}" $(lib::util::functions-matching "test::"))"
+  printf "${bldylw}$(lib.array.join "${sep}" $(lib.util.functions-matching "test."))"
 }
 
-__test::exec() {
+__test.exec() {
   local target
   target="$1"
   shift
@@ -102,14 +102,14 @@ __test::exec() {
 # Public Functions
 #—————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
-test::help() {
+test.help() {
   printf "
 $(help-header USAGE)
   ${bldblk}# without any arguments runs a complete test suite.${clr}
 $(help-usage "bin/test-suite")
 
   ${bldblk}# alternatively, a partial test name can be passed:${clr}
-$(help-usage "bin/test-suite [ $(__test::actions " | ") ]")
+$(help-usage "bin/test-suite [ $(__test.actions " | ") ]")
 
 $(help-header DESCRIPTION:)
   Shell script that runs all or partial tests. Can be used locally and on CI.
@@ -129,23 +129,23 @@ $(help-example bin/test-suite simple-example)
 }
 
 # Runs Rubocop Tests
-test::rubocop() {
-  __test::exec rubocop "
+test.rubocop() {
+  __test.exec rubocop "
     bundle install --path=${BUNDLE_PATH}
     bundle exec rubocop -E -D .rubocop.yml --force-exclusion
   "
 }
 
 # Runs Buildifier
-test::buildifier() {
-  __test::exec buildifier "
+test.buildifier() {
+  __test.exec buildifier "
     bazel run :buildifier-check
   "
 }
 
 # Builds and runs workspace inside examples/simple_script
-test::simple-script() {
-  __test::exec simple-script "
+test.simple-script() {
+  __test.exec simple-script "
     cd examples/simple_script
     ${Bazel__BuildSteps}  
     echo run :bin;        bazel ${BAZEL_OPTS} run   ${BAZEL_BUILD_OPTS} :bin
@@ -154,20 +154,20 @@ test::simple-script() {
 }
 
 # Builds and runs workspace inside examples/simple_script
-test::example-gem() {
-  __test::exec example-gem "
+test.example-gem() {
+  __test.exec example-gem "
     cd examples/example_gem
     echo bazel ${BAZEL_OPTS} build ...:all; bazel ${BAZEL_OPTS} build ...:all
   "
 }
 
-test::workspace() {
-  __test::exec workspace "${Bazel__BuildSteps}"
+test.workspace() {
+  __test.exec workspace "${Bazel__BuildSteps}"
 }
 
 # Private
-test::bazel-info() {
-  __test::exec bazel-info "
+test.bazel-info() {
+  __test.exec bazel-info "
     bazel ${BAZEL_OPTS} version; echo; echo
     bazel ${BAZEL_OPTS} info; echo; echo
     bazel ${BAZEL_OPTS} fetch --curses=no -- '//ruby/...'
@@ -175,79 +175,79 @@ test::bazel-info() {
 }
 
 # Run rspecs once we have something in the spec folder.
-test::rspec() {
+test.rspec() {
   [[ -d "spec" ]] || return 0
-  __test::exec rspec "
+  __test.exec rspec "
     bundle check || bundle install
     bundle exec rspec
   "
 }
 
-test::all() {
-  test::bazel-info
-  test::workspace
-  test::simple-script
-  test::example-gem
-  test::rubocop
-  test::rspec
-  test::buildifier
+test.all() {
+  test.bazel-info
+  test.workspace
+  test.simple-script
+  test.example-gem
+  test.rubocop
+  test.rspec
+  test.buildifier
 }
 
-test-suite::setup() {
+test-suite.setup() {
   # shellcheck disable=SC1090
   [[ -f ${SHELL_INIT} ]] && source "${SHELL_INIT}"
 
   if [[ -n $(command -v ruby) ]]; then
     CURRENT_VERSION=$(ruby -e 'puts RUBY_VERSION')
     if [[ ${CURRENT_VERSION} != "${RUBY_VERSION}" ]]; then
-      __test-suite::setup::rbenv-ruby
+      __test-suite.setup.rbenv-ruby
     else
       info "Ruby already exists and matches the version:"
       info "$(command -v ruby), version: ${bldylw}$(ruby --version)"
     fi
   else
-    hl::subtle "Ruby wasn't found, installing via rbenv..."
-    __test-suite::setup::rbenv-ruby
+    hl.subtle "Ruby wasn't found, installing via rbenv..."
+    __test-suite.setup.rbenv-ruby
   fi
 }
 
-test-suite::main() {
+test-suite.main() {
   local action="${1}"
 
   [[ "${action}" == "-h" || ${action} == "--help" ]] && action="help"
   [[ -z ${action} ]] && action=all
-  local func="test::${action}"
+  local func="test.${action}"
 
   if [[ -n ${action} && ${action} != "all" ]]; then
     shift
-    if lib::util::is-a-function "${func}"; then
+    if lib.util.is-a-function "${func}"; then
       [[ "${action}" != "help" ]] && {
-        box::green-in-cyan "RulesRuby Test Suite Runner" "RubyRules Version $(cat .rules_version)"
-        test-suite::setup
+        box.green-in-cyan "RulesRuby Test Suite Runner" "RubyRules Version $(cat .rules_version)"
+        test-suite.setup
         h1 "Executing partial tests for action ${bldylw}${action}"
       }
       ${func} "$@"
       local code=$?
       [[ ${code} -eq 0 ]] && success "Test Suite for ${action} was successful"
       [[ ${code} -ne 0 ]] && error "Error running tests for ${action}"
-      deps::print-duration
+      deps.print-duration
       exit ${code}
     else
       info "Invalid action ${action}."
-      info "List of valid actions are: $(__test::actions)"
+      info "List of valid actions are: $(__test.actions)"
       exit 1
     fi
   else
-    box::green-in-cyan "RulesRuby Test Suite Runner —— full test suite in series." "RubyRules Version $(cat .rules_version)"
-    test-suite::setup
-    run::set-all abort-on-error
+    box.green-in-cyan "RulesRuby Test Suite Runner —— full test suite in series." "RubyRules Version $(cat .rules_version)"
+    test-suite.setup
+    run.set-all abort-on-error
     set -e
-    test::all
+    test.all
     success "Test suite was successful!"
-    deps::print-duration
+    deps.print-duration
   fi
 }
 
-test-suite::main "$@"
+test-suite.main "$@"
 
 set +x

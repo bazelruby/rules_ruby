@@ -11,34 +11,34 @@ source "bin/deps"
 [[ -n $(command -v rubocop) ]] || {
   # shellcheck disable=SC1091
   source bin/setup
-  setup::main gems
+  setup.main gems
 }
 
 export __git_pre="/tmp/rules-ruby-git-status-before-commit.$$"
 export __git_post="/tmp/rules-ruby-git-status-after-commit.$$"
 
-__lint::cleanup() {
+__lint.cleanup() {
   for f in "${__git_pre}" "${__git_post}"; do
     [[ -f "${f}" ]] && rm -f "${f}"
   done
 }
 
-deps::start-clock
-run::set-all abort-on-error
+deps.start-clock
+run.set-all abort-on-error
 
-__lint::actions() {
+__lint.actions() {
   local sep="${1:-', '}"
-  printf "${bldylw}$(lib::array::join "${sep}" $(lib::util::functions-matching "lint::" | sed 's/ main//g'))${clr}"
+  printf "${bldylw}$(lib.array.join "${sep}" $(lib.util.functions-matching "lint." | sed 's/ main//g'))${clr}"
 }
 
-lint::help() {
+lint.help() {
   printf "
 $(help-header USAGE)
   ${bldblk}# without any arguments runs a complete setup.${clr}
 $(help-usage "bin/linter")
 
   ${bldblk}# alternatively, a partial linter name can be passed:${clr}
-$(help-usage "bin/linter [ $(__lint::actions " | ") ]")
+$(help-usage "bin/linter [ $(__lint.actions " | ") ]")
 
 $(help-header DESCRIPTION:)
   Runs various linters either all serially, or by name based on
@@ -59,8 +59,8 @@ $(help-example bin/linter buildifier)
  exit 0
 }
 
-lint::rubocop() {
-  h2::green "Running Rubocop, please wait..."
+lint.rubocop() {
+  h2.green "Running Rubocop, please wait..."
   run "rubocop || rubocop -a"
   inf "Rubocop completed."
   ok:
@@ -68,8 +68,8 @@ lint::rubocop() {
 
 # runs buildifer from the PATH if it exists, otherwise bazel target
 # we want before-commit to be as fast as possible.
-lint::buildifier() {
-  h2::green "Buildifier"
+lint.buildifier() {
+  h2.green "Buildifier"
   if [[ -n $(command -v buildifier) ]]; then
     info "Running $(command -v buildifier).."
     run "find . -name 'BUILD*' -o -name 'WORKSPACE' -o -name '*.bzl'  | grep -v '.git' | xargs buildifier -v"
@@ -79,25 +79,25 @@ lint::buildifier() {
   fi
 }
 
-lint::all() {
+lint.all() {
   # number of modified files
   local changes_before=$(git status -s | md5)
-  trap __lint::cleanup EXIT
+  trap __lint.cleanup EXIT
   git status -s >"${__git_pre}"
 
   set -e
-  run::set-all abort-on-error
-  lint::rubocop
+  run.set-all abort-on-error
+  lint.rubocop
 
   set -e
-  run::set-all abort-on-error
-  lint::buildifier
+  run.set-all abort-on-error
+  lint.buildifier
 
   git status -s >"${__git_post}"
 
   local changes_after=$(git status -s | md5)
   if [[ ${changes_before} != "${changes_after}" ]]; then
-    hl::subtle "Git status -s output changed after before-commit hook."
+    hl.subtle "Git status -s output changed after before-commit hook."
     info "Changes before before-commit hook:"
     hr
     diff "${pre}" "${post}"
@@ -113,32 +113,32 @@ lint::all() {
 }
 
 
-lint::main() {
+lint.main() {
   local action="$1"
   [[ "${action}" == "-h" || ${action} == "--help" ]] && action="help"
-  local func="lint::${action}"
+  local func="lint.${action}"
 
   if [[ -n ${action} ]]; then
-    if lib::util::is-a-function "${func}"; then
+    if lib.util.is-a-function "${func}"; then
       [[ ${action} != "help" ]] && h2 "Executing partial linting for ${bldylw}${action}"
       shift
       ${func} "$@"
       local code=$?
       [[ ${code} -eq 0 ]] && success "Linter ${action} was successful"
       [[ ${code} -ne 0 ]] && error "Linter failed for ${action}"
-      deps::print-duration
+      deps.print-duration
       exit ${code}
     else
-      h1 "Invalid action provided." "Valid lint actions are: $(__lint::actions)"
+      h1 "Invalid action provided." "Valid lint actions are: $(__lint.actions)"
       exit 1
     fi
   else
     set +e
-    lint::all
-    deps::print-duration
+    lint.all
+    deps.print-duration
   fi
 }
 
-lint::main "$@"
+lint.main "$@"
 
 exit 0

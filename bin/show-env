@@ -9,7 +9,7 @@ set -e
 [[ -x bin/deps ]] && source "bin/deps"
 
 # prints first argument as the key, right arligned, the second left aligned.
-function setup::table-rows() {
+function setup.table-rows() {
   local value="$2"
   #$value="$(printf "%s" "${value}" | head -1 | tr -C -d '[:digit:][:punct:]' | sed 's/([0-9]+.[0-9]+.[0+9]+)//g;s/[()]/-/g')"
   value="$(printf "%s" "${value}" | head -1 | cut -b -40)"
@@ -17,26 +17,26 @@ function setup::table-rows() {
 
 }
 
-function setup::print-versions() {
+function setup.print-versions() {
   local bazelisk_version="$(/bin/ls -ls "$(command -v bazel)" | grep bazelisk | awk 'BEGIN{FS="/"}{print $8}')"
 
   set +e
   h2 "Your Current Runtime Environment:"
   echo
-  setup::table-rows 'Bazel' "$(bazel --version)" "$(command -v bazel)"
-  setup::table-rows 'Bazelisk' "${bazelisk_version}"
-  setup::table-rows 'Python ' "$(python --version 2>&1)" "$(command -v python) -> $(readlink "$(command -v python)")"
-  setup::table-rows 'Python2' "$(python2 --version 2>&1)" "$(command -v python2)"
-  setup::table-rows 'Python3' "$(python3 --version 2>&1)" "$(command -v python3)"
-  setup::table-rows 'Ruby' "$(ruby --version | sed -E 's/p[0-9]+.*$//g' 2>&1)" "$(command -v ruby)"
-  setup::table-rows 'BASH' "$(bash --version 2>/dev/null | tr -d ',')" "$(command -v bash)"
-  setup::table-rows 'CC' "$(cc --version 2>/dev/null)" "$(cc --version | grep clang)"
-  setup::table-rows 'GO' "$(go version 2>/dev/null)" "$(command -v go)"
+  setup.table-rows 'Bazel' "$(bazel --version)" "$(command -v bazel)"
+  setup.table-rows 'Bazelisk' "${bazelisk_version}"
+  setup.table-rows 'Python ' "$(python --version 2>&1)" "$(command -v python) -> $(readlink "$(command -v python)")"
+  setup.table-rows 'Python2' "$(python2 --version 2>&1)" "$(command -v python2)"
+  setup.table-rows 'Python3' "$(python3 --version 2>&1)" "$(command -v python3)"
+  setup.table-rows 'Ruby' "$(ruby --version | sed -E 's/p[0-9]+.*$//g' 2>&1)" "$(command -v ruby)"
+  setup.table-rows 'BASH' "$(bash --version 2>/dev/null | tr -d ',')" "$(command -v bash)"
+  setup.table-rows 'CC' "$(cc --version 2>/dev/null)" "$(cc --version | grep clang)"
+  setup.table-rows 'GO' "$(go version 2>/dev/null)" "$(command -v go)"
   set -e
   hr
   echo
 }
 
-setup::print-versions
+setup.print-versions
 
 exit 0
