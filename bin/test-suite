@@ -81,7 +81,7 @@ __test-suite.setup.rbenv-ruby() {
 
 __test.actions() {
   local sep=', '
-  printf "${bldylw}$(lib.array.join "${sep}" $(lib.util.functions-matching "test."))"
+  printf "${bldylw}$(array.join "${sep}" $(util.functions-matching "test."))"
 }
 
 __test.exec() {
@@ -220,7 +220,7 @@ test-suite.main() {
 
   if [[ -n ${action} && ${action} != "all" ]]; then
     shift
-    if lib.util.is-a-function "${func}"; then
+    if util.is-a-function "${func}"; then
       [[ "${action}" != "help" ]] && {
         box.green-in-cyan "RulesRuby Test Suite Runner" "RubyRules Version $(cat .rules_version)"
         test-suite.setup

@@ -25,7 +25,7 @@ __setup.brew-install-jdk() {
 }
 
 __setup.brew-deps() {
-  lib.brew.install.packages 'xz' 'ydiff'
+  brew.install.packages 'xz' 'ydiff'
 }
 
 __setup.is-bazelisk-installed() {

@@ -53,7 +53,7 @@ deps.start-clock() {
 deps.print-duration() {
   local finish=$(millis)
   local duration=$(( finish - __start ))
-  info "Total running time for was ${bldylw}$(lib.time.duration.millis-to-secs ${duration}) seconds.\n\n"
+  info "Total running time for was ${bldylw}$(time.duration.millis-to-secs ${duration}) seconds.\n\n"
 }
 
 

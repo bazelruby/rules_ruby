@@ -28,7 +28,7 @@ run.set-all abort-on-error
 
 __lint.actions() {
   local sep="${1:-', '}"
-  printf "${bldylw}$(lib.array.join "${sep}" $(lib.util.functions-matching "lint." | sed 's/ main//g'))${clr}"
+  printf "${bldylw}$(array.join "${sep}" $(util.functions-matching "lint." | sed 's/ main//g'))${clr}"
 }
 
 lint.help() {
@@ -119,7 +119,7 @@ lint.main() {
   local func="lint.${action}"
 
   if [[ -n ${action} ]]; then
-    if lib.util.is-a-function "${func}"; then
+    if util.is-a-function "${func}"; then
       [[ ${action} != "help" ]] && h2 "Executing partial linting for ${bldylw}${action}"
       shift
       ${func} "$@"

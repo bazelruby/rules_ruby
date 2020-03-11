@@ -13,7 +13,7 @@ source "bin/deps"
 
 __setup.actions() {
   local sep="${1}"
-  printf "${bldylw}$(lib.array.join "${sep}" $(lib.util.functions-matching "setup." | sed 's/ main//g'))${clr}"
+  printf "${bldylw}$(array.join "${sep}" $(util.functions-matching "setup." | sed 's/ main//g'))${clr}"
 }
 
 #—————————————————————————————————————————————————————————————————————————————————————————————————————————————
@@ -51,7 +51,7 @@ etc.
 
 setup.gems() {
   for gem in rubocop relaxed-rubocop rubocop-performance; do
-    lib.gem.install ${gem}
+    gem.install ${gem}
   done
 }
 
@@ -106,7 +106,7 @@ setup.main() {
   local func="setup.${action}"
 
   if [[ -n ${action} ]]; then
-    if lib.util.is-a-function "${func}"; then
+    if util.is-a-function "${func}"; then
       [[ ${action} != "help" ]] && h2 "Executing partial setup for action ${bldylw}${action}"
       shift
       ${func} "$@"
