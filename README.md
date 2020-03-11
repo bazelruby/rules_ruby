@@ -1,3 +1,5 @@
+![activity](https://img.shields.io/github/commit-activity/m/bazelruby/rules_ruby?style=for-the-badge)
+
 <!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
 
 * [Rules Development Status](#rules-development-status)
