@@ -24,7 +24,7 @@ require 'rbconfig'
 # So we define it.
 unless Dir.respond_to?(:children)
   Dir.class.send :define_method, :children do |dir|
-   Dir.entries(dir).reject { |entry| %w(. ..).include?(entry) }
+    Dir.entries(dir).reject { |entry| %w(. ..).include?(entry) }
   end
 end
 
