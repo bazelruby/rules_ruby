@@ -22,10 +22,10 @@ require 'rbconfig'
 
 # Ruby 2.4 and older does not have +.children+
 # So we define it.
-unless Dir.respond_to?(:children)  
-  Dir.class.send :define_method, :children do |dir|  
-   Dir.entries(dir).reject { |entry| %w(. ..).include?(entry) }  
-  end  
+unless Dir.respond_to?(:children)
+  Dir.class.send :define_method, :children do |dir|
+   Dir.entries(dir).reject { |entry| %w(. ..).include?(entry) }
+  end
 end
 
 def find_runfiles
