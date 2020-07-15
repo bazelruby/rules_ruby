@@ -23,7 +23,7 @@ require 'rbconfig'
 # Ruby 2.4 and older does not have +.children+
 # So we define it.
 unless Dir.respond_to?(:children)
-  Dir.define_method :children do |dir|
+  Dir.class.send :define_method, :children do |dir|
     Dir.entries(dir).reject { |entry| %w(. ..).include?(entry) }
   end
 end
@@ -52,7 +52,8 @@ def create_loadpath_entries(custom, runfiles)
 end
 
 def get_repository_imports(runfiles)
-  Dir.children(runfiles).map {|d|
+  children = Dir.entries(runfiles) - [".", ".."]
+  children.map {|d|
     File.join(runfiles, d)
   }.select {|d|
     File.directory? d
