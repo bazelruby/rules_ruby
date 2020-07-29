@@ -260,21 +260,21 @@ pkg_tar(
     },
 )
 
-container_image(
-    name = "load_path_in_runfiles_container_image",
-    base = "@ruby_base_container//image",
-    entrypoint = ["/app/load_path_in_runfiles"],
-    tars = [":load_path_in_runfiles_container_layer"],
-)
+# container_image(
+#     name = "load_path_in_runfiles_container_image",
+#     base = "@ruby_base_container//image",
+#     entrypoint = ["/app/load_path_in_runfiles"],
+#     tars = [":load_path_in_runfiles_container_layer"],
+# )
 
-sh_test(
-    name = "load_path_in_runfiles_container_test",
-    size = "small",
-    srcs = ["container_test.sh"],
-    args = [
-        "$(location :load_path_in_runfiles_container_image)",
-        "bazel/ruby/tests:load_path_in_runfiles_container_image",
-    ],
-    data = [":load_path_in_runfiles_container_image"],
-    tags = ["docker"],
-)
+# sh_test(
+#     name = "load_path_in_runfiles_container_test",
+#     size = "small",
+#     srcs = ["container_test.sh"],
+#     args = [
+#         "$(location :load_path_in_runfiles_container_image)",
+#         "bazel/ruby/tests:load_path_in_runfiles_container_image",
+#     ],
+#     data = [":load_path_in_runfiles_container_image"],
+#     tags = ["docker"],
+# )
