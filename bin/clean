@@ -19,53 +19,20 @@ fi
 # shellcheck disable=SC1090
 source "${BashMatic}/init.sh" 1>/dev/null 2>&1
 
-__version.detect() {
-  local file="$1"
-  if [[ -f ${file} ]]; then
-    /bin/cat "${file}" | head -1
-  else
-    printf ''
-  fi
+main() {
+  export BAZEL_OPTS="--max_idle_secs=10800 --noshutdown_on_low_sys_mem --connect_timeout_secs=30"
+  h1 "Cleaning Bazel directories... Please wait."
+  local -a du_before=($(du -hs .))
+  run "bazel clean --expunge"
+  for dir in $(ls -1 examples); do
+    run "cd examples/${dir}"
+    run "bazel clean --expunge"
+    run "cd -"
+  done
+  local -a du_after=($(du -hs .))
+  h2 "Space before cleaning: ${bldylw}${du_before[0]}" \
+     "Space after  cleaning: ${bldgrn}${du_after[0]}"
 }
 
-[[ -f .bazelversion ]] || {
-  error "Can't find .bazelversion file, required for installing Bazel!"
-  exit 1
-}
+main "$@"
 
-# Application Constants
-export RulesRuby__RulesVersion="$(__version.detect .rules_version)"
-export RulesRuby__RubyVersion="$(__version.detect .ruby_version)"
-export RulesRuby__BazelVersion="$(__version.detect .bazelversion)"
-
-bazel-sha() {
-  bazel info | grep output_path | awk 'BEGIN{FS="/"}{ for(i = 1; i <= NF; i++) { if (length($i) == 32) print $i; } }'
-}
-
-help-header() {
-  printf "${bldylw}$*${clr}"
-}
-
-help-usage() {
-  printf "  ${bldgrn}$*${clr}"
-}
-
-help-example() {
-  printf "    ${bldpur}$*${clr}"
-}
-
-deps.start-clock() {
-  export __start=$(millis)
-}
-
-deps.print-duration() {
-  local finish=$(millis)
-  local duration=$(( finish - __start ))
-  info "Total running time for was ${bldylw}$(time.duration.millis-to-secs ${duration}) seconds.\n\n"
-}
-
-
-run.set-all abort-on-error
-
-# ensure we can exit with Ctrl-C
-trap exit 1 INT

@@ -4,9 +4,9 @@ load("//ruby/private/toolchains:repository_context.bzl", "ruby_repository_contex
 def _install_ruby_version(ctx, version):
     print("download and extract ruby-build")
     ctx.download_and_extract(
-        url = "https://github.com/rbenv/ruby-build/archive/v20200224.tar.gz",
-        sha256 = "dc3799a1c784c9a0f214a3c0c861a0bb798cd40ee2df49bce95b4c95adf6fc79",
-        stripPrefix = "ruby-build-20200224",
+        url = "https://github.com/rbenv/ruby-build/archive/v20200727.tar.gz",
+        sha256 = "71679d49d9190250059eaa0bc0bedd080c00a523ec47662f559f7629f71772ea",
+        stripPrefix = "ruby-build-20200727",
     )
 
     install_path = "./build"

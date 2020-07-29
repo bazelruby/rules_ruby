@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
+# vim: ft=bash
 #
 # Main dependency shell script that installs BashMatic Library in ~/.bashmatic folder.
+#
+# —————————————————————————————————————————————————————————————————————————————————————
+# NOTE: These setup scripts rely on an open source BASH framework BashMatic.
+#       https://github.com/kigster/bashmatic
+#
+# The framework is pretty light-weight, and is installed in your $HOME/.bashmatic folder.
+# You can safely remove that folder after the setup if you wish, although re-running the 
+# setup will re-install it.
+# —————————————————————————————————————————————————————————————————————————————————————
 
 export COLUMNS=65
 
@@ -100,7 +110,7 @@ lint.all() {
     hl.subtle "Git status -s output changed after before-commit hook."
     info "Changes before before-commit hook:"
     hr
-    diff "${pre}" "${post}"
+    diff "${__git_pre}" "${__git_post}"
     hr
     echo
     info "ACTION: ${bldylw}Please add any respective files to the commit and retry."

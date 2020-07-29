@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
 # vim: ft=bash
+# —————————————————————————————————————————————————————————————————————————————————————
+# NOTE: These setup scripts rely on an open source BASH framework BashMatic.
+#       https://github.com/kigster/bashmatic
+#
+# The framework is pretty light-weight, and is installed in your $HOME/.bashmatic folder.
+# You can safely remove that folder after the setup if you wish, although re-running the 
+# setup will re-install it.
+# —————————————————————————————————————————————————————————————————————————————————————
+
 set -e
 
 # shellcheck disable=SC1091
-source "bin/deps"
+source "bin/deps" 2>/dev/null 1>/dev/null
 
 export SHELL_INIT="${HOME}/.bashrc"
 export BUNDLE_PATH="${BUNDLE_PATH:-${HOME}/.bundle/gems}"
@@ -12,11 +21,13 @@ export PATH="${HOME}/.rbenv/bin:${HOME}/.rbenv/shims:/usr/local/bin:/usr/bin:/bi
 export BAZEL_OPTS="--host_jvm_args=-Xmx500m --host_jvm_args=-Xms500m"
 export BAZEL_BUILD_OPTS="--curses=no --verbose_failures -j 30 --progress_report_interval=2"
 export BAZEL_TEST_OPTS="--verbose_failures --test_verbose_timeout_warnings --verbose_explanations"
-export RUBY_VERSION=2.7.0
+export RUBY_VERSION="$(__version.detect .ruby_version)"
+export BUNDLER_VERSION=$(gem.gemfile.bundler-version)
+export RULES_VERSION=$(__version.detect .rules_version)
 
 export BashMatic__Expr="
-  [[ -f ${SHELL_INIT} ]] && source ${SHELL_INIT}
-  [[ -f ${HOME}/.bashmatic/init.sh ]] && source ${HOME}/.bashmatic/init.sh
+  [[ -f ${SHELL_INIT} ]] && source ${SHELL_INIT};
+  [[ -f ${HOME}/.bashmatic/init.sh ]] && source ${HOME}/.bashmatic/init.sh;
   set -e
 "
 export Bazel__BuildSteps="
@@ -26,7 +37,7 @@ export Bazel__BuildSteps="
 "
 deps.start-clock
 
-run.set-all abort-on-error
+run.set-all abort-on-error show-output-on
 
 #—————————————————————————————————————————————————————————————————————————————————————————————————————————————
 # Private Functions
@@ -34,7 +45,7 @@ run.set-all abort-on-error
 
 __test-suite.setup.environment() {
   # shellcheck disable=SC2016
-  grep -q 'bashmatic/init.sh' ${SHELL_INIT} || echo '[[ -d ${HOME}/.bashmatic ]] && source ${HOME}/.bashmatic/init.sh' >>"${SHELL_INIT}"
+  grep -q 'bashmatic/init.sh' "${SHELL_INIT}" || echo '[[ -d ${HOME}/.bashmatic ]] && source ${HOME}/.bashmatic/init.sh' >>"${SHELL_INIT}"
 
   [[ -n $(command -v rbenv) ]] && {
     export PATH="${HOME}/.rbenv/shims:${HOME}/.rbenv/bin:/usr/local/bin:/usr/bin:/bin:${PATH}"
@@ -52,7 +63,6 @@ __test-suite.setup.environment() {
 
 # Setup rbenv if needed, and install Ruby but only if needed
 __test-suite.setup.rbenv-ruby() {
-
   if [[ ! -d ${HOME}/.rbenv || -z $(command -v rbenv) ]]; then
     [[ -d "${HOME}/.rbenv" ]] && run "mv ${HOME}/.rbenv ${HOME}/.rbenv.backup.$(date '+%s')"
     run "rm -rf ${HOME}/.rbenv"
@@ -68,15 +78,17 @@ __test-suite.setup.rbenv-ruby() {
 
   __test-suite.setup.environment
 
-  run "source ${SHELL_INIT}"
+  set +e
+  source "${SHELL_INIT}" 2>&1 1>/dev/null
+  set -e
+  
   run "rbenv install -s ${RUBY_VERSION}"
   run "rbenv global ${RUBY_VERSION}"
   run "rbenv rehash"
   run "ruby --version"
   run "gem update --system --no-doc"
-  run "gem install bundler --version 2.0.2 --no-doc"
-  run "bundle install --jobs=4 --retry=3 --path "${BUNDLE_PATH}""
-
+  run "gem install bundler --version ${BUNDLER_VERSION} --no-doc"
+  run "bundle install --jobs=4 --retry=3 --path ${BUNDLE_PATH}"
 }
 
 __test.actions() {
@@ -94,6 +106,11 @@ __test.exec() {
     h2 \"Testing Target: ${bldcyn}${target}\"
     $*
   "
+}
+
+__test.header() {
+  box.green-in-cyan "RulesRuby Test Suite Runner" "RubyRules Version ${bldylw}${RULES_VERSION}"
+  test-suite.setup
 }
 
 [[ -n ${DEBUG} ]] && set -x
@@ -222,14 +239,16 @@ test-suite.main() {
     shift
     if util.is-a-function "${func}"; then
       [[ "${action}" != "help" ]] && {
-        box.green-in-cyan "RulesRuby Test Suite Runner" "RubyRules Version $(cat .rules_version)"
-        test-suite.setup
+        __test.header
         h1 "Executing partial tests for action ${bldylw}${action}"
       }
       ${func} "$@"
       local code=$?
-      [[ ${code} -eq 0 ]] && success "Test Suite for ${action} was successful"
-      [[ ${code} -ne 0 ]] && error "Error running tests for ${action}"
+      if [[ ${code} -eq 0 ]]; then
+        success "Test Suite for ${action} was successful"
+      else
+        error "Error running tests for ${action}"
+      fi
       deps.print-duration
       exit ${code}
     else
@@ -238,8 +257,7 @@ test-suite.main() {
       exit 1
     fi
   else
-    box.green-in-cyan "RulesRuby Test Suite Runner —— full test suite in series." "RubyRules Version $(cat .rules_version)"
-    test-suite.setup
+    __test.header
     run.set-all abort-on-error
     set -e
     test.all

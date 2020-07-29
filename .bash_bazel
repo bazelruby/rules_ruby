@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#
+# Install me in your ${HOME} folder, and add me to your ~/.bashrc:
+#
+# cp .bash_bazel ~/ && echo 'source ~/.bash_bazel' >> ~/.bashrc 
+#
+
+[[ -n $(command -V brew) ]] && {
+  completion="$(brew --prefix)/etc/bash_completion"
+  [[ -f "${completion}" ]] && {
+    source "${completion}"
+  }
+}
+
+alias bb='bazel build'
+alias bba='bazel build //...:all'
+alias bbr='bazel run'
+alias bbx='bazel clean --expunge'
+alias bbq='bazel query'
+alias bbt='bazel test'
+alias bbqa='bazel query //...:all'
+

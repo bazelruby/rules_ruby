@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
+# —————————————————————————————————————————————————————————————————————————————————————
+# NOTE: These setup scripts rely on an open source BASH framework BashMatic.
+#       https://github.com/kigster/bashmatic
 #
+# The framework is pretty light-weight, and is installed in your $HOME/.bashmatic folder.
+# You can safely remove that folder after the setup if you wish, although re-running the 
+# setup will re-install it.
+# —————————————————————————————————————————————————————————————————————————————————————
+
 set -e
-# shellcheck disable=SC1091
 source "bin/deps"
 
 setup.linux() {

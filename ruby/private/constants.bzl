@@ -1,3 +1,4 @@
+# Ruby Constants
 load(":providers.bzl", "RubyLibrary")
 
 RULES_RUBY_WORKSPACE_NAME = "@bazelruby_rules_ruby"

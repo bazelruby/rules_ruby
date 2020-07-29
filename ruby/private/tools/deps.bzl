@@ -14,7 +14,8 @@ def _transitive_srcs(deps):
     )
 
 def transitive_deps(ctx, extra_files = [], extra_deps = []):
-    """Calculates transitive sets of args.
+    """
+    Calculates transitive sets of args.
 
     Calculates the transitive sets for ruby sources, data runfiles,
     include flags and runtime flags from the srcs, data and deps attributes
@@ -25,6 +26,8 @@ def transitive_deps(ctx, extra_files = [], extra_deps = []):
       ctx: a ctx object for a ruby_library or a ruby_binary rule.
       extra_files: a list of File objects to be added to the default_files
       extra_deps: a list of Target objects.
+    Returns:
+        struct
     """
     deps = _transitive_srcs(ctx.attr.deps + extra_deps)
     files = depset(extra_files + ctx.files.srcs)
