@@ -12,7 +12,7 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 
 versions.check("2.1.1")
 
-rules_ruby_select_sdk("2.7.0")
+rules_ruby_select_sdk("2.7.1")
 
 local_repository(
     name = "bazelruby_rules_ruby_ruby_tests_testdata_another_workspace",

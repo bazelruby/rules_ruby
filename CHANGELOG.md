@@ -1,3 +1,7 @@
+# 0.4.0 / 2020-07-29
+
+[Total Changes since v0.3.0](https://github.com/bazelruby/rules_ruby/compare/v0.3.0...v0.4.0)
+
 # 0.3.0 / 2020-03-02
 
 [Total Changes since v0.2.0](https://github.com/bazelruby/rules_ruby/compare/v0.2.0...v0.3.0)
@@ -16,7 +20,7 @@
 * Introduced `ruby_gem` rule for packaging Ruby sources into a RubyGem-compatible zip file. Note, the resulting file has `.zip` extension.
 * Introduced `ruby_rubocop` rule for running rubocop in analysis mode or auto-correcting mode.
 * Added an example gem workspace under `examples/example-gem`
-* Default ruby used is now 2.7.0. We also now allow 2.7.0 to be built by Bazel.
+* Default ruby used is now 2.7.1. We also now allow 2.7.1 to be built by Bazel.
 * Bazelisk has been updated to 1.3.0
 * Updated Bazel version from 2.0.0 to 2.1.0
 * Updated gem versions in the Gemfile
