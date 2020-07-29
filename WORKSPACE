@@ -10,7 +10,7 @@ bazel_skylib_workspace()
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
 
-versions.check("2.1.1")
+versions.check("3.4.1")
 
 rules_ruby_select_sdk("2.7.1")
 
@@ -25,22 +25,21 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 # installing go for buildifier
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = "842ec0e6b4fbfdd3de6150b61af92901eeb73681fd4d185746644c338f51d4c0",
+    sha256 = "8663604808d2738dc615a2c3eb70eba54a9a982089dd09f6ffe5d0e75771bc4f",
     urls = [
-        "https://storage.googleapis.com/bazel-mirror/github.com/bazelbuild/rules_go/releases/download/v0.20.1/rules_go-v0.20.1.tar.gz",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.20.1/rules_go-v0.20.1.tar.gz",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.23.6/rules_go-v0.23.6.tar.gz",
     ],
 )
 
 git_repository(
     name = "bazel_gazelle",
-    commit = "11a9ed24876401ee8b570c04de3a132e62415304",
+    commit = "c00612418c4dbc9f3cd35fe71fe1147748048b69",
     remote = "https://github.com/bazelbuild/bazel-gazelle",
 )
 
 git_repository(
     name = "com_google_protobuf",
-    commit = "09745575a923640154bcf307fba8aedff47f240a",
+    commit = "6c61c1e63b9be3c36db6bed19032dfc0d63aadda",
     remote = "https://github.com/protocolbuffers/protobuf",
     shallow_since = "1558721209 -0700",
 )
@@ -49,7 +48,7 @@ load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_depe
 
 go_rules_dependencies()
 
-go_register_toolchains(go_version = "1.12.9")
+go_register_toolchains(go_version = "1.14.6")
 
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
 
@@ -63,9 +62,9 @@ protobuf_deps()
 
 http_archive(
     name = "io_bazel_rules_docker",
-    sha256 = "14ac30773fdb393ddec90e158c9ec7ebb3f8a4fd533ec2abbfd8789ad81a284b",
-    strip_prefix = "rules_docker-0.12.1",
-    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.12.1/rules_docker-v0.12.1.tar.gz"],
+    sha256 = "4521794f0fba2e20f3bf15846ab5e01d5332e587e9ce81629c7f96c793bb7036",
+    strip_prefix = "rules_docker-0.14.4",
+    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.14.4/rules_docker-v0.14.4.tar.gz"],
 )
 
 load(
