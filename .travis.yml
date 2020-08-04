@@ -7,6 +7,7 @@ jdk: openjdk11
 cache:
   directories:
     - ${HOME}/.rbenv
+    - ${HOME}/.bazel
     - ${HOME}/.bundle/gems
 
 addons:
@@ -16,8 +17,21 @@ addons:
       - build-essential
       - g++
 
-script:
+before_script:
+  - mkdir -p ${HOME}/.bazel/cache
+  - mkdir -p ${HOME}/.bazel/out
+  - rm -f .bazelrc.user
+  - echo 'build --disk_cache=${HOME}/.bazel/cache' >> .bazelrc.user
+  - echo 'startup --output_base=${HOME}/.bazel/out' >> .bazelrc.user
+  - echo
+  - echo "======= BEGIN .bazelrc =========="
+  - cat .bazelrc
+  - cat .bazelrc.user
+  - echo "======= END   .bazelrc =========="
   - /usr/bin/env bash bin/setup
+  - /usr/bin/env bash bin/show-env
+
+script:
   - /usr/bin/env bash bin/test-suite
 
 after_script:
@@ -26,6 +40,8 @@ after_script:
 env:
   global:
     - CI=true
+    - SCREEN_WIDTH=70
+    - RBENV_ROOT="${HOME}/.rbenv"
     - BUNDLE_PATH="${HOME}/.bundle/gems"
     - PATH="${HOME}/.rbenv/bin:${HOME}/.rbenv/shims:/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:/opt/local/bin:${PATH}"
     - BAZEL_OPTS="--host_jvm_args=-Xmx1200m --host_jvm_args=-Xms1200m"

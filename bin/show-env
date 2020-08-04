@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#
+# vim: ft=bash
 # When run, shows current runtime environment, locations of Ruby, Bazel,
 # python, etc.
 #
@@ -10,10 +10,9 @@
 #       https://github.com/kigster/bashmatic
 #
 # The framework is pretty light-weight, and is installed in your $HOME/.bashmatic folder.
-# You can safely remove that folder after the setup if you wish, although re-running the 
+# You can safely remove that folder after the setup if you wish, although re-running the
 # setup will re-install it.
 # —————————————————————————————————————————————————————————————————————————————————————
-
 
 set -e
 [[ -x bin/deps ]] && source "bin/deps"
@@ -23,7 +22,7 @@ function setup.table-rows() {
   local value="$2"
   #$value="$(printf "%s" "${value}" | head -1 | tr -C -d '[:digit:][:punct:]' | sed 's/([0-9]+.[0-9]+.[0+9]+)//g;s/[()]/-/g')"
   value="$(printf "%s" "${value}" | head -1 | cut -b -40)"
-  printf "${bldylw}%12.12s : ${bldblu}%40.40s  |  ${txtpur}%s\n${clr}" "$1" "${value}" "$3"
+  printf "${bldylw}%10.10s : ${bldblu}%40.40s  |  ${txtpur}%s\n${clr}" "$1" "${value}" "$3"
 
 }
 
@@ -35,15 +34,20 @@ function setup.print-versions() {
   echo
   setup.table-rows 'Bazel' "$(bazel --version)" "$(command -v bazel)"
   setup.table-rows 'Bazelisk' "${bazelisk_version}"
-  setup.table-rows 'Python ' "$(python --version 2>&1)" "$(command -v python) -> $(readlink "$(command -v python)")"
-  setup.table-rows 'Python2' "$(python2 --version 2>&1)" "$(command -v python2)"
-  setup.table-rows 'Python3' "$(python3 --version 2>&1)" "$(command -v python3)"
-  setup.table-rows 'Ruby' "$(ruby --version | sed -E 's/p[0-9]+.*$//g' 2>&1)" "$(command -v ruby)"
   setup.table-rows 'BASH' "$(bash --version 2>/dev/null | tr -d ',')" "$(command -v bash)"
   setup.table-rows 'CC' "$(cc --version 2>/dev/null)" "$(cc --version | grep clang)"
   setup.table-rows 'GO' "$(go version 2>/dev/null)" "$(command -v go)"
-  set -e
   hr
+  setup.table-rows 'Ruby' "$(ruby --version | sed -E 's/p[0-9]+.*$//g' 2>&1)" "$(command -v ruby)"
+  setup.table-rows 'RBENV' "$(rbenv --version 2>/dev/null)" "$(command -v rbenv)"
+  setup.table-rows 'RUBIES' " " "$(rbenv versions 2>/dev/null | sed 's/ (.*//g; s/[ \*]//g' | tr '\n' '|')"
+  hr
+  setup.table-rows 'Python' "$(python --version 2>&1)" "$(command -v python) -> $(readlink "$(command -v python)")"
+  setup.table-rows 'Python2' "$(python2 --version 2>&1)" "$(command -v python2)"
+  setup.table-rows 'Python3' "$(python3 --version 2>&1)" "$(command -v python3)"
+  hr
+  set -e
+
   echo
 }
 

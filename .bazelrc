@@ -15,3 +15,8 @@ test --spawn_strategy=standalone
 test --test_output=all
 test --test_verbose_timeout_warnings
 test --verbose_failures
+
+# Custom user overrides
+# https://docs.bazel.build/versions/master/best-practices.html#bazelrc
+try-import %workspace%/.bazelrc.user
+try-import %workspace%/user.bazelrc

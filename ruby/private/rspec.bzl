@@ -46,7 +46,7 @@ def ruby_rspec(
     rspec_gems = ["%s:%s" % (bundle, gem) for gem in DEFAULT_RSPEC_GEMS]
 
     deps += rspec_gems
-    deps += ["%s:bin" % bundle]
+    deps.append("%s:bin" % bundle)
 
     ruby_rspec_test(
         name = name,
