@@ -5,7 +5,7 @@
 #       https://github.com/kigster/bashmatic
 #
 # The framework is pretty light-weight, and is installed in your $HOME/.bashmatic folder.
-# You can safely remove that folder after the setup if you wish, although re-running the 
+# You can safely remove that folder after the setup if you wish, although re-running the
 # setup will re-install it.
 # —————————————————————————————————————————————————————————————————————————————————————
 
@@ -60,10 +60,9 @@ deps.start-clock() {
 
 deps.print-duration() {
   local finish=$(millis)
-  local duration=$(( finish - __start ))
+  local duration=$((finish - __start))
   info "Total running time for was ${bldylw}$(time.duration.millis-to-secs ${duration}) seconds.\n\n"
 }
-
 
 run.set-all abort-on-error
 

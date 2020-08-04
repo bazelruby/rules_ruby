@@ -18,48 +18,6 @@ setup.linux.bazel() {
   run "sudo chmod +x /usr/bin/bazel"
 }
 
-setup.linux.rbenv() {
-  local rbenv_home="${HOME}/.rbenv"
-  local ruby_version="$(cat .ruby-version | tr -d '\n')"
-
-  if [[ -n $(command -v ruby) ]]; then
-    local installed_version="$(ruby -e 'puts RUBY_VERSION' | tr -d '\n')"
-    if [[ ${installed_version} == ${ruby_version} ]]; then
-      info "Linux installation already has RUBY version ${bldylw}${ruby_version}"
-      return 0
-    fi
-  fi
-
-  run "sudo apt install autoconf bison build-essential libssl-dev libyaml-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm-dev"
-
-  [[ -d "${rbenv_home}" ]] || run "git clone https://github.com/rbenv/rbenv.git ${rbenv_home}"
-
-  export PATH="${rbenv_home}/bin:${PATH}"
-  command -v rbenv || {
-    echo "Can't find rbenv in the PATH?"
-    echo "PATH=${PATH}"
-    echo "which rbvenv: $(which rbenv)"
-    exit 1
-  }
-
-  # see if we even need to install anything:
-  local ruby_sdk_marker="$(rbenv versions | grep "${ruby_version}" | cut -d ' ' -f 1)"
-  if [[ ${ruby_sdk_marker} == "*" ]]; then
-    info "Ruby Version ${ruby_version} is already present, and is RBENV default."
-    info "Skipping the rest of RBENV setup."
-    return 0
-  fi
-
-  eval "$(rbenv init -)"
-  run "mkdir -p ${rbenv_home}/plugins"
-  run "git clone https://github.com/rbenv/ruby-build.git ${rbenv_home}/plugins/ruby-build"
-  run "rbenv rehash"
-  hash -r
-
-  run "rbenv install -s ${ruby_version}"
-  run "rbenv global ${ruby_version}"
-}
-
 setup.linux() {
   [[ -n $(command -v rvm) ]] && {
     run "rvm implode --force"
@@ -67,7 +25,5 @@ setup.linux() {
   }
 
   run.set-all abort-on-error
-
   setup.linux.bazel
-  setup.linux.rbenv
 }
