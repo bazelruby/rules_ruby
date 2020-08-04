@@ -66,8 +66,6 @@ setup.linux() {
     [[ -d ${HOME}/.rvm ]] && run "rm -rf ${HOME}/.rvm"
   }
 
-  [[ -f ${HOME}/.bazelrc ]] || run "cp -v .circleci/.bazelrc ${HOME}"
-
   run.set-all abort-on-error
 
   setup.linux.bazel

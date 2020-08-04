@@ -19,7 +19,6 @@ jobs:
       - run:
           name: "Install ~/.bazelrc and run setup"
           command: |
-            cp .circleci/.bazelrc ${HOME}
             /usr/bin/env bash bin/setup
 
       - run:
@@ -40,7 +39,6 @@ jobs:
       - run:
           name: "Install ~/.bazelrc and run setup"
           command: |
-            cp .circleci/.bazelrc ${HOME}
             /usr/bin/env bash bin/setup
 
       - run:
@@ -57,7 +55,6 @@ jobs:
       - run:
           name: "Install ~/.bazelrc and run setup"
           command: |
-            cp .circleci/.bazelrc ${HOME}
             /usr/bin/env bash bin/setup
 
       - run:
@@ -74,7 +71,6 @@ jobs:
       - run:
           name: "Install ~/.bazelrc and run setup"
           command: |
-            cp .circleci/.bazelrc ${HOME}
             /usr/bin/env bash bin/setup
 
       - run:
@@ -91,7 +87,6 @@ jobs:
       - run:
           name: "Install ~/.bazelrc and run setup"
           command: |
-            cp .circleci/.bazelrc ${HOME}
             /usr/bin/env bash bin/setup
 
       - run:

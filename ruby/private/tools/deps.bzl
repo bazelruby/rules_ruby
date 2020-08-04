@@ -1,14 +1,14 @@
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load(
     "//ruby/private:providers.bzl",
-    "RubyLibrary",
+    "RubyLibraryInfo",
 )
 
 def _transitive_srcs(deps):
     return struct(
-        srcs = [d[RubyLibrary].transitive_ruby_srcs for d in deps if RubyLibrary in d],
-        incpaths = [d[RubyLibrary].ruby_incpaths for d in deps if RubyLibrary in d],
-        rubyopt = [d[RubyLibrary].rubyopt for d in deps if RubyLibrary in d],
+        srcs = [d[RubyLibraryInfo].transitive_ruby_srcs for d in deps if RubyLibraryInfo in d],
+        incpaths = [d[RubyLibraryInfo].ruby_incpaths for d in deps if RubyLibraryInfo in d],
+        rubyopt = [d[RubyLibraryInfo].rubyopt for d in deps if RubyLibraryInfo in d],
         data_files = [d[DefaultInfo].data_runfiles.files for d in deps],
         default_files = [d[DefaultInfo].default_runfiles.files for d in deps],
     )

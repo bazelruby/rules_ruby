@@ -18,16 +18,15 @@ addons:
       - g++
 
 before_script:
-  - mkdir -p ${HOME}/.bazel/cache
-  - mkdir -p ${HOME}/.bazel/out
+  - rm -f /home/travis/.phpenv/bin/rbenv
+  - hash -r
+  - mkdir -p  /home/travis/.cache/bazel-out
+  - mkdir -p  /home/travis/.cache/bazel-cache
   - rm -f .bazelrc.user
-  - echo 'build --disk_cache=${HOME}/.bazel/cache' >> .bazelrc.user
-  - echo 'startup --output_base=${HOME}/.bazel/out' >> .bazelrc.user
-  - echo
-  - echo "======= BEGIN .bazelrc =========="
+  - echo 'build --disk_cache=/home/travis/.cache/bazel-cache' >> .bazelrc.user
+  - echo 'startup --output_base=/home/travis/.cache/bazel-out' >> .bazelrc.user
   - cat .bazelrc
   - cat .bazelrc.user
-  - echo "======= END   .bazelrc =========="
   - /usr/bin/env bash bin/setup
   - /usr/bin/env bash bin/show-env
 

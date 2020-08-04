@@ -17,7 +17,7 @@
 
 ## Other Changes
 
-* Introduced `ruby_gem` rule for packaging Ruby sources into a RubyGem-compatible zip file. Note, the resulting file has `.zip` extension.
+* Introduced `ruby_gem` rule for packaging Ruby sources into a RubyGemInfo-compatible zip file. Note, the resulting file has `.zip` extension.
 * Introduced `ruby_rubocop` rule for running rubocop in analysis mode or auto-correcting mode.
 * Added an example gem workspace under `examples/example-gem`
 * Default ruby used is now 2.7.1. We also now allow 2.7.1 to be built by Bazel.

@@ -5,7 +5,7 @@
 #       https://github.com/kigster/bashmatic
 #
 # The framework is pretty light-weight, and is installed in your $HOME/.bashmatic folder.
-# You can safely remove that folder after the setup if you wish, although re-running the 
+# You can safely remove that folder after the setup if you wish, although re-running the
 # setup will re-install it.
 # —————————————————————————————————————————————————————————————————————————————————————
 
@@ -63,11 +63,7 @@ __test-suite.setup.environment() {
 
 # Setup rbenv if needed, and install Ruby but only if needed
 __test-suite.setup.rbenv-ruby() {
-  if [[ ! -d ${HOME}/.rbenv || -z $(command -v rbenv) ]]; then
-    [[ -d "${HOME}/.rbenv" ]] && run "mv ${HOME}/.rbenv ${HOME}/.rbenv.backup.$(date '+%s')"
-    run "rm -rf ${HOME}/.rbenv"
-    run "git clone https://github.com/rbenv/rbenv.git ${HOME}/.rbenv"
-  fi
+  [[ -d "${HOME}/.rbenv" ]] || run "git clone https://github.com/rbenv/rbenv.git ${HOME}/.rbenv"
 
   export PATH="${HOME}/.rbenv/bin:${HOME}/.rbenv/shims:${PATH}"
 
@@ -81,7 +77,7 @@ __test-suite.setup.rbenv-ruby() {
   set +e
   source "${SHELL_INIT}" 2>&1 1>/dev/null
   set -e
-  
+
   run "rbenv install -s ${RUBY_VERSION}"
   run "rbenv global ${RUBY_VERSION}"
   run "rbenv rehash"
