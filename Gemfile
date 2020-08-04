@@ -2,4 +2,5 @@
 
 source 'https://rubygems.org'
 
-gem 'rubocop', '~> 0.78'
+gem 'bundler'
+gem 'rubocop', '~> 0.88'

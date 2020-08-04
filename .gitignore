@@ -4,3 +4,6 @@
 **/vendor/bundle/**
 **/.DS_Store
 **/.vscode
+
+.bazelrc.user
+user.bazelrc

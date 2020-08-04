@@ -5,7 +5,7 @@ jobs:
     working_directory: /home/circleci/repo
     resource_class: medium
     docker:
-      - image: bazelruby/ruby-2.7.0
+      - image: bazelruby/ruby-2.7.1
     environment:
       PATH: "/usr/local/bin:/usr/bin:/sbin:/opt/bin:/home/circleci/repo/bin:/bin:/sbin:/usr/sbin"
       BUNDLE_PATH: /home/circleci/.bundle_cache
@@ -19,7 +19,6 @@ jobs:
       - run:
           name: "Install ~/.bazelrc and run setup"
           command: |
-            cp .circleci/.bazelrc ${HOME}
             /usr/bin/env bash bin/setup
 
       - run:
@@ -40,7 +39,6 @@ jobs:
       - run:
           name: "Install ~/.bazelrc and run setup"
           command: |
-            cp .circleci/.bazelrc ${HOME}
             /usr/bin/env bash bin/setup
 
       - run:
@@ -57,7 +55,6 @@ jobs:
       - run:
           name: "Install ~/.bazelrc and run setup"
           command: |
-            cp .circleci/.bazelrc ${HOME}
             /usr/bin/env bash bin/setup
 
       - run:
@@ -74,7 +71,6 @@ jobs:
       - run:
           name: "Install ~/.bazelrc and run setup"
           command: |
-            cp .circleci/.bazelrc ${HOME}
             /usr/bin/env bash bin/setup
 
       - run:
@@ -91,7 +87,6 @@ jobs:
       - run:
           name: "Install ~/.bazelrc and run setup"
           command: |
-            cp .circleci/.bazelrc ${HOME}
             /usr/bin/env bash bin/setup
 
       - run:

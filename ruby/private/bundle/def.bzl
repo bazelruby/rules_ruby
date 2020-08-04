@@ -8,7 +8,7 @@ load(
     "SCRIPT_BUILD_FILE_GENERATOR",
     "SCRIPT_INSTALL_GEM",
 )
-load("//ruby/private:providers.bzl", "RubyRuntimeContext")
+load("//ruby/private:providers.bzl", "RubyRuntimeInfo")
 
 # Runs bundler with arbitrary arguments
 # eg: run_bundler(runtime_ctx, [ "lock", " --gemfile", "Gemfile.rails5" ])
@@ -161,7 +161,7 @@ def _ruby_bundle_impl(ctx):
     bundler_version = ctx.attr.bundler_version
 
     # Setup this provider that we pass around between functions for convenience
-    runtime_ctx = RubyRuntimeContext(
+    runtime_ctx = RubyRuntimeInfo(
         ctx = ctx,
         interpreter = ctx.path(ctx.attr.ruby_interpreter),
         environment = {"RUBYOPT": "--enable-gems"},

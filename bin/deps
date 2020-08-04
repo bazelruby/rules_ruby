@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 # vim: ft=sh
+# —————————————————————————————————————————————————————————————————————————————————————
+# NOTE: These setup scripts rely on an open source BASH framework BashMatic.
+#       https://github.com/kigster/bashmatic
+#
+# The framework is pretty light-weight, and is installed in your $HOME/.bashmatic folder.
+# You can safely remove that folder after the setup if you wish, although re-running the
+# setup will re-install it.
+# —————————————————————————————————————————————————————————————————————————————————————
 
 export BashMatic="${HOME}/.bashmatic"
 
@@ -26,9 +34,9 @@ __version.detect() {
 }
 
 # Application Constants
-export RulesRuby__RulesVersion=$(__version.detect .rules_version)
-export RulesRuby__RubyVersion=2.7.0
-export RulesRuby__BazelVersion=$(__version.detect .bazelversion)
+export RulesRuby__RulesVersion="$(__version.detect .rules_version)"
+export RulesRuby__RubyVersion="$(__version.detect .ruby_version)"
+export RulesRuby__BazelVersion="$(__version.detect .bazelversion)"
 
 bazel-sha() {
   bazel info | grep output_path | awk 'BEGIN{FS="/"}{ for(i = 1; i <= NF; i++) { if (length($i) == 32) print $i; } }'
@@ -52,10 +60,9 @@ deps.start-clock() {
 
 deps.print-duration() {
   local finish=$(millis)
-  local duration=$(( finish - __start ))
+  local duration=$((finish - __start))
   info "Total running time for was ${bldylw}$(time.duration.millis-to-secs ${duration}) seconds.\n\n"
 }
-
 
 run.set-all abort-on-error
 

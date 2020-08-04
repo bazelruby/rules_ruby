@@ -7,6 +7,7 @@ jdk: openjdk11
 cache:
   directories:
     - ${HOME}/.rbenv
+    - ${HOME}/.bazel
     - ${HOME}/.bundle/gems
 
 addons:
@@ -15,9 +16,30 @@ addons:
       - libstdc++6
       - build-essential
       - g++
+      - autoconf 
+      - bison 
+      - libssl-dev 
+      - libyaml-dev 
+      - libreadline6-dev 
+      - zlib1g-dev 
+      - libncurses5-dev 
+      - libffi-dev 
+      - libgdbm-dev
+
+before_script:
+  - rm -f /home/travis/.phpenv/bin/rbenv
+  - hash -r
+  - mkdir -p  /home/travis/.cache/bazel-out
+  - mkdir -p  /home/travis/.cache/bazel-cache
+  - rm -f .bazelrc.user
+  - echo 'build --disk_cache=/home/travis/.cache/bazel-cache' >> .bazelrc.user
+  - echo 'startup --output_base=/home/travis/.cache/bazel-out' >> .bazelrc.user
+  - cat .bazelrc
+  - cat .bazelrc.user
+  - /usr/bin/env bash bin/setup
+  - /usr/bin/env bash bin/show-env
 
 script:
-  - /usr/bin/env bash bin/setup
   - /usr/bin/env bash bin/test-suite
 
 after_script:
@@ -26,6 +48,8 @@ after_script:
 env:
   global:
     - CI=true
+    - SCREEN_WIDTH=70
+    - RBENV_ROOT="${HOME}/.rbenv"
     - BUNDLE_PATH="${HOME}/.bundle/gems"
     - PATH="${HOME}/.rbenv/bin:${HOME}/.rbenv/shims:/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin:/opt/local/bin:${PATH}"
     - BAZEL_OPTS="--host_jvm_args=-Xmx1200m --host_jvm_args=-Xms1200m"

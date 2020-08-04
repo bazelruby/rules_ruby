@@ -1,0 +1,29 @@
+# Bazel RC file for Local
+#
+# Flare Folks: please feel free to update this as you see fit. I put
+# initial values here that make the output pretty and github caching
+# possible. I am not as certain about the JVM args. 
+
+# Startup Options
+startup --host_jvm_args=-Xmx500m
+
+# Build Options
+build --verbose_failures 
+build --jobs 30 
+build --progress_report_interval=2
+build --color yes
+build --incompatible_strict_action_env
+build --show_timestamps
+
+# These inherit from Build 
+test --verbose_failures 
+test --test_verbose_timeout_warnings 
+test --verbose_explanations
+
+# These also inherit from build
+query --keep_going
+
+# Custom user overrides 
+# https://docs.bazel.build/versions/master/best-practices.html#bazelrc
+try-import %workspace%/.bazelrc.user
+try-import %workspace%/user.bazelrc

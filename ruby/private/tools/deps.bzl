@@ -1,20 +1,21 @@
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load(
     "//ruby/private:providers.bzl",
-    "RubyLibrary",
+    "RubyLibraryInfo",
 )
 
 def _transitive_srcs(deps):
     return struct(
-        srcs = [d[RubyLibrary].transitive_ruby_srcs for d in deps if RubyLibrary in d],
-        incpaths = [d[RubyLibrary].ruby_incpaths for d in deps if RubyLibrary in d],
-        rubyopt = [d[RubyLibrary].rubyopt for d in deps if RubyLibrary in d],
+        srcs = [d[RubyLibraryInfo].transitive_ruby_srcs for d in deps if RubyLibraryInfo in d],
+        incpaths = [d[RubyLibraryInfo].ruby_incpaths for d in deps if RubyLibraryInfo in d],
+        rubyopt = [d[RubyLibraryInfo].rubyopt for d in deps if RubyLibraryInfo in d],
         data_files = [d[DefaultInfo].data_runfiles.files for d in deps],
         default_files = [d[DefaultInfo].default_runfiles.files for d in deps],
     )
 
 def transitive_deps(ctx, extra_files = [], extra_deps = []):
-    """Calculates transitive sets of args.
+    """
+    Calculates transitive sets of args.
 
     Calculates the transitive sets for ruby sources, data runfiles,
     include flags and runtime flags from the srcs, data and deps attributes
@@ -25,6 +26,8 @@ def transitive_deps(ctx, extra_files = [], extra_deps = []):
       ctx: a ctx object for a ruby_library or a ruby_binary rule.
       extra_files: a list of File objects to be added to the default_files
       extra_deps: a list of Target objects.
+    Returns:
+        struct
     """
     deps = _transitive_srcs(ctx.attr.deps + extra_deps)
     files = depset(extra_files + ctx.files.srcs)

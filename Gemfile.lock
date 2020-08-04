@@ -17,7 +17,7 @@ GEM
       rubocop-ast (>= 0.1.0, < 1.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 1.4.0, < 2.0)
-    rubocop-ast (0.1.0)
+    rubocop-ast (0.2.0)
       parser (>= 2.7.0.1)
     ruby-progressbar (1.10.1)
     unicode-display_width (1.7.0)
@@ -26,7 +26,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  rubocop (~> 0.78)
+  bundler
+  rubocop (~> 0.88)
 
 BUNDLED WITH
-   2.1.2
+   2.1.4

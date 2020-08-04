@@ -1,8 +1,19 @@
 #!/usr/bin/env bash
+# —————————————————————————————————————————————————————————————————————————————————————
+# NOTE: These setup scripts rely on an open source BASH framework BashMatic.
+#       https://github.com/kigster/bashmatic
+#
+# The framework is pretty light-weight, and is installed in your $HOME/.bashmatic folder.
+# You can safely remove that folder after the setup if you wish, although re-running the 
+# setup will re-install it.
+# —————————————————————————————————————————————————————————————————————————————————————
 
 set -e
 # shellcheck disable=SC1091
 source "bin/deps"
+
+declare -a BREW_DEPS
+BREW_DEPS=(xz ydiff bash-completion)
 
 #——————————————————————————————  OS-X SPECIFIC INSTALLERS —————————————————————————
 
@@ -15,28 +26,22 @@ __setup.brew-validate() {
   fi
 }
 
-__setup.brew-install-jdk() {
-  # The JDK homebrew cask is a required to install the java dependencies for Bazel
-  if ! brew cask list | grep -q openjdk; then
-    run "brew cask install homebrew/cask-versions/adoptopenjdk8"
-  else
-    info: "JDK already installed."
-  fi
+function __setup.brew-deps() {
+  brew.install.packages "${BREW_DEPS[@]}"
 }
 
-__setup.brew-deps() {
-  brew.install.packages 'xz' 'ydiff'
+function __setup.is-bazelisk-installed() {
+  [[ -n "$(command -v bazelisk)" ]] 
 }
 
-__setup.is-bazelisk-installed() {
-  /bin/ls -al "$(command -v bazel)" | grep -q bazelisk
+function __setup.is-bazel-installed() {
+  [[ -n "$(command -v bazel)" ]] 
 }
 
 #——————————————————————————————  PUBLIC INTERFACE —————————————————————————
 
 setup.brew() {
   __setup.brew-validate
-  __setup.brew-install-jdk
   __setup.brew-deps
 }
 
@@ -46,18 +51,25 @@ setup.xcode-tools() {
   if [[ -n $(xcode-select --install 2>&1) ]]; then
     info: "xcode-select tools are already installed."
   fi
+
+  info "Next command requires sudo privileges to accept XCode License"
+  run.set-next show-output-on
+  run "sudo xcodebuild -license accept"
 }
 
-setup.bazelisk() {
-  if __setup.is-bazelisk-installed; then
-    info: "Bazelisk is already installed."
+setup.bazel() {
+  brew.package.is-installed bazelbuild/tap/bazelisk && 
+    brew.uninstall.package bazelbuild/tap/bazelisk
+    
+  if __setup.is-bazelisk-installed && __setup.is-bazel-installed ; then
+    info: "Bazel & bazelisk are already installed."
   else
-    run "brew install bazelbuild/tap/bazelisk"
+    brew.install.packages bazel bazelisk
   fi
 }
 
 setup.darwin() {
   setup.xcode-tools
   setup.brew
-  setup.bazelisk
+  setup.bazel
 }

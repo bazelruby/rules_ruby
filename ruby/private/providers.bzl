@@ -1,4 +1,8 @@
-RubyLibrary = provider(
+"""
+Provider Structs
+"""
+
+RubyLibraryInfo = provider(
     fields = [
         "transitive_ruby_srcs",
         "ruby_incpaths",
@@ -6,7 +10,7 @@ RubyLibrary = provider(
     ],
 )
 
-RubyRuntimeContext = provider(
+RubyRuntimeInfo = provider(
     doc = "Carries info required to execute Ruby Scripts",
     fields = [
         "ctx",
@@ -15,7 +19,7 @@ RubyRuntimeContext = provider(
     ],
 )
 
-RubyGem = provider(
+RubyGemInfo = provider(
     doc = "Carries info required to package a ruby gem",
     fields = [
         "ctx",

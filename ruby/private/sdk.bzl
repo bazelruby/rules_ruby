@@ -6,7 +6,18 @@ load(
 def rules_ruby_select_sdk(version = "host"):
     """Registers ruby toolchains in the WORKSPACE file."""
 
-    supported_versions = ["host", "2.6.3", "2.6.5", "2.7.0"]
+    supported_versions = [
+        "host",
+        "2.5.8",
+        "2.6.3",
+        "2.6.4",
+        "2.6.5",
+        "2.6.6",
+        "2.7.1",
+        "2.7.1",
+        "2.8.0",
+    ]
+
     if version in supported_versions:
         _ruby_runtime(
             name = "org_ruby_lang_ruby_toolchain",

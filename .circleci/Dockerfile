@@ -1,7 +1,7 @@
 #
 # rules_ruby circleci Docker file.
 #
-FROM ruby:2.7.0
+FROM ruby:2.7.1
 
 # make Apt non-interactive
 RUN echo 'APT::Get::Assume-Yes "true";' > /etc/apt/apt.conf.d/90circleci \

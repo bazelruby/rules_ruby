@@ -1,7 +1,7 @@
 load(
     "//ruby/private:providers.bzl",
-    "RubyGem",
-    "RubyLibrary",
+    "RubyGemInfo",
+    "RubyLibraryInfo",
 )
 load(
     "//ruby/private:constants.bzl",
@@ -14,11 +14,11 @@ load(
 
 def _get_transitive_srcs(srcs, deps):
     for dep in deps:
-        print(dep[RubyLibrary].transitive_ruby_srcs)
+        print(dep[RubyLibraryInfo].transitive_ruby_srcs)
 
     return depset(
         srcs,
-        transitive = [dep[RubyLibrary].transitive_ruby_srcs for dep in deps],
+        transitive = [dep[RubyLibraryInfo].transitive_ruby_srcs for dep in deps],
     )
 
 def _unique_elems(list):
@@ -126,7 +126,7 @@ def _gem_impl(ctx):
         DefaultInfo(
             files = _get_transitive_srcs([gemspec, gem_readme], ctx.attr.deps),
         ),
-        RubyGem(
+        RubyGemInfo(
             ctx = ctx,
             gem_author_emails = ctx.attr.gem_author_emails,
             gem_authors = ctx.attr.gem_authors,
@@ -143,7 +143,7 @@ def _gem_impl(ctx):
 gemspec = rule(
     implementation = _gem_impl,
     attrs = GEMSPEC_ATTRS,
-    provides = [DefaultInfo, RubyGem],
+    provides = [DefaultInfo, RubyGemInfo],
 )
 
 def gem(

@@ -1,4 +1,5 @@
-load(":providers.bzl", "RubyLibrary")
+# Ruby Constants
+load(":providers.bzl", "RubyLibraryInfo")
 
 RULES_RUBY_WORKSPACE_NAME = "@bazelruby_rules_ruby"
 TOOLCHAIN_TYPE_NAME = "%s//ruby:toolchain_type" % RULES_RUBY_WORKSPACE_NAME
@@ -20,7 +21,7 @@ RUBY_ATTRS = {
         allow_files = True,
     ),
     "deps": attr.label_list(
-        providers = [RubyLibrary],
+        providers = [RubyLibraryInfo],
     ),
     "includes": attr.string_list(),
     "rubyopt": attr.string_list(),

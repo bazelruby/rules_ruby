@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# vim: ft=sh
+# —————————————————————————————————————————————————————————————————————————————————————
+# NOTE: These setup scripts rely on an open source BASH framework BashMatic.
+#       https://github.com/kigster/bashmatic
+#
+# The framework is pretty light-weight, and is installed in your $HOME/.bashmatic folder.
+# You can safely remove that folder after the setup if you wish, although re-running the 
+# setup will re-install it.
+# —————————————————————————————————————————————————————————————————————————————————————
+
+export BashMatic="${HOME}/.bashmatic"
+
+if [[ ! -f "${BashMatic}/init.sh" ]]; then
+  rm -rf "${BashMatic}" 2>/dev/null
+  git clone https://github.com/kigster/bashmatic "${BashMatic}" 1>/dev/null 2>&1
+fi
+
+# shellcheck disable=SC1090
+source "${BashMatic}/init.sh" 1>/dev/null 2>&1
+
+main() {
+  export BAZEL_OPTS="--max_idle_secs=10800 --noshutdown_on_low_sys_mem --connect_timeout_secs=30"
+  h1 "Cleaning Bazel directories... Please wait."
+  local -a du_before=($(du -hs .))
+  run "bazel clean --expunge"
+  for dir in $(ls -1 examples); do
+    run "cd examples/${dir}"
+    run "bazel clean --expunge"
+    run "cd -"
+  done
+  local -a du_after=($(du -hs .))
+  h2 "Space before cleaning: ${bldylw}${du_before[0]}" \
+     "Space after  cleaning: ${bldgrn}${du_after[0]}"
+}
+
+main "$@"
+

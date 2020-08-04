@@ -92,7 +92,7 @@ rules_ruby_dependencies()
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 bazel_skylib_workspace()
 
-rules_ruby_select_sdk(version = "2.7.0")
+rules_ruby_select_sdk(version = "2.7.1")
 
 #———————————————————————————————————————————————————————————————————————
 # Now, load the ruby_bundle rule & install gems specified in the Gemfile

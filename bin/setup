@@ -2,10 +2,18 @@
 # vim: ft=bash
 #
 # Runs setup.
-# Run bin/setup help for info.
 #
-set -e
-# shellcheck disable=SC1091
+# Run "bin/setup help" for usage.
+#
+# —————————————————————————————————————————————————————————————————————————————————————
+# NOTE: These setup scripts rely on an open source BASH framework BashMatic.
+#       https://github.com/kigster/bashmatic
+#
+# The framework is pretty light-weight, and is installed in your $HOME/.bashmatic folder.
+# You can safely remove that folder after the setup if you wish, although re-running the
+# setup will re-install it.
+# —————————————————————————————————————————————————————————————————————————————————————
+
 source "bin/deps"
 
 #—————————————————————————————————————————————————————————————————————————————————————————————————————————————
@@ -14,45 +22,69 @@ source "bin/deps"
 
 __setup.actions() {
   local sep="${1}"
-  printf "${bldylw}$(array.join "${sep}" $(util.functions-matching "setup." | sed 's/ main//g'))${clr}"
+  printf "$(array.join "${sep}" $(util.functions-matching "setup." | sed 's/ main//g'))"
 }
 
 #—————————————————————————————————————————————————————————————————————————————————————————————————————————————
 # Public Functions
 #—————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
-setup.help() {
-  printf "
-$(help-header USAGE)
-  ${bldblk}# without any arguments runs a complete setup.${clr}
-$(help-usage "bin/setup")
+setup.rbenv() {
+  local rbenv_home="${HOME}/.rbenv"
+  local ruby_version="$(cat .ruby-version | tr -d '\n')"
 
-  ${bldblk}# alternatively, a sub-setup function name can be passed:${clr}
-$(help-usage "bin/setup [ $(__setup.actions " | ") ]")
+  if [[ -n $(command -v ruby) ]]; then
+    local installed_version="$(ruby -e 'puts RUBY_VERSION' | tr -d '\n')"
+    if [[ ${installed_version} == ${ruby_version} ]]; then
+      info "RUBY already installed, current version: ${bldylw}${ruby_version}"
+      return 0
+    fi
+  fi
 
-$(help-header DESCRIPTION:)
-  Runs full setup without any arguments.
+  [[ -d "${rbenv_home}" && -f "${rbenv_home}/bin/rbenv" ]] || {
+    if [[ -z ${CI} ]]; then
+      warning "You are on a local system without any RBENV..."
+      run.ui.ask "Are you sure you want to wipe your local ~/.rbenv?"
+    fi
 
-  Accepts one optional argument — one of the actions that typically run
-  as part of setup, with one exception — ${bldylw}remove-git-hook${clr}.
-  This action removes the git commit hook installed by the setup.
+    warning "Recreating RBENV home, downloading rbenv..."
+    run "rm -rf ${rbenv_home}"
+    run "git clone https://github.com/rbenv/rbenv.git ${rbenv_home}"
+    export PATH="${rbenv_home}/bin:${rbenv_home}/shims:${PATH}"
+  }
 
-$(help-header EXAMPLES:)
-$(help-example "bin/setup")
+  export PATH="${rbenv_home}/bin:${rbenv_home}/shims:${PATH}"
 
-  Or, to run only one of the sub-functions (actions), pass
-  it as an argument:
+  [[ $(which rbenv) == "${rbenv_home}/bin/rbenv" ]] || {
+    error "Can't find rbenv in the PATH — which rbenv returns: $(which rbenv)"
+    error "PATH: ${PATH}"
+    return 1
+  }
 
-$(help-example bin/setup help)
-$(help-example bin/setup remove-git-hook)
+  # Set our current ruby version to the desired one, even if it's not yet there.
+  # This allows the next block to auto-detect it and skip the remainder.
+  run "rbenv global ${ruby_version} || true"
+  # see if we even need to install anything:
+  local ruby_sdk_marker="$(rbenv versions | grep "${ruby_version}" | cut -d ' ' -f 1)"
+  if [[ ${ruby_sdk_marker} == "*" ]]; then
+    info "Ruby Version ${ruby_version} is already present, and is RBENV default."
+    info "Skipping the rest of RBENV setup."
+    return 0
+  fi
 
-etc.
- "
+  eval "$(rbenv init -)"
+  run "mkdir -p ${rbenv_home}/plugins"
+  run "git clone https://github.com/rbenv/ruby-build.git ${rbenv_home}/plugins/ruby-build"
+  run "rbenv rehash"
+  hash -r
+
+  run "rbenv install -s ${ruby_version}"
+  run "rbenv global ${ruby_version}"
 }
 
 setup.gems() {
-  for gem in rubocop relaxed-rubocop rubocop-performance; do
-    gem.install ${gem}
+  for gem in rubocop relaxed-rubocop; do
+    gem.install "${gem}"
   done
 }
 
@@ -78,24 +110,25 @@ setup.git-hook() {
 }
 
 setup.os-specific() {
-  local os=$(uname -s | tr '[:upper:]' '[:lower:]')
+  local os="$(uname -s | tr '[:upper:]' '[:lower:]')"
   local setup_script
   setup_script="./bin/setup-${os}"
 
   if [[ -x "${setup_script}" ]]; then
     set -e
-    # shellcheck disable=SC1090
     source "${setup_script}"
     # run it's main function
     eval "setup.${os} \"$*\""
     echo
     if [[ -z ${CI} ]]; then
-      h2 "Please note — to print your Bazel environment run " "${bldylw}bin/show-env"
+      info "Please note — to print your Bazel environment run "
+      info "❯ ${bldylw}bin/show-env"
     else
       /usr/bin/env bash bin/show-env || true
     fi
   else
     error "Operating system ${os} is not currently supported." >&2
+    return 1
   fi
   echo
   return 0
@@ -103,29 +136,78 @@ setup.os-specific() {
 
 setup.main() {
   local action="$1"
-  [[ "${action}" == "-h" || ${action} == "--help" ]] && action="help"
+  local is_help=0
+  local code=0
+
+  [[ "${action}" == "-h" || ${action} == "--help" ]] && {
+    action="help"
+    is_help=1
+  }
+
   local func="setup.${action}"
 
   if [[ -n ${action} ]]; then
     if util.is-a-function "${func}"; then
-      [[ ${action} != "help" ]] && h2 "Executing partial setup for action ${bldylw}${action}"
+      ((is_help)) || h2 "Executing partial setup for action ${bldylw}${action}"
       shift
       ${func} "$@"
-      local code=$?
-      [[ ${code} -eq 0 ]] && success "Setup for ${action} was successful"
+      code=$?
+      [[ ${code} -eq 0 ]] && {
+        ((is_help)) || success "Setup for ${action} was successful"
+      }
       [[ ${code} -ne 0 ]] && error "Error setting up ${action}"
-      exit ${code}
     else
-      h1 "Invalid action provided." "Valid actions are: $(__setup.actions " | ")"
-      exit 1
+      error "Invalid action provided — '${action}'"
+      info "Valid actions are: [ ${bldylw}${action_list}$(txt-info) ]"
+      echo
+      code=1
     fi
   else
     set +e
     h2 "Installing required development dependencies for working with rules_ruby and Bazel."
+    setup.rbenv
     setup.gems
     [[ -z ${CI} ]] && setup.git-hook
     setup.os-specific "$@"
   fi
+
+  ((is_help)) || bin/show-env
+
+  exit ${code}
 }
 
-setup.main "$@"
+# shellcheck disable=SC2059,SC2155,SC2154
+setup.help() {
+  trap 'exit 0' INT
+
+  printf "
+$(help-header USAGE)
+  ${bldblk}# without any arguments runs a complete setup.${clr}
+$(help-usage "bin/setup")
+
+  ${bldblk}# alternatively, a sub-setup function name can be passed:${clr}
+$(help-usage "bin/setup [ ${action_list} ]")
+
+$(help-header DESCRIPTION:)
+  Runs full setup without any arguments.
+
+  Accepts one optional argument — one of the actions that typically run
+  as part of setup, with one exception — ${bldylw}remove-git-hook${clr}.
+  This action removes the git commit hook installed by the setup.
+
+$(help-header EXAMPLES:)
+$(help-example "bin/setup")
+
+  Or, to run only one of the sub-functions (actions), pass
+  it as an argument:
+
+$(help-example "bin/setup help")
+$(help-example "bin/setup remove-git-hook")
+
+"
+}
+
+action_list="$(__setup.actions " | " | sed 's/setup\.//g')"
+export action_list
+
+bashmatic.detect-subshell || setup.main "$@"
