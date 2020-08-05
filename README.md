@@ -1,35 +1,35 @@
 ![activity](https://img.shields.io/github/commit-activity/m/bazelruby/rules_ruby?style=for-the-badge)
 
-<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
-
-* [Rules Development Status](#rules-development-status)
-* [Usage](#usage)
-  * [`WORKSPACE` File](#workspace-file)
-  * [`BUILD.bazel` files](#buildbazel-files)
-* [Rules](#rules)
-  * [`ruby_library`](#ruby_library)
-  * [`ruby_binary`](#ruby_binary)
-  * [`ruby_test`](#ruby_test)
-  * [`ruby_bundle`](#ruby_bundle)
-    * [Limitations](#limitations)
-    * [Conventions](#conventions)
-      * [Example: `WORKSPACE`:](#example-workspace)
-      * [Example: `lib/BUILD.bazel`:](#example-libbuildbazel)
-  * [`ruby_rspec`](#ruby_rspec)
-  * [`ruby_gem`](#ruby_gem)
-* [What's coming next](#whats-coming-next)
-* [Contributing](#contributing)
-  * [Setup](#setup)
-    * [Using the Script](#using-the-script)
-    * [OS-Specific Setup](#os-specific-setup)
-      * [Issues During Setup](#issues-during-setup)
-  * [Developing Rules](#developing-rules)
-  * [Running Tests](#running-tests)
-    * [Test Script](#test-script)
-  * [Linter](#linter)
-* [Copyright](#copyright)
-
-<!-- /TOC -->
+- [Rules Development Status](#rules-development-status)
+- [Usage](#usage)
+  - [`WORKSPACE` File](#workspace-file)
+    - [Load dependencies, select Ruby SDK and define one or more Bundles](#load-dependencies-select-ruby-sdk-and-define-one-or-more-bundles)
+  - [`BUILD.bazel` file(s)](#buildbazel-files)
+    - [Define Ruby Executable, Library and an RSpec](#define-ruby-executable-library-and-an-rspec)
+    - [Package Ruby files as a Gem](#package-ruby-files-as-a-gem)
+  - [Rule Dependency Diagram](#rule-dependency-diagram)
+- [Rules](#rules)
+  - [`ruby_library`](#ruby_library)
+  - [`ruby_binary`](#ruby_binary)
+  - [`ruby_test`](#ruby_test)
+  - [`ruby_bundle`](#ruby_bundle)
+    - [Limitations](#limitations)
+    - [Conventions](#conventions)
+    - [`WORKSPACE`:](#workspace)
+    - [`BUILD.bazel`:](#buildbazel)
+  - [`ruby_rspec`](#ruby_rspec)
+  - [`ruby_gem`](#ruby_gem)
+- [What's coming next](#whats-coming-next)
+- [Contributing](#contributing)
+  - [Setup](#setup)
+    - [Using the Script](#using-the-script)
+    - [OS-Specific Setup](#os-specific-setup)
+      - [Issues During Setup](#issues-during-setup)
+  - [Developing Rules](#developing-rules)
+  - [Running Tests](#running-tests)
+    - [Test Script](#test-script)
+  - [Linter](#linter)
+- [Copyright](#copyright)
 
 ### Build Status
 
@@ -38,6 +38,14 @@
 | CircleCI | [![CircleCI](https://circleci.com/gh/bazelruby/rules_ruby/tree/develop.svg?style=svg)](https://circleci.com/gh/bazelruby/rules_ruby/tree/develop) 	|
 | TravisCI | [![Build Status](https://travis-ci.org/bazelruby/rules_ruby.svg?branch=develop)](https://travis-ci.org/bazelruby/rules_ruby) 	|
 
+### [Change Log](CHANGELOG.md)
+
+To regenerate:
+
+```bash
+gem install github_changelog_generator
+github_changelog_generator -u bazelruby -p rules_ruby
+```
 
 # Rules Ruby
 
@@ -1032,3 +1040,40 @@ Unless required by applicable law or agreed to in writing, software distributed 
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+    - [Build Status](#build-status)
+    - [Change Log](#change-logchangelogmd)
+- [Rules Development Status](#rules-development-status)
+- [Usage](#usage)
+  - [`WORKSPACE` File](#workspace-file)
+    - [Load dependencies, select Ruby SDK and define one or more Bundles](#load-dependencies-select-ruby-sdk-and-define-one-or-more-bundles)
+  - [`BUILD.bazel` file(s)](#buildbazel-files)
+    - [Define Ruby Executable, Library and an RSpec](#define-ruby-executable-library-and-an-rspec)
+    - [Package Ruby files as a Gem](#package-ruby-files-as-a-gem)
+  - [Rule Dependency Diagram](#rule-dependency-diagram)
+- [Rules](#rules)
+  - [`ruby_library`](#ruby_library)
+  - [`ruby_binary`](#ruby_binary)
+  - [`ruby_test`](#ruby_test)
+  - [`ruby_bundle`](#ruby_bundle)
+    - [Limitations](#limitations)
+    - [Conventions](#conventions)
+    - [`WORKSPACE`:](#workspace)
+    - [`BUILD.bazel`:](#buildbazel)
+  - [`ruby_rspec`](#ruby_rspec)
+  - [`ruby_gem`](#ruby_gem)
+- [What's coming next](#whats-coming-next)
+- [Contributing](#contributing)
+  - [Setup](#setup)
+    - [Using the Script](#using-the-script)
+    - [OS-Specific Setup](#os-specific-setup)
+      - [Issues During Setup](#issues-during-setup)
+  - [Developing Rules](#developing-rules)
+  - [Running Tests](#running-tests)
+    - [Test Script](#test-script)
+  - [Linter](#linter)
+- [Copyright](#copyright)
+
+<!-- /code_chunk_output -->
