@@ -10,7 +10,8 @@ We recently switched from the base branch of `develop` to the base of `master`. 
 
 [![CircleCI](https://circleci.com/gh/bazelruby/rules_ruby.svg?style=shield)](https://circleci.com/gh/bazelruby/rules_ruby) &nbsp;
 [![Build Status](https://travis-ci.org/bazelruby/rules_ruby.svg?branch=master)](https://travis-ci.org/bazelruby/rules_ruby) &nbsp;
-![activity](https://img.shields.io/github/commit-activity/m/bazelruby/rules_ruby?style=badge) &nbsp;
+
+![activity](https://img.shields.io/github/commit-activity/m/bazelruby/rules_ruby?style=for-the-badge) &nbsp;
 
 - [Rules Development Status](#rules-development-status)
 - [Usage](#usage)
