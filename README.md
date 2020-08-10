@@ -31,12 +31,20 @@
   - [Linter](#linter)
 - [Copyright](#copyright)
 
+# RulesRuby Version 0.4.1
+
+## ATTENTION: Base branch change announcement
+
+We recently switched from the base of `develop` branch to the base of `master`. Please update your local repos accordingly. 
+
+**Moving forward, `develop` branch will not be kept up to date.**
+
 ### Build Status
 
 | Build | Status |
 |---------:	|---------------------------------------------------------------------------------------------------------------------------------------------------	|
-| CircleCI | [![CircleCI](https://circleci.com/gh/bazelruby/rules_ruby/tree/develop.svg?style=svg)](https://circleci.com/gh/bazelruby/rules_ruby/tree/develop) 	|
-| TravisCI | [![Build Status](https://travis-ci.org/bazelruby/rules_ruby.svg?branch=develop)](https://travis-ci.org/bazelruby/rules_ruby) 	|
+| CircleCI (master) | [![CircleCI](https://circleci.com/gh/bazelruby/rules_ruby.svg?style=shield)](https://circleci.com/gh/bazelruby/rules_ruby)	|
+| TravisCI (master) | [![Build Status](https://travis-ci.org/bazelruby/rules_ruby.svg?branch=master)](https://travis-ci.org/bazelruby/rules_ruby) 	|
 
 ### [Change Log](CHANGELOG.md)
 
@@ -81,7 +89,7 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 git_repository(
     name = "bazelruby_rules_ruby",
     remote = "https://github.com/bazelruby/rules_ruby.git",
-    branch = "develop"
+    branch = "master"
 )
 
 load(
