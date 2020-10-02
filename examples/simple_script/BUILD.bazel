@@ -31,6 +31,8 @@ ruby_test(
     ] + glob([
         "spec/**/*.rb",
     ]),
+    # This is a WORKSPACE-relative path to a spec directory.
+    # It could be longer, like "my/path/to/spec".
     args = [
         "spec",
     ],
