@@ -79,6 +79,9 @@ BUNDLE_ATTRS = {
     "gemfile_lock": attr.label(
         allow_single_file = True,
     ),
+    "vendor_cache": attr.bool(
+        doc = "Symlink the vendor directory into the Bazel build space, this allows Bundler to access vendored Gems",
+    ),
     "bundler_version": attr.string(
         default = DEFAULT_BUNDLER_VERSION,
     ),

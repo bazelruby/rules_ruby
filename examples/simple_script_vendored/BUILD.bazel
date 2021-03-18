@@ -1,0 +1,94 @@
+load(
+    "@bazelruby_rules_ruby//ruby:defs.bzl",
+    "ruby_binary",
+    "ruby_rspec",
+    "ruby_rubocop",
+    "ruby_test",
+)
+
+package(default_visibility = ["//:__subpackages__"])
+
+ruby_binary(
+    name = "bin",
+    srcs = ["script.rb"],
+    main = "script.rb",
+    deps = [
+        "//lib:foo",
+    ],
+)
+
+# This is an example of the RSpec definition that uses autorun
+# and points to spec_helper as the main spec file. It specifies
+# which specs to run using the args.
+
+ruby_test(
+    name = "all-specs",
+    timeout = "short",
+    srcs = [
+        "script.rb",
+        "//lib:foo",
+    ] + glob([
+        "spec/**/*.rb",
+    ]),
+    # This is a WORKSPACE-relative path to a spec directory.
+    # It could be longer, like "my/path/to/spec".
+    args = [
+        "spec",
+    ],
+    main = "@bundle//:bin/rspec",
+    deps = [
+        "@bundle//:bin",
+        "@bundle//:rspec",
+        "@bundle//:rspec-its",
+    ],
+)
+
+# Finally, this is the short version of the same thing, expressed
+# via the ruby_rspec_test rule that does what the above example
+# shows but encapsulated in the rule itself. It adds rspec and rspec-its
+# gems to the dependency list, executes bin/rspec and passes spec_targets
+# as arguments to rspec.
+ruby_rspec(
+    name = "ruby-rspec-test",
+    srcs = [
+        "script.rb",
+        "//lib:foo",
+    ],
+    rspec_args = {
+        # NOTE: the output is only visible with --test_output=streamed flag
+        "--format": "progress",  # this is how we can override rspec output format
+    },
+    specs = glob([
+        "spec/**/*.rb",
+    ]),
+    deps = [],
+)
+
+ruby_binary(
+    name = "rubocop-bin",
+    srcs = [
+        "script.rb",
+        "//lib:foo",
+    ] + glob([
+        "spec/**/*.rb",
+    ]),
+    args = [
+        "-- *.rb spec/*.rb lib/*.rb -a",
+    ],
+    main = "@bundle//:bin/rubocop",
+    deps = [
+        "//lib:foo",
+        "@bundle//:bin",
+    ],
+)
+
+# Rubocop rule
+# To check
+# bazel run rubocop -- -a
+ruby_rubocop(
+    name = "rubocop",
+    bin = "@bundle//:bin/rubocop",
+    deps = [
+        "@bundle//:rubocop",
+    ],
+)

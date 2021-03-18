@@ -1,0 +1,34 @@
+workspace(
+    name = "bazelruby_rules_ruby_example",
+    managed_directories = {"@bundle": ["vendor"]},
+)
+
+# Importing rules_ruby from the parent directory for developing
+# rules_ruby itself...
+local_repository(
+    name = "bazelruby_rules_ruby",
+    path = "../..",
+)
+
+load(
+    "@bazelruby_rules_ruby//ruby:deps.bzl",
+    "rules_ruby_dependencies",
+    "rules_ruby_select_sdk",
+)
+
+rules_ruby_dependencies()
+
+rules_ruby_select_sdk(version = "2.7.1")
+
+load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
+
+ruby_bundle(
+    name = "bundle",
+    bundler_version = "2.1.2",
+    excludes = {
+        "mini_portile": ["test/**/*"],
+    },
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+    vendor_cache = True,
+)
