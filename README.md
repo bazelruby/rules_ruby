@@ -80,7 +80,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 #———————————————————————————————————————————————————————————————————————
-# To get the latest ruby rules, grab the 'develop' branch.
+# To get the latest ruby rules, grab the 'master' branch.
 #———————————————————————————————————————————————————————————————————————
 
 git_repository(
