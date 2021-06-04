@@ -20,6 +20,8 @@ We recently switched from the base branch of `develop` to the base of `master`. 
   - [`BUILD.bazel` file(s)](#buildbazel-files)
     - [Define Ruby Executable, Library and an RSpec](#define-ruby-executable-library-and-an-rspec)
     - [Package Ruby files as a Gem](#package-ruby-files-as-a-gem)
+  - [Tool Specific Setup](#tool-specific-setup)
+    - [ASDF](#asdf)
   - [Rule Dependency Diagram](#rule-dependency-diagram)
 - [Rules](#rules)
   - [`ruby_library`](#ruby_library)
@@ -78,7 +80,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 
 #———————————————————————————————————————————————————————————————————————
-# To get the latest ruby rules, grab the 'develop' branch.
+# To get the latest ruby rules, grab the 'master' branch.
 #———————————————————————————————————————————————————————————————————————
 
 git_repository(
@@ -225,6 +227,18 @@ ruby_gem(
 )
 
 ```
+
+### Tool Specific Setup
+
+#### ASDF
+
+If you are using ASDF to manage your ruby installs, you can use them by adding `.bazelrc`:
+
+```
+build --test_env=ASDF_DIR --test_env=ASDF_DATA_DIR
+build --action_env=ASDF_DIR --test_env=ASDF_DATA_DIR
+```
+You will have to be sure to export the `ASDF_DATA_DIR` in your profile since it's not set by default. e.g. `export ASDF_DATA_DIR="$HOME/.asdf"` 
 
 ### Rule Dependency Diagram
 
