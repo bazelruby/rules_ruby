@@ -33,14 +33,14 @@ GEM_TEMPLATE = <<~GEM_TEMPLATE
     srcs = glob(
       include = [
         ".bundle/config",
-        "{gem_lib_files}",
-        "lib/ruby/{ruby_version}/specifications/{name}-{version}.gemspec",
+        {gem_lib_files},
+        "{gem_spec}",
         {gem_binaries}
       ],
       exclude = {exclude},
     ),
     deps = {deps},
-    includes = ["lib/ruby/{ruby_version}/gems/{name}-{version}/lib"],
+    includes = [{gem_lib_dirs}],
   )
 GEM_TEMPLATE
 
@@ -58,8 +58,22 @@ ALL_GEMS = <<~ALL_GEMS
   )
 ALL_GEMS
 
+# GEM_PATH = ->(ruby_version, gem_name, gem_version, platform) do
+#   platform_suffix = "-#{platform}" unless platform.nil?
+#   "lib/ruby/#{ruby_version}/gems/#{gem_name}-#{gem_version}#{platform_suffix}"
+# end
+
+# SPEC_PATH = ->(ruby_version, gem_name, gem_version, platform) do
+#   platform_suffix = "-#{platform}" unless platform.nil?
+#   "lib/ruby/#{ruby_version}/specifications/#{gem_name}-#{gem_version}#{platform_suffix}.gemspec"
+# end
+
 GEM_PATH = ->(ruby_version, gem_name, gem_version) do
-  "lib/ruby/#{ruby_version}/gems/#{gem_name}-#{gem_version}"
+  Dir.glob("lib/ruby/#{ruby_version}/gems/#{gem_name}-#{gem_version}*").first
+end
+
+SPEC_PATH = ->(ruby_version, gem_name, gem_version) do
+  Dir.glob("lib/ruby/#{ruby_version}/specifications/#{gem_name}-#{gem_version}*.gemspec").first
 end
 
 require 'bundler'
@@ -223,7 +237,33 @@ class BundleBuildFileGenerator
 
   def register_gem(spec, template_out, bundle_lib_paths, bundle_binaries)
     gem_path = GEM_PATH[ruby_version, spec.name, spec.version]
-    bundle_lib_paths << gem_lib_path = gem_path + '/lib'
+    spec_path = SPEC_PATH[ruby_version, spec.name, spec.version]
+    # puts "spec.source: #{spec.source}"
+    # puts "spec.source.class: #{spec.source.class}" # Bundler::Source::Rubygems
+    # puts "spec.platform: #{spec.platform}" # ruby
+    # puts "spec.source.specs: #{spec.source.specs.inspect}" # Bundler::Index
+    # puts "spec.source.specs.search(Gem::Platform.new(spec.platform)): #{spec.source.specs.search(Gem::Platform.new(spec.platform))}" # Bundler::Index
+    # pp spec
+
+    # specification = spec.__materialize__
+    # gem_lib_paths = specification.require_paths.map { |require_path| Path.join(gem_path, require_path) }
+    # bundle_lib_paths += gem_lib_paths
+    # pp spec
+    #
+    # gem_path = "lib/ruby/#{ruby_version}/gems/#{gem_name}-#{gem_version}#{platform_suffix}"
+    puts "gem_path: #{gem_path}"
+    puts "spec_path: #{spec_path}"
+
+    stub_spec = Gem::StubSpecification.gemspec_stub(
+      spec_path,
+      base_dir="lib/ruby/#{ruby_version}",
+      gems_dir="lib/ruby/#{ruby_version}/gems"
+    )
+    pp spec
+    pp stub_spec
+    puts "stub_spec.require_paths: #{stub_spec.require_paths}"
+    gem_lib_dirs = stub_spec.require_paths.map { |require_path| File.join(gem_path, require_path) }
+    bundle_lib_paths += gem_lib_dirs
 
     # paths to search for executables
     gem_binaries               = find_bundle_binaries(gem_path)
@@ -234,8 +274,9 @@ class BundleBuildFileGenerator
     warn("registering gem #{spec.name} with binaries: #{gem_binaries}") if bundle_binaries.key?(spec.name)
 
     template_out.puts GEM_TEMPLATE
-                        .gsub('{gem_lib_path}', gem_lib_path)
-                        .gsub('{gem_lib_files}', gem_lib_path + '/**/*')
+                        .gsub('{gem_lib_files}', to_flat_string(gem_lib_dirs.map { |p| "#{p}/**/*" }))
+                        .gsub('{gem_lib_dirs}', to_flat_string(gem_lib_dirs))
+                        .gsub('{gem_spec}', spec_path)
                         .gsub('{gem_binaries}', to_flat_string(gem_binaries))
                         .gsub('{exclude}', exclude_array(spec.name).to_s)
                         .gsub('{name}', spec.name)
