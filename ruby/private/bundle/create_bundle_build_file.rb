@@ -58,16 +58,6 @@ ALL_GEMS = <<~ALL_GEMS
   )
 ALL_GEMS
 
-# GEM_PATH = ->(ruby_version, gem_name, gem_version, platform) do
-#   platform_suffix = "-#{platform}" unless platform.nil?
-#   "lib/ruby/#{ruby_version}/gems/#{gem_name}-#{gem_version}#{platform_suffix}"
-# end
-
-# SPEC_PATH = ->(ruby_version, gem_name, gem_version, platform) do
-#   platform_suffix = "-#{platform}" unless platform.nil?
-#   "lib/ruby/#{ruby_version}/specifications/#{gem_name}-#{gem_version}#{platform_suffix}.gemspec"
-# end
-
 GEM_PATH = ->(ruby_version, gem_name, gem_version) do
   Dir.glob("lib/ruby/#{ruby_version}/gems/#{gem_name}-#{gem_version}*").first
 end
@@ -238,31 +228,14 @@ class BundleBuildFileGenerator
   def register_gem(spec, template_out, bundle_lib_paths, bundle_binaries)
     gem_path = GEM_PATH[ruby_version, spec.name, spec.version]
     spec_path = SPEC_PATH[ruby_version, spec.name, spec.version]
-    # puts "spec.source: #{spec.source}"
-    # puts "spec.source.class: #{spec.source.class}" # Bundler::Source::Rubygems
-    # puts "spec.platform: #{spec.platform}" # ruby
-    # puts "spec.source.specs: #{spec.source.specs.inspect}" # Bundler::Index
-    # puts "spec.source.specs.search(Gem::Platform.new(spec.platform)): #{spec.source.specs.search(Gem::Platform.new(spec.platform))}" # Bundler::Index
-    # pp spec
+    base_dir = "lib/ruby/#{ruby_version}"
 
-    # specification = spec.__materialize__
-    # gem_lib_paths = specification.require_paths.map { |require_path| Path.join(gem_path, require_path) }
-    # bundle_lib_paths += gem_lib_paths
-    # pp spec
-    #
-    # gem_path = "lib/ruby/#{ruby_version}/gems/#{gem_name}-#{gem_version}#{platform_suffix}"
-    puts "gem_path: #{gem_path}"
-    puts "spec_path: #{spec_path}"
-
-    stub_spec = Gem::StubSpecification.gemspec_stub(
-      spec_path,
-      base_dir="lib/ruby/#{ruby_version}",
-      gems_dir="lib/ruby/#{ruby_version}/gems"
-    )
-    pp spec
-    pp stub_spec
-    puts "stub_spec.require_paths: #{stub_spec.require_paths}"
-    gem_lib_dirs = stub_spec.require_paths.map { |require_path| File.join(gem_path, require_path) }
+    additional_requre_paths = Hash.new { |h, k| h[k] = [] }
+    additional_requre_paths['grpc'] = ['etc']
+    # paths to register to $LOAD_PATH (usually ["lib"], but not always so.)
+    require_paths = Gem::StubSpecification.gemspec_stub(spec_path, base_dir, "#{base_dir}/gems").require_paths
+    require_paths += additional_requre_paths[spec.name]
+    gem_lib_dirs = require_paths.map { |require_path| File.join(gem_path, require_path) }
     bundle_lib_paths += gem_lib_dirs
 
     # paths to search for executables
