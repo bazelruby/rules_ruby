@@ -33,7 +33,7 @@ GEM_TEMPLATE = <<~GEM_TEMPLATE
     srcs = glob(
       include = [
         ".bundle/config",
-        {gem_lib_files},
+        {gem_lib_dirs},
         "{gem_spec}",
         {gem_binaries}
       ],
@@ -148,6 +148,7 @@ class BundleBuildFileGenerator
               :repo_name,
               :build_file,
               :gemfile_lock,
+              :includes,
               :excludes,
               :ruby_version
 
@@ -159,11 +160,14 @@ class BundleBuildFileGenerator
                  repo_name:,
                  build_file: 'BUILD.bazel',
                  gemfile_lock: 'Gemfile.lock',
-                 excludes: nil)
+                 includes: nil,
+                 excludes: nil,
+                 additional_require_paths: nil)
     @workspace_name = workspace_name
     @repo_name      = repo_name
     @build_file     = build_file
     @gemfile_lock   = gemfile_lock
+    @includes       = includes
     @excludes       = excludes
     # This attribute returns 0 as the third minor version number, which happens to be
     # what Ruby uses in the PATH to gems, eg. ruby 2.6.5 would have a folder called
@@ -230,11 +234,11 @@ class BundleBuildFileGenerator
     spec_path = SPEC_PATH[ruby_version, spec.name, spec.version]
     base_dir = "lib/ruby/#{ruby_version}"
 
-    additional_requre_paths = Hash.new { |h, k| h[k] = [] }
-    additional_requre_paths['grpc'] = ['etc']
-    # paths to register to $LOAD_PATH (usually ["lib"], but not always so.)
+    # paths to register to $LOAD_PATH
+    # Usually, registering the directory paths listed in the `require_paths` of gemspecs is sufficient, but
+    # some rubygems also require additional paths to be included in the load paths.
     require_paths = Gem::StubSpecification.gemspec_stub(spec_path, base_dir, "#{base_dir}/gems").require_paths
-    require_paths += additional_requre_paths[spec.name]
+    require_paths += include_array(spec.name)
     gem_lib_dirs = require_paths.map { |require_path| File.join(gem_path, require_path) }
     bundle_lib_paths += gem_lib_dirs
 
@@ -246,8 +250,7 @@ class BundleBuildFileGenerator
 
     warn("registering gem #{spec.name} with binaries: #{gem_binaries}") if bundle_binaries.key?(spec.name)
 
-    template_out.puts GEM_TEMPLATE
-                        .gsub('{gem_lib_files}', to_flat_string(gem_lib_dirs.map { |p| "#{p}/**/*" }))
+    template_out.puts GEM_TEMPLATE#.gsub('{gem_lib_files}', to_flat_string(gem_lib_dirs.map { |p| "#{p}/**/*" }))
                         .gsub('{gem_lib_dirs}', to_flat_string(gem_lib_dirs))
                         .gsub('{gem_spec}', spec_path)
                         .gsub('{gem_binaries}', to_flat_string(gem_binaries))
@@ -276,6 +279,10 @@ class BundleBuildFileGenerator
       .map { |binary| 'bin/' + binary }
   end
 
+  def include_array(gem_name)
+    (includes[gem_name] || [])
+  end
+
   def exclude_array(gem_name)
     (excludes[gem_name] || []) + DEFAULT_EXCLUDES
   end
@@ -285,18 +292,19 @@ class BundleBuildFileGenerator
   end
 end
 
-# ruby ./create_bundle_build_file.rb "BUILD.bazel" "Gemfile.lock" "repo_name" "[]" "wsp_name"
+# ruby ./create_bundle_build_file.rb "BUILD.bazel" "Gemfile.lock" "repo_name" "{}" "{}" "wsp_name"
 if $0 == __FILE__
-  if ARGV.length != 5
-    warn("USAGE: #{$0} BUILD.bazel Gemfile.lock repo-name [excludes-json] workspace-name".orange)
+  if ARGV.length != 6
+    warn("USAGE: #{$0} BUILD.bazel Gemfile.lock repo-name {includes-json} {excludes-json} workspace-name".orange)
     exit(1)
   end
 
-  build_file, gemfile_lock, repo_name, excludes, workspace_name, * = *ARGV
+  build_file, gemfile_lock, repo_name, includes, excludes, workspace_name, * = *ARGV
 
   BundleBuildFileGenerator.new(build_file:     build_file,
                                gemfile_lock:   gemfile_lock,
                                repo_name:      repo_name,
+                               includes:       JSON.parse(includes),
                                excludes:       JSON.parse(excludes),
                                workspace_name: workspace_name).generate!
 
