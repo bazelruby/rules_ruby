@@ -1,0 +1,35 @@
+workspace(name = "bazelruby_rules_ruby_ruby_tests_testdata_bundle_includes_workspace")
+
+local_repository(
+    name = "bazelruby_rules_ruby",
+    path = "../../../..",
+)
+
+load(
+    "@bazelruby_rules_ruby//ruby:deps.bzl",
+    "rules_ruby_dependencies",
+    "rules_ruby_select_sdk",
+)
+
+rules_ruby_dependencies()
+
+rules_ruby_select_sdk(version = "2.7.1")
+
+load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
+
+ruby_bundle(
+    name = "gems",
+    bundler_version = "2.2.21",
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+    includes = {
+        # The gemspec of google-protobuf rubygem lists ['lib'] as the `require_paths`. Since google-protobuf gem
+        # dynamically chain-loads different dynamic library files depending upon the major and minor Ruby versions
+        # at runtime, additional directories and files need to be manually added to `$LOAD_PATH`.
+        "google-protobuf": [
+            "lib/google/*",
+            "lib/google/2.7/*",
+            "lib/google/protobuf/**/*",
+        ],
+    },
+)
