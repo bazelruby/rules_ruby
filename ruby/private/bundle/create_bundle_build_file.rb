@@ -250,7 +250,7 @@ class BundleBuildFileGenerator
 
     warn("registering gem #{spec.name} with binaries: #{gem_binaries}") if bundle_binaries.key?(spec.name)
 
-    template_out.puts GEM_TEMPLATE#.gsub('{gem_lib_files}', to_flat_string(gem_lib_dirs.map { |p| "#{p}/**/*" }))
+    template_out.puts GEM_TEMPLATE
                         .gsub('{gem_lib_dirs}', to_flat_string(gem_lib_dirs))
                         .gsub('{gem_spec}', spec_path)
                         .gsub('{gem_binaries}', to_flat_string(gem_binaries))
