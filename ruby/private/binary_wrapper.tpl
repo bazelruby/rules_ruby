@@ -147,6 +147,10 @@ def main(args)
     system(gem_program + " pristine {gems_to_pristine}")
   end
 
+  puts "ruby_program: #{ruby_program}"
+  puts "rubyopt: #{rubyopt}"
+  puts "main: " + main
+  puts "args: #{args}"
   exec(ruby_program, *rubyopt, main, *args)
   # TODO(yugui) Support windows
 end
