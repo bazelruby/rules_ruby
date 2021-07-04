@@ -192,7 +192,7 @@ Use `ruby_gem` rule to package any number of ruby files or folders into a Ruby-G
 ```bazel
 load(
     "@bazelruby_rules_ruby//ruby:defs.bzl",
-    "ruby_gem",    
+    "ruby_gem",
 )
 
 ruby_gem(
@@ -201,7 +201,7 @@ ruby_gem(
     gem_version     = "0.1.0",
     gem_summary     = "Example gem to demonstrate Bazel Gem packaging",
     gem_description = "Example gem to demonstrate Bazel Gem packaging",
-    gem_homepage    = "https://github.com/bazelruby/rules_ruby",    
+    gem_homepage    = "https://github.com/bazelruby/rules_ruby",
     gem_authors     = [
         "BazelRuby",
         "Konstantin Gredeskoul"
@@ -219,7 +219,7 @@ ruby_gem(
         "rubocop": "",
     },
     srcs = [
-	 	glob("{bin,exe,lib,spec}/**/*.rb")
+        glob("{bin,exe,lib,spec}/**/*.rb")
     ],
     deps = [
         "//lib:example_gem",
@@ -238,7 +238,7 @@ If you are using ASDF to manage your ruby installs, you can use them by adding `
 build --test_env=ASDF_DIR --test_env=ASDF_DATA_DIR
 build --action_env=ASDF_DIR --test_env=ASDF_DATA_DIR
 ```
-You will have to be sure to export the `ASDF_DATA_DIR` in your profile since it's not set by default. e.g. `export ASDF_DATA_DIR="$HOME/.asdf"` 
+You will have to be sure to export the `ASDF_DATA_DIR` in your profile since it's not set by default. e.g. `export ASDF_DATA_DIR="$HOME/.asdf"`
 
 ### Rule Dependency Diagram
 
@@ -254,19 +254,19 @@ The following diagram attempts to capture the implementation behind `ruby_librar
 
 ```bazel
 ruby_library(
-    name, 
-    deps, 
-    srcs, 
-    data, 
-    compatible_with, 
-    deprecation, 
-    distribs, 
-    features, 
-    licenses, 
-    restricted_to, 
-    tags, 
-    testonly, 
-    toolchains, 
+    name,
+    deps,
+    srcs,
+    data,
+    compatible_with,
+    deprecation,
+    distribs,
+    features,
+    licenses,
+    restricted_to,
+    tags,
+    testonly,
+    toolchains,
     visibility)
 ```
 
@@ -343,22 +343,22 @@ ruby_library(
 
 ```bazel
 ruby_binary(
-    name, 
-    deps, 
-    srcs, 
+    name,
+    deps,
+    srcs,
     data,
-    main, 
-    compatible_with, 
-    deprecation, 
-    distribs, 
-    features, 
-    licenses, 
-    restricted_to, 
-    tags, 
-    testonly,     
-    toolchains, 
-    visibility, 
-    args, 
+    main,
+    compatible_with,
+    deprecation,
+    distribs,
+    features,
+    licenses,
+    restricted_to,
+    tags,
+    testonly,
+    toolchains,
+    visibility,
+    args,
     output_licenses
 )
 ```
@@ -442,25 +442,25 @@ ruby_binary(
 
 ```bazel
 ruby_test(
-    name, 
-    deps, 
-    srcs, 
-    data, 
-    main, 
-    compatible_with, 
-    deprecation, 
-    distribs, 
-    features, 
-    licenses, 
-    restricted_to, 
-    tags, 
-    testonly, 
-    toolchains, 
-    visibility, 
-    args, 
-    size, 
-    timeout, 
-    flaky, 
+    name,
+    deps,
+    srcs,
+    data,
+    main,
+    compatible_with,
+    deprecation,
+    distribs,
+    features,
+    licenses,
+    restricted_to,
+    tags,
+    testonly,
+    toolchains,
+    visibility,
+    args,
+    size,
+    timeout,
+    flaky,
     local, shard_count)
 ```
 
@@ -547,9 +547,9 @@ This rule installs gems defined in a Gemfile using Bundler, and exports individu
 
 ```bazel
 ruby_bundle(
-    name, 
-    gemfile, 
-    gemfile_lock, 
+    name,
+    gemfile,
+    gemfile_lock,
     bundler_version = "2.1.2",
     includes = {},
     excludes = {},
@@ -679,28 +679,28 @@ ruby_binary(
 
 ```bazel
 ruby_rspec(
-    name, 
-    deps, 
-    srcs, 
-    data, 
-    main, 
-    rspec_args, 
-    bundle, 
-    compatible_with, 
-    deprecation, 
-    distribs, 
-    features, 
-    licenses, 
-    restricted_to, 
-    tags, 
-    testonly, 
-    toolchains, 
-    visibility, 
-    args, 
-    size, 
-    timeout, 
-    flaky, 
-    local, 
+    name,
+    deps,
+    srcs,
+    data,
+    main,
+    rspec_args,
+    bundle,
+    compatible_with,
+    deprecation,
+    distribs,
+    features,
+    licenses,
+    restricted_to,
+    tags,
+    testonly,
+    toolchains,
+    visibility,
+    args,
+    size,
+    timeout,
+    flaky,
+    local,
     shard_count
 )
 ```
@@ -810,7 +810,7 @@ ruby_gem(
     data = data
 )
 ```
- 
+
 
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
@@ -858,17 +858,17 @@ ruby_gem(
     <tr>
       <td><code>gem_description</code></td>
       <td>
-        <code>String, required</code>      
+        <code>String, required</code>
         <p>Single-line, paragraph-sized description text for the gem.</p>
       </td>
     </tr>
     <tr>
       <td><code>gem_homepage</code></td>
       <td>
-        <code>String, optional</code>      
+        <code>String, optional</code>
         <p>Homepage URL of the gem.</p>
       </td>
-    </tr>    
+    </tr>
     <tr>
       <td><code>gem_authors</code></td>
       <td>
@@ -887,7 +887,7 @@ ruby_gem(
           List of email addresses of the authors.
         </p>
       </td>
-    </tr>    
+    </tr>
     <tr>
       <td><code>srcs</code></td>
       <td>
@@ -918,7 +918,7 @@ ruby_gem(
           Typically this value is just `lib` (which is also the default).
         </p>
       </td>
-    </tr>    
+    </tr>
     <tr>
       <td><code>gem_runtime_dependencies</code></td>
       <td>
@@ -939,8 +939,8 @@ ruby_gem(
         testing gems, linters, code coverage and more.
         </p>
       </td>
-    </tr>    
-    
+    </tr>
+
   </tbody>
 </table>
 
