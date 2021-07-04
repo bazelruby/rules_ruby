@@ -551,7 +551,8 @@ ruby_bundle(
     gemfile, 
     gemfile_lock, 
     bundler_version = "2.1.2",
-    excludes = [],
+    includes = {},
+    excludes = {},
     ruby_sdk = "@org_ruby_lang_ruby_toolchain",
     ruby_interpreter = "@org_ruby_lang_ruby_toolchain//:ruby",
 )
@@ -598,6 +599,29 @@ ruby_bundle(
         <code>String, optional</code>
           <p>The Version of Bundler to use. Defaults to 2.1.2.</p>
           <p>NOTE: This rule never updates the <code>Gemfile.lock</code>. It is your responsibility to generate/update <code>Gemfile.lock</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>includes</code></td>
+      <td>
+        <code>Dictionary of key-value-pairs (key: string, value: list of strings), optional</code>
+        <p>
+          List of glob patterns per gem to be additionally loaded from the library.
+          Keys are the names of the gems which require some file/directory paths not listed in the <code>require_paths</code> attribute of the gemspecs to be also added to <code>$LOAD_PATH</code> at runtime.
+          Values are lists of blob path patterns. The path blob patterns are relative to the root directory of the gems.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>excludes</code></td>
+      <td>
+        <code>Dictionary of key-value-pairs (key: string, value: list of strings), optional</code>
+        <p>
+          List of glob patterns per gem to be excluded from the library.
+          Keys are the names of the gems.
+          Values are lists of blob path patterns. The path blob patterns are relative to the root directory of the gems.
+          The default value is <code>["**/* *.*", "**/* */*"]</code>
+        </p>
       </td>
     </tr>
   </tbody>
