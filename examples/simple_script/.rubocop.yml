@@ -23,6 +23,7 @@ AllCops:
     - '**/*.ru'
     - '**/Gemfile'
     - '**/Rakefile'
+  NewCops: enable
 
 Layout/HashAlignment:
   Enabled: true
