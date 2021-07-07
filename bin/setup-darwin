@@ -58,14 +58,18 @@ setup.xcode-tools() {
 }
 
 setup.bazel() {
-  brew.package.is-installed bazelbuild/tap/bazelisk && 
-    brew.uninstall.package bazelbuild/tap/bazelisk
+  brew.package.is-installed bazelisk && 
+    brew.uninstall.package bazelisk && 
+      run "brew unlink bazel"
     
   if __setup.is-bazelisk-installed && __setup.is-bazel-installed ; then
     info: "Bazel & bazelisk are already installed."
   else
     brew.install.packages bazel bazelisk
+    run "brew link bazel || true"
   fi
+
+  
 }
 
 setup.darwin() {

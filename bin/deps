@@ -9,15 +9,12 @@
 # setup will re-install it.
 # —————————————————————————————————————————————————————————————————————————————————————
 
-export BashMatic="${HOME}/.bashmatic"
 
-if [[ ! -f "${BashMatic}/init.sh" ]]; then
-  rm -rf "${BashMatic}" 2>/dev/null
-  git clone https://github.com/kigster/bashmatic "${BashMatic}" 1>/dev/null 2>&1
-fi
+[[ -z ${BASHMATIC_HOME} ]] && export BASHMATIC_HOME="${HOME}/.bashmatic"
+[[ -d ${BASHMATIC_HOME} ]] || bash -c "$(curl -fsSL https://bashmatic.re1.re); bashmatic-install -q"
 
 # shellcheck disable=SC1090
-source "${BashMatic}/init.sh" 1>/dev/null 2>&1
+source "${BASHMATIC_HOME}/init.sh" 1>/dev/null 2>&1
 
 __version.detect() {
   local file="$1"

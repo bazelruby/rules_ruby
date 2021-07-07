@@ -1,10 +1,6 @@
-# Rules Ruby Version 0.4.1
+# Rules Ruby Version 0.5.0
 
 This is the README for Ruby Rules for the [Bazel Build](https://bazel.build) system.
-
-## ATTENTION: Base Branch Change Announcement
-
-We recently switched from the base branch of `develop` to the base of `master`. Please update your local repos accordingly.
 
 ### Build Status
 
@@ -13,47 +9,13 @@ We recently switched from the base branch of `develop` to the base of `master`. 
 
 ![activity](https://img.shields.io/github/commit-activity/m/bazelruby/rules_ruby?style=for-the-badge) &nbsp;
 
-- [Rules Development Status](#rules-development-status)
-- [Usage](#usage)
-  - [`WORKSPACE` File](#workspace-file)
-    - [Load dependencies, select Ruby SDK and define one or more Bundles](#load-dependencies-select-ruby-sdk-and-define-one-or-more-bundles)
-  - [`BUILD.bazel` file(s)](#buildbazel-files)
-    - [Define Ruby Executable, Library and an RSpec](#define-ruby-executable-library-and-an-rspec)
-    - [Package Ruby files as a Gem](#package-ruby-files-as-a-gem)
-  - [Tool Specific Setup](#tool-specific-setup)
-    - [ASDF](#asdf)
-  - [Rule Dependency Diagram](#rule-dependency-diagram)
-- [Rules](#rules)
-  - [`ruby_library`](#ruby_library)
-  - [`ruby_binary`](#ruby_binary)
-  - [`ruby_test`](#ruby_test)
-  - [`ruby_bundle`](#ruby_bundle)
-    - [Limitations](#limitations)
-    - [Conventions](#conventions)
-    - [`WORKSPACE`:](#workspace)
-    - [`BUILD.bazel`:](#buildbazel)
-  - [`ruby_rspec`](#ruby_rspec)
-  - [`ruby_gem`](#ruby_gem)
-- [What's coming next](#whats-coming-next)
-- [Contributing](#contributing)
-  - [Setup](#setup)
-    - [Using the Script](#using-the-script)
-    - [OS-Specific Setup](#os-specific-setup)
-      - [Issues During Setup](#issues-during-setup)
-  - [Developing Rules](#developing-rules)
-  - [Running Tests](#running-tests)
-    - [Test Script](#test-script)
-  - [Linter](#linter)
-- [Copyright](#copyright)
-
-
 ### [Change Log](CHANGELOG.md)
 
-To regenerate:
+To regenerate, first you may need to grab an [API token](https://github.com/settings/tokens), and then:
 
 ```bash
 gem install github_changelog_generator
-github_changelog_generator -u bazelruby -p rules_ruby
+github_changelog_generator -u bazelruby -p rules_ruby -t your-github-token
 ```
 
 ## Rules Development Status
@@ -105,7 +67,7 @@ rules_ruby_dependencies()
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 bazel_skylib_workspace()
 
-rules_ruby_select_sdk(version = "2.7.1")
+rules_ruby_select_sdk(version = "3.0.1")
 
 #———————————————————————————————————————————————————————————————————————
 # Now, load the ruby_bundle rule & install gems specified in the Gemfile
@@ -550,7 +512,7 @@ ruby_bundle(
     name, 
     gemfile, 
     gemfile_lock, 
-    bundler_version = "2.1.2",
+    bundler_version = "2.1.4",
     excludes = [],
     ruby_sdk = "@org_ruby_lang_ruby_toolchain",
     ruby_interpreter = "@org_ruby_lang_ruby_toolchain//:ruby",
@@ -596,7 +558,7 @@ ruby_bundle(
       <td><code>bundler_version</code></td>
       <td>
         <code>String, optional</code>
-          <p>The Version of Bundler to use. Defaults to 2.1.2.</p>
+          <p>The Version of Bundler to use. Defaults to 2.1.4.</p>
           <p>NOTE: This rule never updates the <code>Gemfile.lock</code>. It is your responsibility to generate/update <code>Gemfile.lock</code></p>
       </td>
     </tr>
@@ -623,7 +585,7 @@ load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
 
 ruby_bundle(
     name = "gems",
-    bundler_version = '2.1.2',
+    bundler_version = '2.1.4',
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
 )
@@ -1060,40 +1022,40 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 
 <!-- code_chunk_output -->
 
+- [Rules Ruby Version 0.5.0](#rules-ruby-version-050)
     - [Build Status](#build-status)
     - [Change Log](#change-logchangelogmd)
-- [ATTENTION: Base Branch Change Announcement](#attention-base-branch-change-announcement)
-  - [Build Status](#build-status)
-  - [Change Log](#change-log)
-- [Rules Development Status](#rules-development-status)
-- [Usage](#usage)
-  - [`WORKSPACE` File](#workspace-file)
-    - [Load dependencies, select Ruby SDK and define one or more Bundles](#load-dependencies-select-ruby-sdk-and-define-one-or-more-bundles)
-  - [`BUILD.bazel` file(s)](#buildbazel-files)
-    - [Define Ruby Executable, Library and an RSpec](#define-ruby-executable-library-and-an-rspec)
-    - [Package Ruby files as a Gem](#package-ruby-files-as-a-gem)
-  - [Rule Dependency Diagram](#rule-dependency-diagram)
-- [Rules](#rules)
-  - [`ruby_library`](#ruby_library)
-  - [`ruby_binary`](#ruby_binary)
-  - [`ruby_test`](#ruby_test)
-  - [`ruby_bundle`](#ruby_bundle)
-    - [Limitations](#limitations)
-    - [Conventions](#conventions)
-    - [`WORKSPACE`:](#workspace)
-    - [`BUILD.bazel`:](#buildbazel)
-  - [`ruby_rspec`](#ruby_rspec)
-  - [`ruby_gem`](#ruby_gem)
-- [What's coming next](#whats-coming-next)
-- [Contributing](#contributing)
-  - [Setup](#setup)
-    - [Using the Script](#using-the-script)
-    - [OS-Specific Setup](#os-specific-setup)
-      - [Issues During Setup](#issues-during-setup)
-  - [Developing Rules](#developing-rules)
-  - [Running Tests](#running-tests)
-    - [Test Script](#test-script)
-  - [Linter](#linter)
-- [Copyright](#copyright)
+  - [Rules Development Status](#rules-development-status)
+  - [Usage](#usage)
+    - [`WORKSPACE` File](#workspace-file)
+      - [Load dependencies, select Ruby SDK and define one or more Bundles](#load-dependencies-select-ruby-sdk-and-define-one-or-more-bundles)
+    - [`BUILD.bazel` file(s)](#buildbazel-files)
+      - [Define Ruby Executable, Library and an RSpec](#define-ruby-executable-library-and-an-rspec)
+      - [Package Ruby files as a Gem](#package-ruby-files-as-a-gem)
+    - [Tool Specific Setup](#tool-specific-setup)
+      - [ASDF](#asdf)
+    - [Rule Dependency Diagram](#rule-dependency-diagram)
+  - [Rules](#rules)
+    - [`ruby_library`](#ruby_library)
+    - [`ruby_binary`](#ruby_binary)
+    - [`ruby_test`](#ruby_test)
+    - [`ruby_bundle`](#ruby_bundle)
+      - [Limitations](#limitations)
+      - [Conventions](#conventions)
+      - [`WORKSPACE`:](#workspace)
+      - [`BUILD.bazel`:](#buildbazel)
+    - [`ruby_rspec`](#ruby_rspec)
+    - [`ruby_gem`](#ruby_gem)
+  - [What's coming next](#whats-coming-next)
+  - [Contributing](#contributing)
+    - [Setup](#setup)
+      - [Using the Script](#using-the-script)
+      - [OS-Specific Setup](#os-specific-setup)
+        - [Issues During Setup](#issues-during-setup)
+    - [Developing Rules](#developing-rules)
+    - [Running Tests](#running-tests)
+      - [Test Script](#test-script)
+    - [Linter](#linter)
+  - [Copyright](#copyright)
 
 <!-- /code_chunk_output -->

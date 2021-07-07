@@ -12,7 +12,7 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 
 versions.check("3.4.1")
 
-rules_ruby_select_sdk("2.7.1")
+rules_ruby_select_sdk("3.0.1")
 
 local_repository(
     name = "bazelruby_rules_ruby_ruby_tests_testdata_another_workspace",
@@ -94,7 +94,7 @@ load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
 
 ruby_bundle(
     name = "bundle",
-    bundler_version = "2.1.2",
+    bundler_version = "2.1.4",
     excludes = {
         "mini_portile": ["test/**/*"],
     },

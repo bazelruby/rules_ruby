@@ -15,7 +15,7 @@ load(
 
 rules_ruby_dependencies()
 
-rules_ruby_select_sdk(version = "2.7.1")
+rules_ruby_select_sdk(version = "3.0.1")
 
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 
