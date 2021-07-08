@@ -1,18 +1,22 @@
 # Changelog
 
-## [Unreleased](https://github.com/bazelruby/rules_ruby/tree/HEAD)
+## [v0.5.0](https://github.com/bazelruby/rules_ruby/tree/v0.5.0) (2021-07-08)
 
-[Full Changelog](https://github.com/bazelruby/rules_ruby/compare/v0.4.1...HEAD)
+[Full Changelog](https://github.com/bazelruby/rules_ruby/compare/v0.4.1...v0.5.0)
 
 **Closed issues:**
 
 - ruby\_binary - how to package up runfiles dir [\#101](https://github.com/bazelruby/rules_ruby/issues/101)
+- bin/setup Failure [\#95](https://github.com/bazelruby/rules_ruby/issues/95)
 - `warning: string literal in condition` from generated wrapper [\#87](https://github.com/bazelruby/rules_ruby/issues/87)
+- Setup script attempts to delete ~/.rbenv if rbenv is installed with Homebrew [\#81](https://github.com/bazelruby/rules_ruby/issues/81)
 - ruby\_rspec specs argument not resolved [\#79](https://github.com/bazelruby/rules_ruby/issues/79)
 - ruby\_test and ruby\_rspec rules use system ruby [\#63](https://github.com/bazelruby/rules_ruby/issues/63)
 
 **Merged pull requests:**
 
+- Adding  makefile for auto-generating PDF [\#106](https://github.com/bazelruby/rules_ruby/pull/106) ([kigster](https://github.com/kigster))
+- Massive upgrade of everything at once ;-\) [\#105](https://github.com/bazelruby/rules_ruby/pull/105) ([kigster](https://github.com/kigster))
 - Support ruby 3 [\#103](https://github.com/bazelruby/rules_ruby/pull/103) ([mmizutani](https://github.com/mmizutani))
 - Bump nokogiri from 1.11.2 to 1.11.5 in /examples/simple\_rails\_api [\#99](https://github.com/bazelruby/rules_ruby/pull/99) ([dependabot[bot]](https://github.com/apps/dependabot))
 - Bump nokogiri from 1.10.10 to 1.11.2 in /examples/simple\_rails\_api [\#94](https://github.com/bazelruby/rules_ruby/pull/94) ([dependabot[bot]](https://github.com/apps/dependabot))

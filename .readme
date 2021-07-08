@@ -1,0 +1,10 @@
+=Ruby Rules® for Bazel
+:subtitle: Version %VERSION%
+:doctype: book
+:source-highlighter: rouge
+:rouge-style: base16.monokai
+:toclevels: 5
+:toc:
+:sectnums: 9
+:icons: font
+:license: apache
