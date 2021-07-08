@@ -10,6 +10,6 @@ ruby_binary(
     srcs = ["script.rb"],
     main = "script.rb",
     deps = [
-        "@gems//:google-protobuf",
+        "@gems//:grpc",
     ],
 )

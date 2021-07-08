@@ -101,15 +101,7 @@ ruby_bundle(
     name = "bundle",
     # Specify additional paths to be loaded from the gems at runtime, if any.
     includes = {
-        "grpc": [
-            "etc/*",
-            "src/ruby/lib/*",
-        ],
-        "google-protobuf": [
-            "lib/google/*",
-            "lib/google/3.0/*",
-            "lib/google/protobuf/**/*",
-        ]
+        "grpc": ["etc"],
     },
     excludes = {
         "mini_portile": ["test/**/*"],

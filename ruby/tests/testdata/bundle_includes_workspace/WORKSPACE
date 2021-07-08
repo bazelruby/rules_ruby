@@ -23,13 +23,10 @@ ruby_bundle(
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
     includes = {
-        # The gemspec of google-protobuf rubygem lists ['lib'] as the `require_paths`. Since google-protobuf gem
-        # dynamically chain-loads different dynamic library files depending upon the major and minor Ruby versions
-        # at runtime, additional directories and files need to be manually added to `$LOAD_PATH`.
-        "google-protobuf": [
-            "lib/google/*",
-            "lib/google/3.0/*",
-            "lib/google/protobuf/**/*",
-        ],
+        # The gemspec of grpc gem lists ['src/ruby/bin', 'src/ruby/lib', 'src/ruby/pb'] as the `require_paths`. When installing
+        # pre-built versions of the gem, these are sufficient. However, when installing it from source, 'etc/roots.pem', a file
+        # required by 'src/ruby/lib/grpc.rb', also needs to be present in the `$LOAD_PATH`. Thus users have to manually add the
+        # 'etc' directory to the `$LOAD_PATH` using the `includes` option of `ruby_bundle` rule.
+        "grpc": ["etc"],
     },
 )
