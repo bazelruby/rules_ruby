@@ -1,10 +1,34 @@
 # Changelog
 
+## [v0.5.0](https://github.com/bazelruby/rules_ruby/tree/v0.5.0) (2021-07-08)
+
+[Full Changelog](https://github.com/bazelruby/rules_ruby/compare/v0.4.1...v0.5.0)
+
+**Closed issues:**
+
+- ruby\_binary - how to package up runfiles dir [\#101](https://github.com/bazelruby/rules_ruby/issues/101)
+- bin/setup Failure [\#95](https://github.com/bazelruby/rules_ruby/issues/95)
+- `warning: string literal in condition` from generated wrapper [\#87](https://github.com/bazelruby/rules_ruby/issues/87)
+- Setup script attempts to delete ~/.rbenv if rbenv is installed with Homebrew [\#81](https://github.com/bazelruby/rules_ruby/issues/81)
+- ruby\_rspec specs argument not resolved [\#79](https://github.com/bazelruby/rules_ruby/issues/79)
+- ruby\_test and ruby\_rspec rules use system ruby [\#63](https://github.com/bazelruby/rules_ruby/issues/63)
+
+**Merged pull requests:**
+
+- Adding  makefile for auto-generating PDF [\#106](https://github.com/bazelruby/rules_ruby/pull/106) ([kigster](https://github.com/kigster))
+- Massive upgrade of everything at once ;-\) [\#105](https://github.com/bazelruby/rules_ruby/pull/105) ([kigster](https://github.com/kigster))
+- Support ruby 3 [\#103](https://github.com/bazelruby/rules_ruby/pull/103) ([mmizutani](https://github.com/mmizutani))
+- Bump nokogiri from 1.11.2 to 1.11.5 in /examples/simple\_rails\_api [\#99](https://github.com/bazelruby/rules_ruby/pull/99) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump nokogiri from 1.10.10 to 1.11.2 in /examples/simple\_rails\_api [\#94](https://github.com/bazelruby/rules_ruby/pull/94) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Update README.md [\#93](https://github.com/bazelruby/rules_ruby/pull/93) ([JustusFT](https://github.com/JustusFT))
+- Fix warning due to string literal in condition [\#91](https://github.com/bazelruby/rules_ruby/pull/91) ([russell](https://github.com/russell))
+- Add description for how to configure ASDF [\#90](https://github.com/bazelruby/rules_ruby/pull/90) ([russell](https://github.com/russell))
+- Remove print statements from ruby\_runtime.bzl [\#84](https://github.com/bazelruby/rules_ruby/pull/84) ([adzenith](https://github.com/adzenith))
+- Document path argument to ruby\_test [\#80](https://github.com/bazelruby/rules_ruby/pull/80) ([sayrer](https://github.com/sayrer))
+
 ## [v0.4.1](https://github.com/bazelruby/rules_ruby/tree/v0.4.1) (2020-08-10)
 
 [Full Changelog](https://github.com/bazelruby/rules_ruby/compare/v0.4.0...v0.4.1)
-
- * Switched from `develop` to `master` as the base branch & updated README
 
 ## [v0.4.0](https://github.com/bazelruby/rules_ruby/tree/v0.4.0) (2020-08-04)
 
@@ -29,8 +53,8 @@
 **Closed issues:**
 
 - 🐛 "Could not create symlink... \(File exists\)"  [\#54](https://github.com/bazelruby/rules_ruby/issues/54)
-- When using a local ruby installation it includes the local `LOAD\_PATH` [\#44](https://github.com/bazelruby/rules_ruby/issues/44)
-- \[Cleanup\] Pretty sure `eval` is never used in `repository\_context` [\#43](https://github.com/bazelruby/rules_ruby/issues/43)
+- When using a local ruby installation it includes the local `LOAD_PATH` [\#44](https://github.com/bazelruby/rules_ruby/issues/44)
+- \[Cleanup\] Pretty sure `eval` is never used in `repository_context` [\#43](https://github.com/bazelruby/rules_ruby/issues/43)
 - Importing a bundle gem adds all gems onto the load path \(although they are not there\) [\#42](https://github.com/bazelruby/rules_ruby/issues/42)
 - Support Ruby Lambda with the Gemfile full of dependencies. [\#33](https://github.com/bazelruby/rules_ruby/issues/33)
 - Support AWS Ruby Lambda with Bazel Rules [\#27](https://github.com/bazelruby/rules_ruby/issues/27)
@@ -55,13 +79,14 @@
 
 **Fixed bugs:**
 
-- Make `rules\_ruby/examples` a deeper tree structure and ensure CircleCI integration pass [\#10](https://github.com/bazelruby/rules_ruby/issues/10)
+- Make `rules_ruby/examples` a deeper tree structure and ensure CircleCI integration pass [\#10](https://github.com/bazelruby/rules_ruby/issues/10)
 
 **Closed issues:**
 
 - Ability to package all files related to a bazel target in a zip file [\#29](https://github.com/bazelruby/rules_ruby/issues/29)
 - Build rules\_ruby on CircleCI using workflows \(in addition to Travis\) [\#26](https://github.com/bazelruby/rules_ruby/issues/26)
 - Restore functionality that supported symlinking an existing Ruby interpreter [\#21](https://github.com/bazelruby/rules_ruby/issues/21)
+- Move ruby files under ruby\_rules/examples into a mini-mono repo [\#8](https://github.com/bazelruby/rules_ruby/issues/8)
 
 **Merged pull requests:**
 

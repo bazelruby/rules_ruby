@@ -96,8 +96,11 @@ class Buildifier
 
   # @formatter:off
   class BuildifierError < StandardError; end
+
   class BuildifierNotFoundError < BuildifierError; end
+
   class BuildifierFailedError < BuildifierError; end
+
   class BuildifierNoBuildFileError < BuildifierError; end
   # @formatter:on
 

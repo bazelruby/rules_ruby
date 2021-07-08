@@ -1,7 +1,7 @@
 inherit_from: .relaxed-rubocop-2.4.yml
 
 AllCops:
-  TargetRubyVersion: 2.6
+  TargetRubyVersion: 3.0
   UseCache: true
   DefaultFormatter: progress
   DisplayStyleGuide: true
@@ -23,6 +23,7 @@ AllCops:
     - '**/*.ru'
     - '**/Gemfile'
     - '**/Rakefile'
+  NewCops: enable
 
 Layout/HashAlignment:
   Enabled: true
