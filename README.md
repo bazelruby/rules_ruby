@@ -2,7 +2,7 @@
 
 > This repo is primarily maintained by [Konstantin Gredeskoul](https://github.com/kigster) and [Yuki "Yugui" Sonoda](https://github.com/yugui). We are both very busy and would really love more contributors to join the core team. If you are interested in developing Ruby Rules for Bazel, please submit a couple of PRs and then lets talk!
 
-### Build Status & Activity
+## Build Status & Activity
 
 | **CI Status**                               | **Activity & Documentation**                                    |
 | :------------------------------------------ | :----------------------------------------------------------- |
@@ -20,7 +20,6 @@
 
 Note: we have a short guide on [Building your first Ruby Project](https://github.com/bazelruby/rules_ruby/wiki/Build-your-ruby-project) on the Wiki. We encourage you to check it out.
 
-
 ## Table of Contents 
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=0 depthTo=3 orderedList=false} -->
@@ -28,7 +27,7 @@ Note: we have a short guide on [Building your first Ruby Project](https://github
 <!-- code_chunk_output -->
 
 - [Ruby Rules® for Bazel Build System](#ruby-rules-for-bazelhttpsbazelbuild-build-system)
-    - [Build Status & Activity](#build-status-activity)
+  - [Build Status & Activity](#build-status-activity)
   - [Rules Development Status](#rules-development-status)
   - [Table of Contents](#table-of-contents)
   - [Usage](#usage)
@@ -1125,6 +1124,5 @@ Core Team (Emeritus):
 Licensed under the [Apache License, Version 2.0 (the "License")](http://www.apache.org/licenses/LICENSE-2.0).
 
 
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
