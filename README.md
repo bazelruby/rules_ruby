@@ -107,7 +107,7 @@ ruby_bundle(
         ],
         "google-protobuf": [
             "lib/google/*",
-            "lib/google/2.7/*",
+            "lib/google/3.0/*",
             "lib/google/protobuf/**/*",
         ]
     },
