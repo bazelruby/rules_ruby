@@ -7,3 +7,5 @@
 
 .bazelrc.user
 user.bazelrc
+README.adoc
+.readme.adoc

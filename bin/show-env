@@ -32,19 +32,21 @@ function setup.print-versions() {
   set +e
   h2 "Your Current Runtime Environment:"
   echo
-  setup.table-rows 'Bazel' "$(bazel --version)" "$(command -v bazel)"
-  setup.table-rows 'Bazelisk' "${bazelisk_version}"
+  setup.table-rows 'RULES_RUBY' "$(cat .rules_version)" "Last updated on $(file.last-modified-date CHANGELOG.md)"
+  hr
+  setup.table-rows 'BAZEL' "$(bazel --version)" "$(command -v bazel)"
+  setup.table-rows 'BAZELISK' "${bazelisk_version}"
   setup.table-rows 'BASH' "$(bash --version 2>/dev/null | tr -d ',')" "$(command -v bash)"
   setup.table-rows 'CC' "$(cc --version 2>/dev/null)" "$(cc --version | grep clang)"
   setup.table-rows 'GO' "$(go version 2>/dev/null)" "$(command -v go)"
   hr
-  setup.table-rows 'Ruby' "$(ruby --version | sed -E 's/p[0-9]+.*$//g' 2>&1)" "$(command -v ruby)"
+  setup.table-rows 'RUBY' "$(ruby --version | sed -E 's/p[0-9]+.*$//g' 2>&1)" "$(command -v ruby)"
   setup.table-rows 'RBENV' "$(rbenv --version 2>/dev/null)" "$(command -v rbenv)"
-  setup.table-rows 'RUBIES' " " "$(rbenv versions 2>/dev/null | sed 's/ (.*//g; s/[ \*]//g' | tr '\n' '|')"
+  setup.table-rows 'RUBIES' "List of installed Ruby Versions" "$(rbenv versions 2>/dev/null | sed 's/ (.*//g; s/[ \*]//g' | sed 's/$/, /g' | tr -d '\n')"
   hr
-  setup.table-rows 'Python' "$(python --version 2>&1)" "$(command -v python) -> $(readlink "$(command -v python)")"
-  setup.table-rows 'Python2' "$(python2 --version 2>&1)" "$(command -v python2)"
-  setup.table-rows 'Python3' "$(python3 --version 2>&1)" "$(command -v python3)"
+  setup.table-rows 'PYTHON' "$(python --version 2>&1)" "$(command -v python) -> $(readlink "$(command -v python)")"
+  setup.table-rows 'PYTHON2' "$(python2 --version 2>&1)" "$(command -v python2)"
+  setup.table-rows 'PYTHON3' "$(python3 --version 2>&1)" "$(command -v python3)"
   hr
   set -e
 
