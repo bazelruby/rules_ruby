@@ -12,8 +12,8 @@ blue            		:= \033[0;34m
 green           		:= \033[0;35m
 clear           		:= \033[0m
 
-RUBY_VERSION    		:= $(cat .ruby-version)
-RULES_VERSION 	   		:= $(cat .version)
+RUBY_VERSION    		:= $(shell cat .ruby-version)
+RULES_VERSION 	   		:= $(shell cat .rules_version)
 OS	 		 	:= $(shell uname -s | tr '[:upper:]' '[:lower:]')
 
 # see: https://stackoverflow.com/questions/18136918/how-to-get-current-relative-directory-of-your-makefile/18137056#18137056
