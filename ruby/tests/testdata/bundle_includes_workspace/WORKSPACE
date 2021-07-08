@@ -24,9 +24,12 @@ ruby_bundle(
     gemfile_lock = "//:Gemfile.lock",
     includes = {
         # The gemspec of grpc gem lists ['src/ruby/bin', 'src/ruby/lib', 'src/ruby/pb'] as the `require_paths`. When installing
-        # pre-built versions of the gem, these are sufficient. However, when installing it from source, 'etc/roots.pem', a file
-        # required by 'src/ruby/lib/grpc.rb', also needs to be present in the `$LOAD_PATH`. Thus users have to manually add the
-        # 'etc' directory to the `$LOAD_PATH` using the `includes` option of `ruby_bundle` rule.
+        # pre-built versions of the gem using a package downloaded from rubygems.org, these paths are sufficient since the file
+        # `src/ruby/lib/grpc.rb` in the downloaded gem package does not `require` any file outside these directories.
+        # However, when installing grpc gem from source using Bundler, `src/ruby/lib/grpc.rb` in the source package does
+        # `require` 'etc/roots.pem', so the directory containing this `require`-d file also needs to be present in the `$LOAD_PATH`.
+        # Thus users have to manually add the 'etc' directory to the `$LOAD_PATH` using the `includes` option of `ruby_bundle` rule.
+        # The `includes` option of `ruby_bundle` rule is a means of workaround for such a peculiar situation.
         "grpc": ["etc"],
     },
 )
