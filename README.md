@@ -1,30 +1,22 @@
-# Rules Ruby Version 0.5.0
+# Ruby Rules® for [Bazel](https://bazel.build) Build System
 
-This is the README for Ruby Rules for the [Bazel Build](https://bazel.build) system.
+> This repo is primarily maintained by [Konstantin Gredeskoul](https://github.com/kigster) and [Yuki "Yugui" Sonoda](https://github.com/yugui). We are both very busy and would really love more contributors to join the core team. If you are interested in developing Ruby Rules for Bazel, please submit a couple of PRs and then lets talk!
 
-### Build Status
+### Build Status & Activity
 
-[![CircleCI](https://circleci.com/gh/bazelruby/rules_ruby.svg?style=shield)](https://circleci.com/gh/bazelruby/rules_ruby) &nbsp;
-[![Build Status](https://travis-ci.org/bazelruby/rules_ruby.svg?branch=master)](https://travis-ci.org/bazelruby/rules_ruby) &nbsp;
+| **CI Status**                               | **Activity & Documentation**                                    |
+| :------------------------------------------ | :----------------------------------------------------------- |
+| [![CircleCI](https://circleci.com/gh/bazelruby/rules_ruby.svg?style=shield)](https://circleci.com/gh/bazelruby/rules_ruby) &nbsp;         | ![activity](https://img.shields.io/github/commit-activity/m/bazelruby/rules_ruby?style=for-the-badge) &nbsp; |
+| [![Build Status](https://travis-ci.org/bazelruby/rules_ruby.svg?branch=master)](https://travis-ci.org/bazelruby/rules_ruby) &nbsp;           | [![changelog](https://img.shields.io/badge/change-log-brightgreen)](CHANGELOG.md)  [![readme.pdf](https://img.shields.io/badge/README-pdf-blue)](README.pdf)     |
 
-![activity](https://img.shields.io/github/commit-activity/m/bazelruby/rules_ruby?style=for-the-badge) &nbsp;
-
-### [Change Log](CHANGELOG.md)
-
-To regenerate, first you may need to grab an [API token](https://github.com/settings/tokens), and then:
-
-```bash
-gem install github_changelog_generator
-github_changelog_generator -u bazelruby -p rules_ruby -t your-github-token
-```
 
 ## Rules Development Status
 
 | **Readiness**                               | **Types of Applications**                                    |
 | :------------------------------------------ | :----------------------------------------------------------- |
 | ![Ready](docs/img/status-ready.svg)         | ruby apps, ruby gems, micro-services, ideally in a mono-repo |
-| ![Wait](docs/img/status-wait.svg)           | medium-sized Ruby on Rails apps, ideally in a mono-repo      |
-| ![Not Ready](docs/img/status-not-ready.svg) | complex Ruby on Rails monoliths, single-repo                 |
+| ![Wait](docs/img/status-ready.svg)          | medium-sized Ruby on Rails apps, ideally in a mono-repo      |
+| ![Not Ready](docs/img/status-wait.svg)      | complex Ruby on Rails monoliths, single-repo                 |
 
 Note: we have a short guide on [Building your first Ruby Project](https://github.com/bazelruby/rules_ruby/wiki/Build-your-ruby-project) on the Wiki. We encourage you to check it out.
 
@@ -35,9 +27,8 @@ Note: we have a short guide on [Building your first Ruby Project](https://github
 
 <!-- code_chunk_output -->
 
-- [Rules Ruby Version 0.5.0](#rules-ruby-version-050)
-    - [Build Status](#build-status)
-    - [Change Log](#change-logchangelogmd)
+- [Ruby Rules® for Bazel Build System](#ruby-rules-for-bazelhttpsbazelbuild-build-system)
+    - [Build Status & Activity](#build-status-activity)
   - [Rules Development Status](#rules-development-status)
   - [Table of Contents](#table-of-contents)
   - [Usage](#usage)
@@ -52,12 +43,14 @@ Note: we have a short guide on [Building your first Ruby Project](https://github
     - [`ruby_bundle`](#ruby_bundle)
     - [`ruby_rspec`](#ruby_rspec)
     - [`ruby_gem`](#ruby_gem)
-  - [What's coming next](#whats-coming-next)
+  - [Potential Future Features](#potential-future-features)
   - [Contributing](#contributing)
     - [Setup](#setup)
+    - [Verifying Your Environment](#verifying-your-environment)
     - [Developing Rules](#developing-rules)
     - [Running Tests](#running-tests)
     - [Linter](#linter)
+    - [Regenerating README.pdf & Changelog](#regenerating-readmepdf-changelog)
   - [Copyright](#copyright)
 
 <!-- /code_chunk_output -->
@@ -68,7 +61,7 @@ Note: we have a short guide on [Building your first Ruby Project](https://github
 
 #### Load dependencies, select Ruby SDK and define one or more Bundles
 
-```bazel
+```python
 workspace(name = "my_ruby_project")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
@@ -136,7 +129,7 @@ Any of the project `BUILD` files can now reference any gems included in the `Gem
 
 Add `ruby_library`, `ruby_binary`, `ruby_rspec` or `ruby_test` into your `BUILD.bazel` files.
 
-```bazel
+```python
 #———————————————————————————————————————————————————————————————————————
 # Define Ruby executable, test, spec and package a gem
 #———————————————————————————————————————————————————————————————————————
@@ -184,7 +177,7 @@ ruby_rspec(
 
 Use `ruby_gem` rule to package any number of ruby files or folders into a Ruby-Gem compatible ZIP archive.
 
-```bazel
+```python
 load(
     "@bazelruby_rules_ruby//ruby:defs.bzl",
     "ruby_gem",
@@ -248,7 +241,7 @@ The following diagram attempts to capture the implementation behind `ruby_librar
 
 ### `ruby_library`
 
-```bazel
+```python
 ruby_library(
     name,
     deps,
@@ -265,6 +258,7 @@ ruby_library(
     toolchains,
     visibility)
 ```
+
 
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
@@ -335,9 +329,10 @@ ruby_library(
   </tbody>
 </table>
 
+
 ### `ruby_binary`
 
-```bazel
+```python
 ruby_binary(
     name,
     deps,
@@ -359,6 +354,7 @@ ruby_binary(
 )
 ```
 
+
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
     <col class="col-param" />
@@ -434,9 +430,10 @@ ruby_binary(
   </tbody>
 </table>
 
+
 ### `ruby_test`
 
-```bazel
+```python
 ruby_test(
     name,
     deps,
@@ -457,7 +454,9 @@ ruby_test(
     size,
     timeout,
     flaky,
-    local, shard_count)
+    local, 
+    shard_count
+)
 ```
 
 <table class="table table-condensed table-bordered table-params">
@@ -535,13 +534,14 @@ ruby_test(
   </tbody>
 </table>
 
+
 ### `ruby_bundle`
 
 **NOTE: This is a repository rule, and can only be used in a `WORKSPACE` file.**
 
 This rule installs gems defined in a Gemfile using Bundler, and exports individual gems from the bundle, as well as the entire bundle, available as a `ruby_library` that can be depended upon from other targets.
 
-```bazel
+```python
 ruby_bundle(
     name,
     gemfile,
@@ -552,6 +552,7 @@ ruby_bundle(
     ruby_interpreter = "@org_ruby_lang_ruby_toolchain//:ruby",
 )
 ```
+
 
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
@@ -599,6 +600,7 @@ ruby_bundle(
   </tbody>
 </table>
 
+
 #### Limitations
 
 Installing using a `Gemfile` that uses the `gemspec` keyword is not currently supported.
@@ -614,7 +616,7 @@ Installing using a `Gemfile` that uses the `gemspec` keyword is not currently su
 
 #### `WORKSPACE`:
 
-```bazel
+```python
 load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
 
 ruby_bundle(
@@ -627,7 +629,7 @@ ruby_bundle(
 
 #### `BUILD.bazel`:
 
-```bazel
+```python
 # Reference the entire bundle with :gems
 
 ruby_library(
@@ -649,7 +651,7 @@ ruby_binary(
 
 ### `ruby_rspec`
 
-```bazel
+```python
 ruby_rspec(
     name,
     deps,
@@ -676,6 +678,7 @@ ruby_rspec(
     shard_count
 )
 ```
+
 
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
@@ -760,11 +763,12 @@ ruby_rspec(
   </tbody>
 </table>
 
+
 ### `ruby_gem`
 
 Used to generate a zipped gem containing its srcs, dependencies and a gemspec.
 
-```bazel
+```python
 ruby_gem(
     name,
     gem_name,
@@ -782,6 +786,7 @@ ruby_gem(
     data = data
 )
 ```
+
 
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
@@ -915,15 +920,16 @@ ruby_gem(
   </tbody>
 </table>
 
-## What's coming next
 
-1. Building native extensions in gems with Bazel
-2. Using a specified version of Ruby.
-3. Releasing your gems with Bazel
+## Potential Future Features
+
+- [x] Using various versions of Ruby installed locally
+- [ ] Building native extensions in gems with Bazel
+- [ ] Releasing your gems with Bazel ([Coinbase fork](https://github.com/coinbase/rules_ruby) might have this feature, worth checking)
 
 ## Contributing
 
-We welcome contributions to RulesRuby. Please make yourself familiar with the [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md) document.
+We welcome contributions to RulesRuby. Please make yourself familiar with the [code of conduct](CODE_OF_CONDUCT.md), which basically says — don't be an a-hole.
 
 You may notice that there is more than one Bazel WORKSPACE inside this repo. There is one in `examples/simple_script` for instance, because
 we use this example to validate and test the rules. So be mindful whether your current directory contains `WORKSPACE` file or not.
@@ -971,9 +977,19 @@ Note that the setup contains `os-specific` section. This is because there are tw
 
 Those will install Bazel and everything else you need on either platform. In fact, we use the linux version on CI.
 
-##### Issues During Setup
+### Verifying Your Environment
 
-**Please report any errors to `bin/setup` as Issues on Github. You can assign them to @kigster.**
+We provided a handy script `bin/show-env` to display where your dependencies are coming from. Here is an example of running it on a Mac OS-X system:
+
+```bash
+❯ bin/show-env
+```
+
+![bin/show-env](docs/img/env.png)
+
+#### Issues During Setup
+
+> **Please report any errors to `bin/setup` as Issues on Github. You can assign them to @kigster.** If I am not responding fast enough, and you are in a hurry, please email kigster AT gmail directly.
 
 ### Developing Rules
 
@@ -984,11 +1000,11 @@ Besides making yourself familiar with the existing code, and [Bazel documentatio
 3. Make sure all tests pass — you can run a single command for that (but see more on it [below](#test-script).
 
 
-    ```bash
-    bin/test-suite
-    ```
+```bash
+bin/test-suite
+```
 
-OR you can run individual Bazel test commands from the inside.
+OR, you can run individual Bazel test commands from the inside.
 
 - `bazel test //...`
 - `cd examples/simple_script && bazel test //...`
@@ -1001,10 +1017,10 @@ In general, it's always a good idea to ask questions first — you can do so by 
 
 After running setup, and since this is a bazel repo you can use Bazel commands:
 
-```bazel
+```python
 bazel build //...:all
 bazel query //...:all
-bazel test //...:all
+bazel test  //...:all
 ```
 
 But to run tests inside each sub-WORKSPACE, you will need to repeat that in each sub-folder. Luckily, there is a better way.
@@ -1041,13 +1057,43 @@ The following are the partial linting functions you can run:
 bin/linter [ all | buildifier | help | rubocop ]
 ```
 
+### Regenerating README.pdf & Changelog
+
+To regenerate, first you may need to grab an [API token](https://github.com/settings/tokens) and export the `GITHUB_TOKEN` variable:
+
+```bash
+export GITHUB_TOKEN=....
+```
+
+Then use the `make` target:
+
+```bash
+make update
+```
+
+Or, manually:
+
+```bash
+gem install github_changelog_generator
+github_changelog_generator -u bazelruby -p rules_ruby -t your-github-token
+```
+
+
 ## Copyright
 
-© 2018-2019 Yuki Yugui Sonoda, Konstantin Gredeskoul, and BazelRuby Contributors
+© 2018-2021 BazelRuby Contributors.
 
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+Core Team:
 
-<http://www.apache.org/licenses/LICENSE-2.0>
+ * [Yuki Yugui Sonoda](https://github.com/yugui/)
+ * [Konstantin Gredeskoul](https://kig.re/)
+
+Core Team (Emeritus):
+
+ * [Graham Jenson](https://github.com/grahamjenson)
+
+Licensed under the [Apache License, Version 2.0 (the "License")](http://www.apache.org/licenses/LICENSE-2.0).
+
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
