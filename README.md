@@ -1,10 +1,6 @@
-# Rules Ruby Version 0.4.1
+# Rules Ruby Version 0.5.0
 
 This is the README for Ruby Rules for the [Bazel Build](https://bazel.build) system.
-
-## ATTENTION: Base Branch Change Announcement
-
-We recently switched from the base branch of `develop` to the base of `master`. Please update your local repos accordingly.
 
 ### Build Status
 
@@ -13,47 +9,13 @@ We recently switched from the base branch of `develop` to the base of `master`. 
 
 ![activity](https://img.shields.io/github/commit-activity/m/bazelruby/rules_ruby?style=for-the-badge) &nbsp;
 
-- [Rules Development Status](#rules-development-status)
-- [Usage](#usage)
-  - [`WORKSPACE` File](#workspace-file)
-    - [Load dependencies, select Ruby SDK and define one or more Bundles](#load-dependencies-select-ruby-sdk-and-define-one-or-more-bundles)
-  - [`BUILD.bazel` file(s)](#buildbazel-files)
-    - [Define Ruby Executable, Library and an RSpec](#define-ruby-executable-library-and-an-rspec)
-    - [Package Ruby files as a Gem](#package-ruby-files-as-a-gem)
-  - [Tool Specific Setup](#tool-specific-setup)
-    - [ASDF](#asdf)
-  - [Rule Dependency Diagram](#rule-dependency-diagram)
-- [Rules](#rules)
-  - [`ruby_library`](#ruby_library)
-  - [`ruby_binary`](#ruby_binary)
-  - [`ruby_test`](#ruby_test)
-  - [`ruby_bundle`](#ruby_bundle)
-    - [Limitations](#limitations)
-    - [Conventions](#conventions)
-    - [`WORKSPACE`:](#workspace)
-    - [`BUILD.bazel`:](#buildbazel)
-  - [`ruby_rspec`](#ruby_rspec)
-  - [`ruby_gem`](#ruby_gem)
-- [What's coming next](#whats-coming-next)
-- [Contributing](#contributing)
-  - [Setup](#setup)
-    - [Using the Script](#using-the-script)
-    - [OS-Specific Setup](#os-specific-setup)
-      - [Issues During Setup](#issues-during-setup)
-  - [Developing Rules](#developing-rules)
-  - [Running Tests](#running-tests)
-    - [Test Script](#test-script)
-  - [Linter](#linter)
-- [Copyright](#copyright)
-
-
 ### [Change Log](CHANGELOG.md)
 
-To regenerate:
+To regenerate, first you may need to grab an [API token](https://github.com/settings/tokens), and then:
 
 ```bash
 gem install github_changelog_generator
-github_changelog_generator -u bazelruby -p rules_ruby
+github_changelog_generator -u bazelruby -p rules_ruby -t your-github-token
 ```
 
 ## Rules Development Status
@@ -64,8 +26,41 @@ github_changelog_generator -u bazelruby -p rules_ruby
 | ![Wait](docs/img/status-wait.svg)           | medium-sized Ruby on Rails apps, ideally in a mono-repo      |
 | ![Not Ready](docs/img/status-not-ready.svg) | complex Ruby on Rails monoliths, single-repo                 |
 
-
 Note: we have a short guide on [Building your first Ruby Project](https://github.com/bazelruby/rules_ruby/wiki/Build-your-ruby-project) on the Wiki. We encourage you to check it out.
+
+
+## Table of Contents 
+
+<!-- @import "[TOC]" {cmd="toc" depthFrom=0 depthTo=3 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+- [Rules Ruby Version 0.5.0](#rules-ruby-version-050)
+    - [Build Status](#build-status)
+    - [Change Log](#change-logchangelogmd)
+  - [Rules Development Status](#rules-development-status)
+  - [Table of Contents](#table-of-contents)
+  - [Usage](#usage)
+    - [`WORKSPACE` File](#workspace-file)
+    - [`BUILD.bazel` file(s)](#buildbazel-files)
+    - [Tool Specific Setup](#tool-specific-setup)
+    - [Rule Dependency Diagram](#rule-dependency-diagram)
+  - [Rules](#rules)
+    - [`ruby_library`](#ruby_library)
+    - [`ruby_binary`](#ruby_binary)
+    - [`ruby_test`](#ruby_test)
+    - [`ruby_bundle`](#ruby_bundle)
+    - [`ruby_rspec`](#ruby_rspec)
+    - [`ruby_gem`](#ruby_gem)
+  - [What's coming next](#whats-coming-next)
+  - [Contributing](#contributing)
+    - [Setup](#setup)
+    - [Developing Rules](#developing-rules)
+    - [Running Tests](#running-tests)
+    - [Linter](#linter)
+  - [Copyright](#copyright)
+
+<!-- /code_chunk_output -->
 
 ## Usage
 
@@ -105,7 +100,7 @@ rules_ruby_dependencies()
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 bazel_skylib_workspace()
 
-rules_ruby_select_sdk(version = "2.7.1")
+rules_ruby_select_sdk(version = "3.0.1")
 
 #———————————————————————————————————————————————————————————————————————
 # Now, load the ruby_bundle rule & install gems specified in the Gemfile
@@ -192,7 +187,7 @@ Use `ruby_gem` rule to package any number of ruby files or folders into a Ruby-G
 ```bazel
 load(
     "@bazelruby_rules_ruby//ruby:defs.bzl",
-    "ruby_gem",    
+    "ruby_gem",
 )
 
 ruby_gem(
@@ -201,7 +196,7 @@ ruby_gem(
     gem_version     = "0.1.0",
     gem_summary     = "Example gem to demonstrate Bazel Gem packaging",
     gem_description = "Example gem to demonstrate Bazel Gem packaging",
-    gem_homepage    = "https://github.com/bazelruby/rules_ruby",    
+    gem_homepage    = "https://github.com/bazelruby/rules_ruby",
     gem_authors     = [
         "BazelRuby",
         "Konstantin Gredeskoul"
@@ -238,7 +233,8 @@ If you are using ASDF to manage your ruby installs, you can use them by adding `
 build --test_env=ASDF_DIR --test_env=ASDF_DATA_DIR
 build --action_env=ASDF_DIR --test_env=ASDF_DATA_DIR
 ```
-You will have to be sure to export the `ASDF_DATA_DIR` in your profile since it's not set by default. e.g. `export ASDF_DATA_DIR="$HOME/.asdf"` 
+
+You will have to be sure to export the `ASDF_DATA_DIR` in your profile since it's not set by default. e.g. `export ASDF_DATA_DIR="$HOME/.asdf"`
 
 ### Rule Dependency Diagram
 
@@ -254,19 +250,19 @@ The following diagram attempts to capture the implementation behind `ruby_librar
 
 ```bazel
 ruby_library(
-    name, 
-    deps, 
-    srcs, 
-    data, 
-    compatible_with, 
-    deprecation, 
-    distribs, 
-    features, 
-    licenses, 
-    restricted_to, 
-    tags, 
-    testonly, 
-    toolchains, 
+    name,
+    deps,
+    srcs,
+    data,
+    compatible_with,
+    deprecation,
+    distribs,
+    features,
+    licenses,
+    restricted_to,
+    tags,
+    testonly,
+    toolchains,
     visibility)
 ```
 
@@ -343,22 +339,22 @@ ruby_library(
 
 ```bazel
 ruby_binary(
-    name, 
-    deps, 
-    srcs, 
+    name,
+    deps,
+    srcs,
     data,
-    main, 
-    compatible_with, 
-    deprecation, 
-    distribs, 
-    features, 
-    licenses, 
-    restricted_to, 
-    tags, 
-    testonly,     
-    toolchains, 
-    visibility, 
-    args, 
+    main,
+    compatible_with,
+    deprecation,
+    distribs,
+    features,
+    licenses,
+    restricted_to,
+    tags,
+    testonly,
+    toolchains,
+    visibility,
+    args,
     output_licenses
 )
 ```
@@ -442,25 +438,25 @@ ruby_binary(
 
 ```bazel
 ruby_test(
-    name, 
-    deps, 
-    srcs, 
-    data, 
-    main, 
-    compatible_with, 
-    deprecation, 
-    distribs, 
-    features, 
-    licenses, 
-    restricted_to, 
-    tags, 
-    testonly, 
-    toolchains, 
-    visibility, 
-    args, 
-    size, 
-    timeout, 
-    flaky, 
+    name,
+    deps,
+    srcs,
+    data,
+    main,
+    compatible_with,
+    deprecation,
+    distribs,
+    features,
+    licenses,
+    restricted_to,
+    tags,
+    testonly,
+    toolchains,
+    visibility,
+    args,
+    size,
+    timeout,
+    flaky,
     local, shard_count)
 ```
 
@@ -547,10 +543,10 @@ This rule installs gems defined in a Gemfile using Bundler, and exports individu
 
 ```bazel
 ruby_bundle(
-    name, 
-    gemfile, 
-    gemfile_lock, 
-    bundler_version = "2.1.2",
+    name,
+    gemfile,
+    gemfile_lock,
+    bundler_version = "2.1.4",
     excludes = [],
     ruby_sdk = "@org_ruby_lang_ruby_toolchain",
     ruby_interpreter = "@org_ruby_lang_ruby_toolchain//:ruby",
@@ -596,7 +592,7 @@ ruby_bundle(
       <td><code>bundler_version</code></td>
       <td>
         <code>String, optional</code>
-          <p>The Version of Bundler to use. Defaults to 2.1.2.</p>
+          <p>The Version of Bundler to use. Defaults to 2.1.4.</p>
           <p>NOTE: This rule never updates the <code>Gemfile.lock</code>. It is your responsibility to generate/update <code>Gemfile.lock</code></p>
       </td>
     </tr>
@@ -611,10 +607,10 @@ Installing using a `Gemfile` that uses the `gemspec` keyword is not currently su
 
 `ruby_bundle` creates several targets that can be used downstream. In the examples below we assume that your `ruby_bundle` has a name `app_bundle`:
 
- * `@app_bundle//:bundler` — references just the Bundler from the bundle.
- * `@app_bundle//:gems` — references *all* gems in the bundle (i.e. "the entire bundle").
- * `@app_bundle//:gem-name` — references *just the specified* gem in the bundle, eg. `@app_bundle//:awesome_print`.
- * `@app_bundle//:bin` — references to all installed executables from this bundle, with individual executables accessible via eg. `@app_bundle//:bin/rubocop`
+- `@app_bundle//:bundler` — references just the Bundler from the bundle.
+- `@app_bundle//:gems` — references _all_ gems in the bundle (i.e. "the entire bundle").
+- `@app_bundle//:gem-name` — references _just the specified_ gem in the bundle, eg. `@app_bundle//:awesome_print`.
+- `@app_bundle//:bin` — references to all installed executables from this bundle, with individual executables accessible via eg. `@app_bundle//:bin/rubocop`
 
 #### `WORKSPACE`:
 
@@ -623,7 +619,7 @@ load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
 
 ruby_bundle(
     name = "gems",
-    bundler_version = '2.1.2',
+    bundler_version = '2.1.4',
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
 )
@@ -655,28 +651,28 @@ ruby_binary(
 
 ```bazel
 ruby_rspec(
-    name, 
-    deps, 
-    srcs, 
-    data, 
-    main, 
-    rspec_args, 
-    bundle, 
-    compatible_with, 
-    deprecation, 
-    distribs, 
-    features, 
-    licenses, 
-    restricted_to, 
-    tags, 
-    testonly, 
-    toolchains, 
-    visibility, 
-    args, 
-    size, 
-    timeout, 
-    flaky, 
-    local, 
+    name,
+    deps,
+    srcs,
+    data,
+    main,
+    rspec_args,
+    bundle,
+    compatible_with,
+    deprecation,
+    distribs,
+    features,
+    licenses,
+    restricted_to,
+    tags,
+    testonly,
+    toolchains,
+    visibility,
+    args,
+    size,
+    timeout,
+    flaky,
+    local,
     shard_count
 )
 ```
@@ -786,7 +782,6 @@ ruby_gem(
     data = data
 )
 ```
- 
 
 <table class="table table-condensed table-bordered table-params">
   <colgroup>
@@ -971,8 +966,8 @@ EXAMPLES:
 
 Note that the setup contains `os-specific` section. This is because there are two extension scripts:
 
- * `bin/setup-linux`
- * `bin/setup-darwin`
+- `bin/setup-linux`
+- `bin/setup-darwin`
 
 Those will install Bazel and everything else you need on either platform. In fact, we use the linux version on CI.
 
@@ -984,9 +979,10 @@ Those will install Bazel and everything else you need on either platform. In fac
 
 Besides making yourself familiar with the existing code, and [Bazel documentation on writing rules](https://docs.bazel.build/versions/master/skylark/concepts.html), you might want to follow this order:
 
-  1. Setup dev tools as described in the [setup](#Setup) section.
-  3. hack, hack, hack...
-  4. Make sure all tests pass — you can run a single command for that (but see more on it [below](#test-script).
+1. Setup dev tools as described in the [setup](#Setup) section.
+2. hack, hack, hack...
+3. Make sure all tests pass — you can run a single command for that (but see more on it [below](#test-script).
+
 
     ```bash
     bin/test-suite
@@ -994,10 +990,10 @@ Besides making yourself familiar with the existing code, and [Bazel documentatio
 
 OR you can run individual Bazel test commands from the inside.
 
-   * `bazel test //...`
-   * `cd examples/simple_script && bazel test //...`
+- `bazel test //...`
+- `cd examples/simple_script && bazel test //...`
 
-  4. Open a pull request in Github, and please be as verbose as possible in your description.
+4. Open a pull request in Github, and please be as verbose as possible in your description.
 
 In general, it's always a good idea to ask questions first — you can do so by creating an issue.
 
@@ -1047,7 +1043,7 @@ bin/linter [ all | buildifier | help | rubocop ]
 
 ## Copyright
 
-© 2018-2019 Yuki Yugui Sonoda & BazelRuby Authors
+© 2018-2019 Yuki Yugui Sonoda, Konstantin Gredeskoul, and BazelRuby Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
@@ -1056,44 +1052,3 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
-
-<!-- code_chunk_output -->
-
-    - [Build Status](#build-status)
-    - [Change Log](#change-logchangelogmd)
-- [ATTENTION: Base Branch Change Announcement](#attention-base-branch-change-announcement)
-  - [Build Status](#build-status)
-  - [Change Log](#change-log)
-- [Rules Development Status](#rules-development-status)
-- [Usage](#usage)
-  - [`WORKSPACE` File](#workspace-file)
-    - [Load dependencies, select Ruby SDK and define one or more Bundles](#load-dependencies-select-ruby-sdk-and-define-one-or-more-bundles)
-  - [`BUILD.bazel` file(s)](#buildbazel-files)
-    - [Define Ruby Executable, Library and an RSpec](#define-ruby-executable-library-and-an-rspec)
-    - [Package Ruby files as a Gem](#package-ruby-files-as-a-gem)
-  - [Rule Dependency Diagram](#rule-dependency-diagram)
-- [Rules](#rules)
-  - [`ruby_library`](#ruby_library)
-  - [`ruby_binary`](#ruby_binary)
-  - [`ruby_test`](#ruby_test)
-  - [`ruby_bundle`](#ruby_bundle)
-    - [Limitations](#limitations)
-    - [Conventions](#conventions)
-    - [`WORKSPACE`:](#workspace)
-    - [`BUILD.bazel`:](#buildbazel)
-  - [`ruby_rspec`](#ruby_rspec)
-  - [`ruby_gem`](#ruby_gem)
-- [What's coming next](#whats-coming-next)
-- [Contributing](#contributing)
-  - [Setup](#setup)
-    - [Using the Script](#using-the-script)
-    - [OS-Specific Setup](#os-specific-setup)
-      - [Issues During Setup](#issues-during-setup)
-  - [Developing Rules](#developing-rules)
-  - [Running Tests](#running-tests)
-    - [Test Script](#test-script)
-  - [Linter](#linter)
-- [Copyright](#copyright)
-
-<!-- /code_chunk_output -->

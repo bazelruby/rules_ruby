@@ -12,7 +12,7 @@
 set -e
 
 # shellcheck disable=SC1091
-source "bin/deps" 2>/dev/null 1>/dev/null
+source "bin/deps" 
 
 export SHELL_INIT="${HOME}/.bashrc"
 export BUNDLE_PATH="${BUNDLE_PATH:-${HOME}/.bundle/gems}"
@@ -21,10 +21,12 @@ export PATH="${HOME}/.rbenv/bin:${HOME}/.rbenv/shims:/usr/local/bin:/usr/bin:/bi
 export BAZEL_OPTS="--host_jvm_args=-Xmx500m --host_jvm_args=-Xms500m"
 export BAZEL_BUILD_OPTS="--curses=no --verbose_failures -j 30 --progress_report_interval=2"
 export BAZEL_TEST_OPTS="--verbose_failures --test_verbose_timeout_warnings --verbose_explanations"
-export RUBY_VERSION="$(__version.detect .ruby_version)"
+export RUBY_VERSION="$(__version.detect .ruby-version)"
 export BUNDLER_VERSION=$(gem.gemfile.bundler-version)
 export RULES_VERSION=$(__version.detect .rules_version)
 
+h3bg "RUBY_VERSION=${RUBY_VERSION}"
+ 
 export BashMatic__Expr="
   [[ -f ${SHELL_INIT} ]] && source ${SHELL_INIT};
   [[ -f ${HOME}/.bashmatic/init.sh ]] && source ${HOME}/.bashmatic/init.sh;
