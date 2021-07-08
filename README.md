@@ -22,10 +22,6 @@ Note: we have a short guide on [Building your first Ruby Project](https://github
 
 ## Table of Contents 
 
-<!-- @import "[TOC]" {cmd="toc" depthFrom=0 depthTo=3 orderedList=false} -->
-
-<!-- code_chunk_output -->
-
 - [Ruby Rules® for Bazel Build System](#ruby-rules-for-bazelhttpsbazelbuild-build-system)
   - [Build Status & Activity](#build-status-activity)
   - [Rules Development Status](#rules-development-status)
@@ -51,8 +47,6 @@ Note: we have a short guide on [Building your first Ruby Project](https://github
     - [Linter](#linter)
     - [Regenerating README.pdf & Changelog](#regenerating-readmepdf-changelog)
   - [Copyright](#copyright)
-
-<!-- /code_chunk_output -->
 
 ## Usage
 
