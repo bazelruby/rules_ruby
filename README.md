@@ -2,7 +2,7 @@
 
 > This repo is primarily maintained by [Konstantin Gredeskoul](https://github.com/kigster) and [Yuki "Yugui" Sonoda](https://github.com/yugui). We are both very busy and would really love more contributors to join the core team. If you are interested in developing Ruby Rules for Bazel, please submit a couple of PRs and then lets talk!
 
-### Build Status & Activity
+## Build Status & Activity
 
 | **CI Status**                               | **Activity & Documentation**                                    |
 | :------------------------------------------ | :----------------------------------------------------------- |
@@ -20,15 +20,10 @@
 
 Note: we have a short guide on [Building your first Ruby Project](https://github.com/bazelruby/rules_ruby/wiki/Build-your-ruby-project) on the Wiki. We encourage you to check it out.
 
-
 ## Table of Contents 
 
-<!-- @import "[TOC]" {cmd="toc" depthFrom=0 depthTo=3 orderedList=false} -->
-
-<!-- code_chunk_output -->
-
 - [Ruby Rules® for Bazel Build System](#ruby-rules-for-bazelhttpsbazelbuild-build-system)
-    - [Build Status & Activity](#build-status-activity)
+  - [Build Status & Activity](#build-status-activity)
   - [Rules Development Status](#rules-development-status)
   - [Table of Contents](#table-of-contents)
   - [Usage](#usage)
@@ -52,8 +47,6 @@ Note: we have a short guide on [Building your first Ruby Project](https://github
     - [Linter](#linter)
     - [Regenerating README.pdf & Changelog](#regenerating-readmepdf-changelog)
   - [Copyright](#copyright)
-
-<!-- /code_chunk_output -->
 
 ## Usage
 
@@ -560,7 +553,8 @@ ruby_bundle(
     gemfile_lock,
     bundler_version = "2.1.4",
     includes = {},
-    excludes = {},
+    excludes = [],
+    vendor_cache = False,
     ruby_sdk = "@org_ruby_lang_ruby_toolchain",
     ruby_interpreter = "@org_ruby_lang_ruby_toolchain//:ruby",
 )
@@ -600,6 +594,13 @@ ruby_bundle(
         <code>Label, required</code>
           <p>The <code>Gemfile.lock</code> which Bundler runs with.</p>
           <p>NOTE: This rule never updates the <code>Gemfile.lock</code>. It is your responsibility to generate/update <code>Gemfile.lock</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>vendor_cache</code></td>
+      <td>
+        <code>Bool, optional</code>
+          <p>Symlink the vendor directory into the Bazel build space, this allows Bundler to access vendored Gems</p>
       </td>
     </tr>
     <tr>
@@ -658,6 +659,28 @@ load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
 ruby_bundle(
     name = "gems",
     bundler_version = '2.1.4',
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+)
+```
+
+##### Vendor directory handling
+
+To use the vendor cache, you have to declare a `managed_directory` in
+your workspace. The name should match the name of the bundle.
+
+``` bazel
+load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
+
+workspace(
+    name = "my_wksp",
+    managed_directories = {"@bundle": ["vendor"]},
+)
+
+ruby_bundle(
+    name = "bundle",
+    bundler_version = "2.1.2",
+    vendor_cache = True,
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
 )
@@ -1138,6 +1161,5 @@ Core Team (Emeritus):
 Licensed under the [Apache License, Version 2.0 (the "License")](http://www.apache.org/licenses/LICENSE-2.0).
 
 
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
