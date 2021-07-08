@@ -19,6 +19,11 @@ local_repository(
     path = "ruby/tests/testdata/another_workspace",
 )
 
+local_repository(
+    name = "bazelruby_rules_ruby_ruby_tests_testdata_bundle_includes_workspace",
+    path = "ruby/tests/testdata/bundle_includes_workspace",
+)
+
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 

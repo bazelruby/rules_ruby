@@ -8,7 +8,7 @@ expected_gem_require_paths = [
 ]
 
 gem_require_paths = $LOAD_PATH.map do |load_path|
-  %r{.+script.runfiles/gems/lib/ruby/3.0.1/gems/google-protobuf-.+?/(.+)}.match(load_path).to_a[1]
+  %r{.+script.runfiles/(?:gems|bundle)/lib/ruby/3.0.0/gems/google-protobuf-.+?/(.+)}.match(load_path).to_a[1]
 end
 
 (expected_gem_require_paths - gem_require_paths).each do |missing_require_path|
