@@ -20,7 +20,7 @@
 
 Note: we have a short guide on [Building your first Ruby Project](https://github.com/bazelruby/rules_ruby/wiki/Build-your-ruby-project) on the Wiki. We encourage you to check it out.
 
-## Table of Contents 
+## Table of Contents
 
 - [Ruby Rules® for Bazel Build System](#ruby-rules-for-bazelhttpsbazelbuild-build-system)
   - [Build Status & Activity](#build-status-activity)
@@ -459,7 +459,7 @@ ruby_test(
     size,
     timeout,
     flaky,
-    local, 
+    local,
     shard_count
 )
 ```
@@ -553,7 +553,7 @@ ruby_bundle(
     gemfile_lock,
     bundler_version = "2.1.4",
     includes = {},
-    excludes = [],
+    excludes = {},
     vendor_cache = False,
     ruby_sdk = "@org_ruby_lang_ruby_toolchain",
     ruby_interpreter = "@org_ruby_lang_ruby_toolchain//:ruby",
