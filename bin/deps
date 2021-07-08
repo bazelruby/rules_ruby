@@ -16,6 +16,8 @@
 # shellcheck disable=SC1090
 source "${BASHMATIC_HOME}/init.sh" 1>/dev/null 2>&1
 
+command -v rbenv >/dev/null && eval "$(rbenv init -)"
+
 __version.detect() {
   local file="$1"
   if [[ -f ${file} ]]; then
@@ -32,7 +34,7 @@ __version.detect() {
 
 # Application Constants
 export RulesRuby__RulesVersion="$(__version.detect .rules_version)"
-export RulesRuby__RubyVersion="$(__version.detect .ruby_version)"
+export RulesRuby__RubyVersion="$(__version.detect .ruby-version)"
 export RulesRuby__BazelVersion="$(__version.detect .bazelversion)"
 
 bazel-sha() {

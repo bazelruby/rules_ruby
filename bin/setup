@@ -41,21 +41,26 @@ setup.rbenv() {
     fi
   fi
 
-  [[ -d "${rbenv_home}" && -f "${rbenv_home}/bin/rbenv" ]] || {
+  [[ -d "${rbenv_home}" && -n "$(command -v rbenv)" ]] || {
     if [[ -z ${CI} ]]; then
-      warning "You are on a local system without any RBENV..."
-      run.ui.ask "Are you sure you want to wipe your local ~/.rbenv?"
+      warning "You are on a local system without any RBENV..." \
+              "We are going to move your ~/.rbenv to a backup location and" \
+              "install it from scratch to ensure it is up to date."
+      run.ui.ask "Should we proceed with building a new Ruby and backing up your ~/.rbenv?"
     fi
 
-    warning "Recreating RBENV home, downloading rbenv..."
-    run "rm -rf ${rbenv_home}"
+    [[ -d ${rbenv_home} ]] && {
+      local rbenv_backup="${rbenv_home}.backup.$(time.now.db)"
+      info "Moving your current ${rbenv_home} to ${bldylw}${rbenv_backup}"
+      run "mv -v ${rbenv_home} ${rbenv_backup}"
+    }
     run "git clone https://github.com/rbenv/rbenv.git ${rbenv_home}"
     export PATH="${rbenv_home}/bin:${rbenv_home}/shims:${PATH}"
   }
 
   export PATH="${rbenv_home}/bin:${rbenv_home}/shims:${PATH}"
 
-  [[ $(which rbenv) == "${rbenv_home}/bin/rbenv" ]] || {
+  [[ $(command -v rbenv) == "${rbenv_home}/bin/rbenv" || $(command -v rbenv) == "/usr/local/bin/rbenv" ]] || {
     error "Can't find rbenv in the PATH — which rbenv returns: $(which rbenv)"
     error "PATH: ${PATH}"
     return 1
