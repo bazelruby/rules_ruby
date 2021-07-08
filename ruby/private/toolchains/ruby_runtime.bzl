@@ -3,9 +3,9 @@ load("//ruby/private/toolchains:repository_context.bzl", "ruby_repository_contex
 
 def _install_ruby_version(ctx, version):
     ctx.download_and_extract(
-        url = "https://github.com/rbenv/ruby-build/archive/v20210611.tar.gz",
-        sha256 = "dba3fd6722c007773ccef2c01cca454152d834f962754a85ae2c746b338f5772",
-        stripPrefix = "ruby-build-20210611",
+        url = "https://github.com/rbenv/ruby-build/archive/refs/tags/v20210707.tar.gz",
+        sha256 = "afd8aa2d05fb2f33c09c78dabcd2fc0bfa7e70dfc6b5288a1b5794337497039b",
+        stripPrefix = "ruby-build-20210707",
     )
 
     install_path = "./build"

@@ -4,7 +4,7 @@ load(":providers.bzl", "RubyLibraryInfo")
 RULES_RUBY_WORKSPACE_NAME = "@bazelruby_rules_ruby"
 TOOLCHAIN_TYPE_NAME = "%s//ruby:toolchain_type" % RULES_RUBY_WORKSPACE_NAME
 
-DEFAULT_BUNDLER_VERSION = "2.1.2"
+DEFAULT_BUNDLER_VERSION = "2.1.4"
 DEFAULT_RSPEC_ARGS = {"--format": "documentation", "--force-color": None}
 DEFAULT_RSPEC_GEMS = ["rspec", "rspec-its"]
 DEFAULT_BUNDLE_NAME = "@bundle//"
