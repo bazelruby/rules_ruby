@@ -33,14 +33,14 @@ GEM_TEMPLATE = <<~GEM_TEMPLATE
     srcs = glob(
       include = [
         ".bundle/config",
-        {gem_lib_dirs},
+        {gem_lib_files},
         "{gem_spec}",
         {gem_binaries}
       ],
       exclude = {exclude},
     ),
     deps = {deps},
-    includes = [{gem_lib_dirs}],
+    includes = [{gem_lib_paths}],
   )
 GEM_TEMPLATE
 
@@ -238,12 +238,12 @@ class BundleBuildFileGenerator
     base_dir = "lib/ruby/#{ruby_version}"
 
     # paths to register to $LOAD_PATH
-    # Usually, registering the directory paths listed in the `require_paths` of gemspecs is sufficient, but
-    # some rubygems also require additional paths to be included in the load paths.
     require_paths = Gem::StubSpecification.gemspec_stub(spec_path, base_dir, "#{base_dir}/gems").require_paths
+    # Usually, registering the directory paths listed in the `require_paths` of gemspecs is sufficient, but
+    # some gems also require additional paths to be included in the load paths.
     require_paths += include_array(spec.name)
-    gem_lib_dirs = require_paths.map { |require_path| File.join(gem_path, require_path) }
-    bundle_lib_paths += gem_lib_dirs
+    gem_lib_paths = require_paths.map { |require_path| File.join(gem_path, require_path) }
+    bundle_lib_paths.push(*gem_lib_paths)
 
     # paths to search for executables
     gem_binaries               = find_bundle_binaries(gem_path)
@@ -254,7 +254,8 @@ class BundleBuildFileGenerator
     warn("registering gem #{spec.name} with binaries: #{gem_binaries}") if bundle_binaries.key?(spec.name)
 
     template_out.puts GEM_TEMPLATE
-                        .gsub('{gem_lib_dirs}', to_flat_string(gem_lib_dirs))
+                        .gsub('{gem_lib_paths}', to_flat_string(gem_lib_paths))
+                        .gsub('{gem_lib_files}', to_flat_string(gem_lib_paths.map { |p| "#{p}/**/*" }))
                         .gsub('{gem_spec}', spec_path)
                         .gsub('{gem_binaries}', to_flat_string(gem_binaries))
                         .gsub('{exclude}', exclude_array(spec.name).to_s)
