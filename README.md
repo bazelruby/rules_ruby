@@ -100,6 +100,8 @@ load(
 ruby_bundle(
     name = "bundle",
     # Specify additional paths to be loaded from the gems at runtime, if any.
+    # Since spec.require_paths in Gem specifications are auto-included, directory paths
+    # in spec.require_paths do not need to be listed in includes hash.
     includes = {
         "grpc": ["etc"],
     },
