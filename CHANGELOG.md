@@ -1,5 +1,31 @@
 # Changelog
 
+## [v0.5.2](https://github.com/bazelruby/rules_ruby/tree/v0.5.2) (2021-07-09)
+
+[Full Changelog](https://github.com/bazelruby/rules_ruby/compare/v0.5.1...v0.5.2)
+
+**Closed issues:**
+
+- require\_paths attribute does not work [\#97](https://github.com/bazelruby/rules_ruby/issues/97)
+- google-protobuf and grpc gems fail [\#86](https://github.com/bazelruby/rules_ruby/issues/86)
+- Ruby Gem isn't including generated files [\#85](https://github.com/bazelruby/rules_ruby/issues/85)
+
+**Merged pull requests:**
+
+- Add `includes` option to `ruby_bundle` rule for per-gem load path customization [\#102](https://github.com/bazelruby/rules_ruby/pull/102) ([mmizutani](https://github.com/mmizutani))
+
+## [v0.5.1](https://github.com/bazelruby/rules_ruby/tree/v0.5.1) (2021-07-08)
+
+[Full Changelog](https://github.com/bazelruby/rules_ruby/compare/v0.5.0...v0.5.1)
+
+**Closed issues:**
+
+- `ruby_bundle` should support local gems [\#62](https://github.com/bazelruby/rules_ruby/issues/62)
+
+**Merged pull requests:**
+
+- feat: Support mapping the vendor cache from workspace [\#92](https://github.com/bazelruby/rules_ruby/pull/92) ([russell](https://github.com/russell))
+
 ## [v0.5.0](https://github.com/bazelruby/rules_ruby/tree/v0.5.0) (2021-07-08)
 
 [Full Changelog](https://github.com/bazelruby/rules_ruby/compare/v0.4.1...v0.5.0)
