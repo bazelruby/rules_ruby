@@ -1,0 +1,35 @@
+workspace(name = "bazelruby_rules_ruby_ruby_tests_testdata_bundle_includes_workspace")
+
+local_repository(
+    name = "bazelruby_rules_ruby",
+    path = "../../../..",
+)
+
+load(
+    "@bazelruby_rules_ruby//ruby:deps.bzl",
+    "rules_ruby_dependencies",
+    "rules_ruby_select_sdk",
+)
+
+rules_ruby_dependencies()
+
+rules_ruby_select_sdk(version = "3.0.1")
+
+load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
+
+ruby_bundle(
+    name = "gems",
+    bundler_version = "2.2.21",
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock",
+    includes = {
+        # The gemspec of grpc gem lists ['src/ruby/bin', 'src/ruby/lib', 'src/ruby/pb'] as the `require_paths`. When installing
+        # pre-built versions of the gem using a package downloaded from rubygems.org, these paths are sufficient since the file
+        # `src/ruby/lib/grpc.rb` in the downloaded gem package does not `require` any file outside these directories.
+        # However, when installing grpc gem from source using Bundler, `src/ruby/lib/grpc.rb` in the source package does
+        # `require` 'etc/roots.pem', so the directory containing this `require`-d file also needs to be present in the `$LOAD_PATH`.
+        # Thus users have to manually add the 'etc' directory to the `$LOAD_PATH` using the `includes` option of `ruby_bundle` rule.
+        # The `includes` option of `ruby_bundle` rule is a means of workaround for such a peculiar situation.
+        "grpc": ["etc"],
+    },
+)

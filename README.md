@@ -20,7 +20,7 @@
 
 Note: we have a short guide on [Building your first Ruby Project](https://github.com/bazelruby/rules_ruby/wiki/Build-your-ruby-project) on the Wiki. We encourage you to check it out.
 
-## Table of Contents 
+## Table of Contents
 
 - [Ruby Rules® for Bazel Build System](#ruby-rules-for-bazelhttpsbazelbuild-build-system)
   - [Build Status & Activity](#build-status-activity)
@@ -99,6 +99,12 @@ load(
 
 ruby_bundle(
     name = "bundle",
+    # Specify additional paths to be loaded from the gems at runtime, if any.
+    # Since spec.require_paths in Gem specifications are auto-included, directory paths
+    # in spec.require_paths do not need to be listed in includes hash.
+    includes = {
+        "grpc": ["etc"],
+    },
     excludes = {
         "mini_portile": ["test/**/*"],
     },
@@ -200,7 +206,7 @@ ruby_gem(
         "rubocop": "",
     },
     srcs = [
-	 	glob("{bin,exe,lib,spec}/**/*.rb")
+        glob("{bin,exe,lib,spec}/**/*.rb")
     ],
     deps = [
         "//lib:example_gem",
@@ -224,7 +230,7 @@ You will have to be sure to export the `ASDF_DATA_DIR` in your profile since it'
 
 ### Rule Dependency Diagram
 
-> NOTE: this diagram is slightly outdated.
+> NOTE: this diagram is somewhat outdated.
 
 The following diagram attempts to capture the implementation behind `ruby_library` that depends on the result of `bundle install`, and a `ruby_binary` that depends on both:
 
@@ -447,7 +453,7 @@ ruby_test(
     size,
     timeout,
     flaky,
-    local, 
+    local,
     shard_count
 )
 ```
@@ -540,7 +546,8 @@ ruby_bundle(
     gemfile,
     gemfile_lock,
     bundler_version = "2.1.4",
-    excludes = [],
+    includes = {},
+    excludes = {},
     vendor_cache = False,
     ruby_sdk = "@org_ruby_lang_ruby_toolchain",
     ruby_interpreter = "@org_ruby_lang_ruby_toolchain//:ruby",
@@ -596,6 +603,29 @@ ruby_bundle(
         <code>String, optional</code>
           <p>The Version of Bundler to use. Defaults to 2.1.4.</p>
           <p>NOTE: This rule never updates the <code>Gemfile.lock</code>. It is your responsibility to generate/update <code>Gemfile.lock</code></p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>includes</code></td>
+      <td>
+        <code>Dictionary of key-value-pairs (key: string, value: list of strings), optional</code>
+        <p>
+          List of glob patterns per gem to be additionally loaded from the library.
+          Keys are the names of the gems which require some file/directory paths not listed in the <code>require_paths</code> attribute of the gemspecs to be also added to <code>$LOAD_PATH</code> at runtime.
+          Values are lists of blob path patterns, which are relative to the root directories of the gems.
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>excludes</code></td>
+      <td>
+        <code>Dictionary of key-value-pairs (key: string, value: list of strings), optional</code>
+        <p>
+          List of glob patterns per gem to be excluded from the library.
+          Keys are the names of the gems.
+          Values are lists of blob path patterns, which are relative to the root directories of the gems.
+          The default value is <code>["**/* *.*", "**/* */*"]</code>
+        </p>
       </td>
     </tr>
   </tbody>
@@ -857,17 +887,17 @@ ruby_gem(
     <tr>
       <td><code>gem_description</code></td>
       <td>
-        <code>String, required</code>      
+        <code>String, required</code>
         <p>Single-line, paragraph-sized description text for the gem.</p>
       </td>
     </tr>
     <tr>
       <td><code>gem_homepage</code></td>
       <td>
-        <code>String, optional</code>      
+        <code>String, optional</code>
         <p>Homepage URL of the gem.</p>
       </td>
-    </tr>    
+    </tr>
     <tr>
       <td><code>gem_authors</code></td>
       <td>
@@ -886,7 +916,7 @@ ruby_gem(
           List of email addresses of the authors.
         </p>
       </td>
-    </tr>    
+    </tr>
     <tr>
       <td><code>srcs</code></td>
       <td>
@@ -917,7 +947,7 @@ ruby_gem(
           Typically this value is just `lib` (which is also the default).
         </p>
       </td>
-    </tr>    
+    </tr>
     <tr>
       <td><code>gem_runtime_dependencies</code></td>
       <td>
@@ -938,8 +968,8 @@ ruby_gem(
         testing gems, linters, code coverage and more.
         </p>
       </td>
-    </tr>    
-    
+    </tr>
+
   </tbody>
 </table>
 
@@ -972,13 +1002,14 @@ After that, cd into the top level folder and run the setup script in your Termin
 This runs a complete setup, shouldn't take too long. You can explore various script options with the `help` command:
 
 ```bash
-❯ bin/setup help
+❯ bin/setup -h
+
 USAGE
   # without any arguments runs a complete setup.
   bin/setup
 
   # alternatively, a sub-setup function name can be passed:
-  bin/setup [ gems | git-hook | help | os-specific | main | remove-git-hook ]
+  bin/setup [ gems | git-hook | help | main | os-specific | rbenv | remove-git-hook ]
 
 DESCRIPTION:
   Runs full setup without any arguments.
@@ -988,7 +1019,13 @@ DESCRIPTION:
   This action removes the git commit hook installed by the setup.
 
 EXAMPLES:
-    bin/setup — runs the entire setup.
+    bin/setup
+
+  Or, to run only one of the sub-functions (actions), pass
+  it as an argument:
+
+    bin/setup help
+    bin/setup remove-git-hook
 ```
 
 #### OS-Specific Setup

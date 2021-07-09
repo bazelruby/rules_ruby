@@ -85,6 +85,9 @@ BUNDLE_ATTRS = {
     "bundler_version": attr.string(
         default = DEFAULT_BUNDLER_VERSION,
     ),
+    "includes": attr.string_list_dict(
+        doc = "List of glob patterns per gem to be additionally loaded from the library",
+    ),
     "excludes": attr.string_list_dict(
         doc = "List of glob patterns per gem to be excluded from the library",
     ),
