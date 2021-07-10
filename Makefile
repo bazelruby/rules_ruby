@@ -33,16 +33,11 @@ update-changelog: 		## Auto-generate the doc/CHANGELOG (requires GITHUB_TOKEN en
 				@bash -c "$(BASHMATIC_HOME)/bin/regen-changelog"
 
 update-readme:			## Generate the PDF version of the README
-				@printf "\n$(bold)  👉    $(red)$(clear)  $(green)Converting README.md into the ASCIIDOC...$(clear)\n"
-				@bash -c "command -v kramdoc || gem install kramdoc; kramdoc README.md"
 				@rm -fv README.pdf
 				@printf "\n$(bold)  👉    $(red)$(clear)  $(green)Converting ASCIIDOC into the PDF...$(clear)\n"
-				@mv README.adoc .readme.adoc
-				@cat .readme .readme.adoc | sed -E "s/source,bazel/source,python/g; s/%VERSION%/$(RULES_VERSION)/g" > README.adoc
 				@$(BASHMATIC_HOME)/bin/adoc2pdf README.adoc 
 				@git add README.pdf
 				@open README.pdf
-
 
 tag:				## Tag this commit with .rules_version and push to remote
 				@git tag "v$(RULES_VERSION)" -f
