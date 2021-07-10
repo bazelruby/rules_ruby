@@ -58,10 +58,24 @@ ALL_GEMS = <<~ALL_GEMS
   )
 ALL_GEMS
 
+# For ordinary gems, this path is like 'lib/ruby/3.0.0/gems/rspec-3.10.0'.
+# For gems with native extension installed via prebuilt packages, the last part of this path can
+# contain an OS-specific suffix like 'grpc-1.38.0-universal-darwin' or 'grpc-1.38.0-x86_64-linux' 
+# instead of 'grpc-1.38.0'.
+# 
+# Since OS platform is unlikely to change between Bazel builds on the same machine, 
+# `#{gem_name}-#{gem_version}*` would be sufficient to narrow down matches to at most one.
 GEM_PATH = ->(ruby_version, gem_name, gem_version) do
   Dir.glob("lib/ruby/#{ruby_version}/gems/#{gem_name}-#{gem_version}*").first
 end
 
+# For ordinary gems, this path is like 'lib/ruby/3.0.0/specifications/rspec-3.10.0.gemspec'.
+# For gems with native extension installed via prebuilt packages, the last part of this path can
+# contain an OS-specific suffix like 'grpc-1.38.0-universal-darwin.gemspec' or 
+# 'grpc-1.38.0-x86_64-linux.gemspec' instead of 'grpc-1.38.0.gemspec'.
+#
+# Since OS platform is unlikely to change between Bazel builds on the same machine,
+# `#{gem_name}-#{gem_version}*.gemspec` would be sufficient to narrow down matches to at most one.
 SPEC_PATH = ->(ruby_version, gem_name, gem_version) do
   Dir.glob("lib/ruby/#{ruby_version}/specifications/#{gem_name}-#{gem_version}*.gemspec").first
 end
