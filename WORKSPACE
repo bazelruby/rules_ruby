@@ -110,3 +110,9 @@ ruby_bundle(
 load("@rules_pkg//:deps.bzl", "rules_pkg_dependencies")
 
 rules_pkg_dependencies()
+
+# Load custom toolchains.
+load("//toolchains:REPOSITORIES.bzl", "toolchain_dependencies")
+
+toolchain_dependencies()
+
