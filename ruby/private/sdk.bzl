@@ -9,15 +9,20 @@ def rules_ruby_select_sdk(version = "host"):
     supported_versions = [
         "host",
         "2.5.8",
+        "2.5.9",
         "2.6.3",
         "2.6.4",
         "2.6.5",
         "2.6.6",
         "2.6.7",
+        "2.6.8",
         "2.7.1",
         "2.7.2",
+        "2.7.3",
+        "2.7.4",
         "3.0.0",
         "3.0.1",
+        "3.0.2",
     ]
 
     if version in supported_versions:
