@@ -4,4 +4,4 @@ source 'https://rubygems.org'
 
 gem 'rspec', '~> 3.7.0'
 gem 'rspec-its'
-gem 'rubocop', '~> 0.78.0'
+gem 'rubocop'

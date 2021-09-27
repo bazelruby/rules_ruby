@@ -11,5 +11,6 @@ ruby_binary(
     main = "script.rb",
     deps = [
         "@gems//:grpc",
+        "@gems//:awesome_print",
     ],
 )

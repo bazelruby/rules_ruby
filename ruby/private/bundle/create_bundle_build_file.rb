@@ -60,10 +60,10 @@ ALL_GEMS
 
 # For ordinary gems, this path is like 'lib/ruby/3.0.0/gems/rspec-3.10.0'.
 # For gems with native extension installed via prebuilt packages, the last part of this path can
-# contain an OS-specific suffix like 'grpc-1.38.0-universal-darwin' or 'grpc-1.38.0-x86_64-linux' 
+# contain an OS-specific suffix like 'grpc-1.38.0-universal-darwin' or 'grpc-1.38.0-x86_64-linux'
 # instead of 'grpc-1.38.0'.
-# 
-# Since OS platform is unlikely to change between Bazel builds on the same machine, 
+#
+# Since OS platform is unlikely to change between Bazel builds on the same machine,
 # `#{gem_name}-#{gem_version}*` would be sufficient to narrow down matches to at most one.
 GEM_PATH = ->(ruby_version, gem_name, gem_version) do
   Dir.glob("lib/ruby/#{ruby_version}/gems/#{gem_name}-#{gem_version}*").first
@@ -71,7 +71,7 @@ end
 
 # For ordinary gems, this path is like 'lib/ruby/3.0.0/specifications/rspec-3.10.0.gemspec'.
 # For gems with native extension installed via prebuilt packages, the last part of this path can
-# contain an OS-specific suffix like 'grpc-1.38.0-universal-darwin.gemspec' or 
+# contain an OS-specific suffix like 'grpc-1.38.0-universal-darwin.gemspec' or
 # 'grpc-1.38.0-x86_64-linux.gemspec' instead of 'grpc-1.38.0.gemspec'.
 #
 # Since OS platform is unlikely to change between Bazel builds on the same machine,
@@ -154,8 +154,7 @@ class Buildifier
       puts 'Buildifier gave 👍 '.green + (output ? " and said: #{output}" : '')
     else
       raise BuildifierFailedError,
-            'Generated BUILD file failed buildifier, with error — '.red + "\n\n" +
-            output.yellow
+            "Generated BUILD file failed buildifier, with error:\n\n#{output.yellow}\n\n".red
     end
   end
 end
@@ -178,8 +177,7 @@ class BundleBuildFileGenerator
                  build_file: 'BUILD.bazel',
                  gemfile_lock: 'Gemfile.lock',
                  includes: nil,
-                 excludes: nil,
-                 additional_require_paths: nil)
+                 excludes: nil)
     @workspace_name = workspace_name
     @repo_name      = repo_name
     @build_file     = build_file
@@ -294,7 +292,7 @@ class BundleBuildFileGenerator
     end.flatten
       .compact
       .sort
-      .map { |binary| 'bin/' + binary }
+      .map { |binary| "bin/#{binary}" }
   end
 
   def include_array(gem_name)

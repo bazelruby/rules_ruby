@@ -5,7 +5,7 @@ jobs:
     working_directory: /home/circleci/repo
     resource_class: medium
     docker:
-      - image: bazelruby/ruby-3.0.1
+      - image: bazelruby/ruby-3.0.2
     environment:
       PATH: "/usr/local/bin:/usr/bin:/sbin:/opt/bin:/home/circleci/repo/bin:/bin:/sbin:/usr/sbin"
       BUNDLE_PATH: /home/circleci/.bundle_cache
@@ -24,7 +24,7 @@ jobs:
       - run:
           name: Install Bundler
           command: |
-            gem install bundler:2.0.2 --no-doc
+            gem install bundler:2.2.28 --no-doc
             bundle install --jobs=4 --retry=3 --path ${BUNDLE_PATH}
 
       - run:

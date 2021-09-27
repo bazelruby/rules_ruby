@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    awesome_print (1.9.2)
     google-protobuf (3.17.3)
     googleapis-common-protos-types (1.1.0)
       google-protobuf (~> 3.14)
@@ -12,7 +13,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  awesome_print
   grpc
 
 BUNDLED WITH
-   2.2.22
+   2.2.28

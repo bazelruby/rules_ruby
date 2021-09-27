@@ -15,7 +15,6 @@
 
 # shellcheck disable=SC1090
 source "${BASHMATIC_HOME}/init.sh" 1>/dev/null 2>&1
-
 command -v rbenv >/dev/null && eval "$(rbenv init -)"
 
 __version.detect() {
