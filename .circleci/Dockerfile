@@ -98,4 +98,4 @@ RUN curl -L -o /usr/bin/bazel https://github.com/bazelbuild/bazelisk/releases/do
 USER circleci
 ENV PATH /home/circleci/.local/bin:/home/circleci/bin:/usr/local/bin:/usr/bin:/bin:/sbin:${PATH}
 
-CMD ["/bin/sh"]
+CMD ["/bin/bash"]
