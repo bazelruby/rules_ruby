@@ -10,6 +10,7 @@
 :icons: font
 :license: apache
 
+
 ====
 This repo is primarily maintained by https://github.com/kigster[Konstantin Gredeskoul] and https://github.com/yugui[Yuki "Yugui" Sonoda]. We are both very busy and would really love more contributors to join the core team. If you are interested in developing Ruby Rules for Bazel, please submit a couple of PRs and then lets talk!
 ====
@@ -55,9 +56,7 @@ NOTE: we have a short guide on https://github.com/bazelruby/rules_ruby/wiki/Buil
  ** <<table-of-contents,Table of Contents>>
  ** <<usage,Usage>>
   *** <<workspace-file,`WORKSPACE` File>>
-  *** <<buildbazel-files,`BUILD.bazel` file(s)>>
-  *** <<tool-specific-setup,Tool Specific Setup>>
-  *** <<rule-dependency-diagram,Rule Dependency Diagram>>
+  *** <<buildbazel-files,`BUILD.bazel` file(s)>> *** <<tool-specific-setup,Tool Specific Setup>> *** <<rule-dependency-diagram,Rule Dependency Diagram>>
  ** <<rules,Rules>>
   *** <<ruby_library,`ruby_library`>>
   *** <<ruby_binary,`ruby_binary`>>
