@@ -32,6 +32,8 @@ def _relativate(path):
     # TODO(yugui) support windows
     if path.startswith("/"):
         return path[1:]
+    elif path.startswith("C:/"):
+        return path[3:]
     else:
         return path
 
