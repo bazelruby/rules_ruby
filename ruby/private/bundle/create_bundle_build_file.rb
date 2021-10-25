@@ -176,14 +176,14 @@ class BundleBuildFileGenerator
   def initialize(workspace_name:,
                  repo_name:,
                  build_file: 'BUILD.bazel',
-                 gemfile_lock: 'Gemfile.lock',
+                 gemfile: 'Gemfile',
                  includes: nil,
                  excludes: nil,
                  additional_require_paths: nil)
     @workspace_name = workspace_name
     @repo_name      = repo_name
     @build_file     = build_file
-    @gemfile_lock   = gemfile_lock
+    @gemfile_lock   = "#{gemfile}.lock"
     @includes       = includes
     @excludes       = excludes
     # This attribute returns 0 as the third minor version number, which happens to be
@@ -313,14 +313,14 @@ end
 # ruby ./create_bundle_build_file.rb "BUILD.bazel" "Gemfile.lock" "repo_name" "{}" "{}" "wsp_name"
 if $0 == __FILE__
   if ARGV.length != 6
-    warn("USAGE: #{$0} BUILD.bazel Gemfile.lock repo-name {includes-json} {excludes-json} workspace-name".orange)
+    warn("USAGE: #{$0} BUILD.bazel Gemfile repo-name {includes-json} {excludes-json} workspace-name".orange)
     exit(1)
   end
 
-  build_file, gemfile_lock, repo_name, includes, excludes, workspace_name, * = *ARGV
+  build_file, gemfile, repo_name, includes, excludes, workspace_name, * = *ARGV
 
   BundleBuildFileGenerator.new(build_file:     build_file,
-                               gemfile_lock:   gemfile_lock,
+                               gemfile:        gemfile,
                                repo_name:      repo_name,
                                includes:       JSON.parse(includes),
                                excludes:       JSON.parse(excludes),

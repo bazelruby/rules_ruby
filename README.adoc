@@ -506,7 +506,7 @@ A unique name for this rule.
 The `Gemfile` which Bundler runs with.
 
 |`gemfile_lock` a|
-`Label, required`
+`Label, optional`
 
 The `Gemfile.lock` which Bundler runs with.
 

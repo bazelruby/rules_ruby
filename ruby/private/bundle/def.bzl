@@ -115,17 +115,19 @@ def install_bundler(runtime_ctx, bundler_version):
 
 def bundle_install(runtime_ctx, previous_result):
     cwd = runtime_ctx.ctx.path(".")
+    bundler_args = [
+        "install",
+        "--binstubs={}".format(cwd.get_child(BUNDLE_BIN_PATH)),
+        "--path={}".format(cwd.get_child(BUNDLE_PATH)),
+        "--standalone",
+        "--gemfile={}".format(runtime_ctx.ctx.attr.gemfile.name),
+    ]
+    if runtime_ctx.ctx.attr.gemfile_lock:
+        bundler_args += ["--deployment", "--frozen"]
+
     result = run_bundler(
         runtime_ctx,
-        [
-            "install",
-            "--binstubs={}".format(cwd.get_child(BUNDLE_BIN_PATH)),
-            "--path={}".format(cwd.get_child(BUNDLE_PATH)),
-            "--deployment",
-            "--standalone",
-            "--frozen",
-            "--gemfile={}".format(runtime_ctx.ctx.attr.gemfile.name)
-        ],
+        bundler_args,
         previous_result,
     )
 
@@ -144,7 +146,7 @@ def generate_bundle_build_file(runtime_ctx, previous_result):
         "bundler/lib",
         SCRIPT_BUILD_FILE_GENERATOR,  # The template used to created bundle file
         "BUILD.bazel",  # Bazel build file (can be empty)
-        runtime_ctx.ctx.attr.gemfile_lock.name,  # Gemfile.lock where we list all direct and transitive dependencies
+        runtime_ctx.ctx.attr.gemfile.name,  # Gemfile -> Gemfile.lock where we list all direct and transitive dependencies
         runtime_ctx.ctx.name,  # Name of the target
         repr(runtime_ctx.ctx.attr.includes),
         repr(runtime_ctx.ctx.attr.excludes),
@@ -157,7 +159,8 @@ def generate_bundle_build_file(runtime_ctx, previous_result):
 
 def _ruby_bundle_impl(ctx):
     ctx.symlink(ctx.attr.gemfile, ctx.attr.gemfile.name)
-    ctx.symlink(ctx.attr.gemfile_lock, ctx.attr.gemfile_lock.name)
+    if ctx.attr.gemfile_lock:
+        ctx.symlink(ctx.attr.gemfile_lock, ctx.attr.gemfile_lock.name)
     if ctx.attr.vendor_cache:
         ctx.symlink(
             ctx.path(str(ctx.path(ctx.attr.gemfile).dirname) + "/vendor"),
