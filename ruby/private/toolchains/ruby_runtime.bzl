@@ -47,6 +47,9 @@ def _list_libdirs(ruby):
 def _install_dirs(ctx, ruby, *names):
     paths = sorted([ruby.rbconfig(ruby, name) for name in names])
 
+    # JRuby reports some of the directories as nulls.
+    paths = [path for path in paths if path]
+
     # Sometimes we end up with the same directory multiple times
     # so make sure paths are unique by converting it to set.
     # For example, this is what we have on Fedora 34:
