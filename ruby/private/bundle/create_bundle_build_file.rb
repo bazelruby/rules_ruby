@@ -247,6 +247,9 @@ class BundleBuildFileGenerator
   end
 
   def register_gem(spec, template_out, bundle_lib_paths, bundle_binaries)
+    # Do not register local gems
+    return if spec.source.path?
+
     gem_path = GEM_PATH[ruby_version, spec.name, spec.version]
     spec_path = SPEC_PATH[ruby_version, spec.name, spec.version]
     base_dir = "lib/ruby/#{ruby_version}"
