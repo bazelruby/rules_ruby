@@ -65,8 +65,10 @@ ALL_GEMS
 #
 # Since OS platform is unlikely to change between Bazel builds on the same machine,
 # `#{gem_name}-#{gem_version}*` would be sufficient to narrow down matches to at most one.
+#
+# Library path differs across implementations as `lib/ruby` on MRI and `lib/jruby` on JRuby.
 GEM_PATH = ->(ruby_version, gem_name, gem_version) do
-  Dir.glob("lib/ruby/#{ruby_version}/gems/#{gem_name}-#{gem_version}*").first
+  Dir.glob("lib/#{RbConfig::CONFIG['RUBY_INSTALL_NAME']}/#{ruby_version}/gems/#{gem_name}-#{gem_version}*").first
 end
 
 # For ordinary gems, this path is like 'lib/ruby/3.0.0/specifications/rspec-3.10.0.gemspec'.
@@ -76,8 +78,10 @@ end
 #
 # Since OS platform is unlikely to change between Bazel builds on the same machine,
 # `#{gem_name}-#{gem_version}*.gemspec` would be sufficient to narrow down matches to at most one.
+#
+# Library path differs across implementations as `lib/ruby` on MRI and `lib/jruby` on JRuby.
 SPEC_PATH = ->(ruby_version, gem_name, gem_version) do
-  Dir.glob("lib/ruby/#{ruby_version}/specifications/#{gem_name}-#{gem_version}*.gemspec").first
+  Dir.glob("lib/#{RbConfig::CONFIG['RUBY_INSTALL_NAME']}/#{ruby_version}/specifications/#{gem_name}-#{gem_version}*.gemspec").first
 end
 
 require 'bundler'
