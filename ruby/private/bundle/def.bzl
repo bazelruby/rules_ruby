@@ -137,6 +137,11 @@ def bundle_install(runtime_ctx, previous_result):
         return result
 
 def generate_bundle_build_file(runtime_ctx, previous_result):
+    if runtime_ctx.ctx.attr.gemfile_lock:
+        gemfile_lock = runtime_ctx.ctx.attr.gemfile_lock.name
+    else:
+        gemfile_lock = "{}.lock".format(runtime_ctx.ctx.attr.gemfile.name)
+
     # Create the BUILD file to expose the gems to the WORKSPACE
     # USAGE: ./create_bundle_build_file.rb BUILD.bazel Gemfile.lock repo-name [excludes-json] workspace-name
     args = [
@@ -146,7 +151,7 @@ def generate_bundle_build_file(runtime_ctx, previous_result):
         "bundler/lib",
         SCRIPT_BUILD_FILE_GENERATOR,  # The template used to created bundle file
         "BUILD.bazel",  # Bazel build file (can be empty)
-        runtime_ctx.ctx.attr.gemfile.name,  # Gemfile -> Gemfile.lock where we list all direct and transitive dependencies
+        gemfile_lock,  # Gemfile.lock where we list all direct and transitive dependencies
         runtime_ctx.ctx.name,  # Name of the target
         repr(runtime_ctx.ctx.attr.includes),
         repr(runtime_ctx.ctx.attr.excludes),
