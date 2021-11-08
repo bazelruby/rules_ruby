@@ -2,5 +2,5 @@
 
 source 'https://rubygems.org'
 
-gem 'grpc'
 gem 'awesome_print'
+gem 'grpc'

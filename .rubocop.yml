@@ -1,4 +1,8 @@
-inherit_from: .relaxed-rubocop-2.4.yml
+inherit_from:
+  - .rubocop_todo.yml
+  - .relaxed-rubocop-2.4.yml
+
+
 
 AllCops:
   TargetRubyVersion: 2.6
