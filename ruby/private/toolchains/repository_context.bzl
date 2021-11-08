@@ -45,6 +45,8 @@ def ruby_repository_context(repository_ctx, interpreter_path):
     rel_interpreter_path = str(interpreter_path)
     if rel_interpreter_path.startswith("/"):
         rel_interpreter_path = rel_interpreter_path[1:]
+    elif rel_interpreter_path.startswith("C:/"):
+        rel_interpreter_path = rel_interpreter_path[3:]
 
     return struct(
         # Location of the interpreter

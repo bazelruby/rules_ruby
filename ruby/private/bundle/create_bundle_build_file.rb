@@ -60,24 +60,28 @@ ALL_GEMS
 
 # For ordinary gems, this path is like 'lib/ruby/3.0.0/gems/rspec-3.10.0'.
 # For gems with native extension installed via prebuilt packages, the last part of this path can
-# contain an OS-specific suffix like 'grpc-1.38.0-universal-darwin' or 'grpc-1.38.0-x86_64-linux' 
+# contain an OS-specific suffix like 'grpc-1.38.0-universal-darwin' or 'grpc-1.38.0-x86_64-linux'
 # instead of 'grpc-1.38.0'.
-# 
-# Since OS platform is unlikely to change between Bazel builds on the same machine, 
+#
+# Since OS platform is unlikely to change between Bazel builds on the same machine,
 # `#{gem_name}-#{gem_version}*` would be sufficient to narrow down matches to at most one.
+#
+# Library path differs across implementations as `lib/ruby` on MRI and `lib/jruby` on JRuby.
 GEM_PATH = ->(ruby_version, gem_name, gem_version) do
-  Dir.glob("lib/ruby/#{ruby_version}/gems/#{gem_name}-#{gem_version}*").first
+  Dir.glob("lib/#{RbConfig::CONFIG['RUBY_INSTALL_NAME']}/#{ruby_version}/gems/#{gem_name}-#{gem_version}*").first
 end
 
 # For ordinary gems, this path is like 'lib/ruby/3.0.0/specifications/rspec-3.10.0.gemspec'.
 # For gems with native extension installed via prebuilt packages, the last part of this path can
-# contain an OS-specific suffix like 'grpc-1.38.0-universal-darwin.gemspec' or 
+# contain an OS-specific suffix like 'grpc-1.38.0-universal-darwin.gemspec' or
 # 'grpc-1.38.0-x86_64-linux.gemspec' instead of 'grpc-1.38.0.gemspec'.
 #
 # Since OS platform is unlikely to change between Bazel builds on the same machine,
 # `#{gem_name}-#{gem_version}*.gemspec` would be sufficient to narrow down matches to at most one.
+#
+# Library path differs across implementations as `lib/ruby` on MRI and `lib/jruby` on JRuby.
 SPEC_PATH = ->(ruby_version, gem_name, gem_version) do
-  Dir.glob("lib/ruby/#{ruby_version}/specifications/#{gem_name}-#{gem_version}*.gemspec").first
+  Dir.glob("lib/#{RbConfig::CONFIG['RUBY_INSTALL_NAME']}/#{ruby_version}/specifications/#{gem_name}-#{gem_version}*.gemspec").first
 end
 
 require 'bundler'
@@ -247,6 +251,9 @@ class BundleBuildFileGenerator
   end
 
   def register_gem(spec, template_out, bundle_lib_paths, bundle_binaries)
+    # Do not register local gems
+    return if spec.source.path?
+
     gem_path = GEM_PATH[ruby_version, spec.name, spec.version]
     spec_path = SPEC_PATH[ruby_version, spec.name, spec.version]
     base_dir = "lib/ruby/#{ruby_version}"
