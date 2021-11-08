@@ -1,5 +1,4 @@
 #include <ruby/ruby.h>
-#include <ruby/core/rbasic.h>
 
 static VALUE show_version(VALUE self) {
   ruby_show_version();
