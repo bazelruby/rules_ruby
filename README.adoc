@@ -143,8 +143,16 @@ ruby_bundle(
 # You can specify more than one bundle in the WORKSPACE file
 ruby_bundle(
     name = "bundle_app_shopping",
-    gemfile = "//apps/shopping:Gemfile",
-    gemfile_lock = "//apps/shopping:Gemfile.lock",
+    gemfile = "//:apps/shopping/Gemfile",
+    gemfile_lock = "//:apps/shopping/Gemfile.lock",
+)
+
+# You can also install from Gemfile using `gemspec`.
+ruby_bundle(
+    name = "bundle_gemspec",
+    srcs = ["//:lib/my_gem/my_gem.gemspec"],
+    gemfile = "//:lib/my_gem/Gemfile",
+    gemfile_lock = "//:lib/my_gem/Gemfile.lock",
 )
 ----
 
@@ -477,6 +485,7 @@ ruby_bundle(
     bundler_version = "2.1.4",
     includes = {},
     excludes = {},
+    srcs = [],
     vendor_cache = False,
     ruby_sdk = "@org_ruby_lang_ruby_toolchain",
     ruby_interpreter = "@org_ruby_lang_ruby_toolchain//:ruby",
@@ -497,11 +506,16 @@ A unique name for this rule.
 The `Gemfile` which Bundler runs with.
 
 |`gemfile_lock` a|
-`Label, required`
+`Label, optional`
 
 The `Gemfile.lock` which Bundler runs with.
 
 NOTE: This rule never updates the `Gemfile.lock`. It is your responsibility to generate/update `Gemfile.lock`
+
+|`srcs` a|
+`List of Labels, optional`
+
+List of additional files required for Bundler to install gems. This could usually include `*.gemspec` files.
 
 |`vendor_cache` a|
 `Bool, optional`
@@ -528,10 +542,6 @@ List of glob patterns per gem to be excluded from the library. Keys are the name
 2+<|And other https://docs.bazel.build/versions/master/be/common-definitions.html#common-attributes[common attributes].
 |===
 
-
-==== Limitations
-
-Installing using a `Gemfile` that uses the `gemspec` keyword is not currently supported.
 
 ==== Conventions
 

@@ -114,16 +114,20 @@ def install_bundler(runtime_ctx, bundler_version):
     )
 
 def bundle_install(runtime_ctx, previous_result):
+    cwd = runtime_ctx.ctx.path(".")
+    bundler_args = [
+        "install",
+        "--binstubs={}".format(cwd.get_child(BUNDLE_BIN_PATH)),
+        "--path={}".format(cwd.get_child(BUNDLE_PATH)),
+        "--standalone",
+        "--gemfile={}".format(runtime_ctx.ctx.attr.gemfile.name),
+    ]
+    if runtime_ctx.ctx.attr.gemfile_lock:
+        bundler_args += ["--deployment", "--frozen"]
+
     result = run_bundler(
         runtime_ctx,
-        [
-            "install",
-            "--binstubs={}".format(BUNDLE_BIN_PATH),
-            "--path={}".format(BUNDLE_PATH),
-            "--deployment",
-            "--standalone",
-            "--frozen",
-        ],
+        bundler_args,
         previous_result,
     )
 
@@ -133,6 +137,11 @@ def bundle_install(runtime_ctx, previous_result):
         return result
 
 def generate_bundle_build_file(runtime_ctx, previous_result):
+    if runtime_ctx.ctx.attr.gemfile_lock:
+        gemfile_lock = runtime_ctx.ctx.attr.gemfile_lock.name
+    else:
+        gemfile_lock = "{}.lock".format(runtime_ctx.ctx.attr.gemfile.name)
+
     # Create the BUILD file to expose the gems to the WORKSPACE
     # USAGE: ./create_bundle_build_file.rb BUILD.bazel Gemfile.lock repo-name [excludes-json] workspace-name
     args = [
@@ -142,7 +151,7 @@ def generate_bundle_build_file(runtime_ctx, previous_result):
         "bundler/lib",
         SCRIPT_BUILD_FILE_GENERATOR,  # The template used to created bundle file
         "BUILD.bazel",  # Bazel build file (can be empty)
-        "Gemfile.lock",  # Gemfile.lock where we list all direct and transitive dependencies
+        gemfile_lock,  # Gemfile.lock where we list all direct and transitive dependencies
         runtime_ctx.ctx.name,  # Name of the target
         repr(runtime_ctx.ctx.attr.includes),
         repr(runtime_ctx.ctx.attr.excludes),
@@ -154,8 +163,9 @@ def generate_bundle_build_file(runtime_ctx, previous_result):
         fail("build file generation failed: %s%s" % (result.stdout, result.stderr))
 
 def _ruby_bundle_impl(ctx):
-    ctx.symlink(ctx.attr.gemfile, "Gemfile")
-    ctx.symlink(ctx.attr.gemfile_lock, "Gemfile.lock")
+    ctx.symlink(ctx.attr.gemfile, ctx.attr.gemfile.name)
+    if ctx.attr.gemfile_lock:
+        ctx.symlink(ctx.attr.gemfile_lock, ctx.attr.gemfile_lock.name)
     if ctx.attr.vendor_cache:
         ctx.symlink(
             ctx.path(str(ctx.path(ctx.attr.gemfile).dirname) + "/vendor"),
@@ -163,6 +173,8 @@ def _ruby_bundle_impl(ctx):
         )
     ctx.symlink(ctx.attr._create_bundle_build_file, SCRIPT_BUILD_FILE_GENERATOR)
     ctx.symlink(ctx.attr._install_bundler, SCRIPT_INSTALL_GEM)
+    for src in ctx.attr.srcs:
+        ctx.symlink(src, src.name)
 
     bundler_version = ctx.attr.bundler_version
 

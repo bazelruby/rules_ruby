@@ -32,6 +32,8 @@ def _relativate(path):
     # TODO(yugui) support windows
     if path.startswith("/"):
         return path[1:]
+    elif path.startswith("C:/"):
+        return path[3:]
     else:
         return path
 
@@ -44,6 +46,19 @@ def _list_libdirs(ruby):
 
 def _install_dirs(ctx, ruby, *names):
     paths = sorted([ruby.rbconfig(ruby, name) for name in names])
+
+    # JRuby reports some of the directories as nulls.
+    paths = [path for path in paths if path]
+
+    # Sometimes we end up with the same directory multiple times
+    # so make sure paths are unique by converting it to set.
+    # For example, this is what we have on Fedora 34:
+    # $ ruby -rrbconfig -e "p RbConfig::CONFIG['rubyhdrdir']"
+    # "/usr/include"
+    # $ ruby -rrbconfig -e "p RbConfig::CONFIG['rubyarchhdrdir']"
+    # "/usr/include"
+    paths = depset(paths).to_list()
+
     rel_paths = [_relativate(path) for path in paths]
     for i, (path, rel_path) in enumerate(zip(paths, rel_paths)):
         if not _is_subpath(path, paths[:i]):
