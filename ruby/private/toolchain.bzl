@@ -11,13 +11,15 @@ RubyRuntimeInfo = provider(
 )
 
 def _ruby_toolchain_impl(ctx):
-    return [platform_common.ToolchainInfo(
-        ruby_runtime = RubyRuntimeInfo(
-            interpreter = ctx.attr.interpreter,
-            runtime = ctx.files.runtime,
-            rubyopt = ctx.attr.rubyopt,
+    return [
+        platform_common.ToolchainInfo(
+            ruby_runtime = RubyRuntimeInfo(
+                interpreter = ctx.attr.interpreter,
+                runtime = ctx.files.runtime,
+                rubyopt = ctx.attr.rubyopt,
+            ),
         ),
-    )]
+    ]
 
 _ruby_toolchain = rule(
     implementation = _ruby_toolchain_impl,

@@ -10,7 +10,7 @@ ruby_binary(
     srcs = ["script.rb"],
     main = "script.rb",
     deps = [
-        "@gems//:grpc",
         "@gems//:awesome_print",
+        "@gems//:grpc",
     ],
 )
