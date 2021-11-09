@@ -158,8 +158,7 @@ class Buildifier
       puts 'Buildifier gave 👍 '.green + (output ? " and said: #{output}" : '')
     else
       raise BuildifierFailedError,
-            'Generated BUILD file failed buildifier, with error — '.red + "\n\n" +
-            output.yellow
+            "Generated BUILD file failed buildifier, with error:\n\n#{output.yellow}\n\n".red
     end
   end
 end
@@ -182,8 +181,7 @@ class BundleBuildFileGenerator
                  build_file: 'BUILD.bazel',
                  gemfile_lock: 'Gemfile.lock',
                  includes: nil,
-                 excludes: nil,
-                 additional_require_paths: nil)
+                 excludes: nil)
     @workspace_name = workspace_name
     @repo_name      = repo_name
     @build_file     = build_file
@@ -301,7 +299,7 @@ class BundleBuildFileGenerator
     end.flatten
       .compact
       .sort
-      .map { |binary| 'bin/' + binary }
+      .map { |binary| "bin/#{binary}" }
   end
 
   def include_array(gem_name)

@@ -1,7 +1,7 @@
 #
 # rules_ruby circleci Docker file.
 #
-FROM ruby:3.0.1
+FROM ruby:3.0.2
 
 # make Apt non-interactive
 RUN echo 'APT::Get::Assume-Yes "true";' > /etc/apt/apt.conf.d/90circleci \
@@ -95,7 +95,10 @@ RUN apt-get install -y openjdk-11-jdk python2.7 python3 golang-go
 RUN curl -L -o /usr/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.3.0/bazelisk-linux-amd64 \
     && sudo chmod +x /usr/bin/bazel
 
+RUN cd /usr/bin && ln -s python3 python
+
 USER circleci
 ENV PATH /home/circleci/.local/bin:/home/circleci/bin:/usr/local/bin:/usr/bin:/bin:/sbin:${PATH}
 
-CMD ["/bin/sh"]
+
+CMD ["/bin/bash"]

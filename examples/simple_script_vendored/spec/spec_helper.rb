@@ -11,9 +11,13 @@
 #    it is invoked by rpsec/autorun. So #warn_with raises an exception
 # 5. The process fails with an unhandled exception.
 
-ENV['HOME'] ||= '/'
+LIB = File.expand_path(File.dirname(__dir__))
+$LOAD_PATH.unshift(LIB) unless $LOAD_PATH.include?(LIB)
 
-require 'rspec'
+ENV["HOME"] ||= "/"
+
+require "rspec"
+require "script"
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
