@@ -1,12 +1,12 @@
 # Changelog
 
-## [v0.5.2](https://github.com/bazelruby/rules_ruby/tree/v0.5.2) (2021-11-09)
-
-[Full Changelog](https://github.com/bazelruby/rules_ruby/compare/v0.6.0...v0.5.2)
-
 ## [v0.6.0](https://github.com/bazelruby/rules_ruby/tree/v0.6.0) (2021-11-09)
 
-[Full Changelog](https://github.com/bazelruby/rules_ruby/compare/v0.5.1...v0.6.0)
+[Full Changelog](https://github.com/bazelruby/rules_ruby/compare/v0.5.2...v0.6.0)
+
+## [v0.5.2](https://github.com/bazelruby/rules_ruby/tree/v0.5.2) (2021-11-09)
+
+[Full Changelog](https://github.com/bazelruby/rules_ruby/compare/v0.5.1...v0.5.2)
 
 **Closed issues:**
 
