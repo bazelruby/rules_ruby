@@ -4,7 +4,15 @@
 
 [Full Changelog](https://github.com/bazelruby/rules_ruby/compare/v0.5.2...v0.6.0)
 
-## [v0.5.2](https://github.com/bazelruby/rules_ruby/tree/v0.5.2) (2021-11-09)
+**Merged pull requests:**
+
+- Bump nokogiri from 1.11.7 to 1.12.5 in /examples/simple\_rails\_api [\#120](https://github.com/bazelruby/rules_ruby/pull/120) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Upstream changes from Selenium's fork [\#118](https://github.com/bazelruby/rules_ruby/pull/118) ([p0deje](https://github.com/p0deje))
+- Bump puma from 4.3.8 to 4.3.9 in /examples/simple\_rails\_api [\#117](https://github.com/bazelruby/rules_ruby/pull/117) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump nokogiri from 1.11.7 to 1.12.5 in /examples/simple\_rails\_api [\#116](https://github.com/bazelruby/rules_ruby/pull/116) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump Ruby primary to 3.0.2 & Add sdk versions: 2.5.9, 2.6.8, 2.7.3, 2.7.4, 3.0.2 [\#114](https://github.com/bazelruby/rules_ruby/pull/114) ([kigster](https://github.com/kigster))
+
+## [v0.5.2](https://github.com/bazelruby/rules_ruby/tree/v0.5.2) (2021-07-09)
 
 [Full Changelog](https://github.com/bazelruby/rules_ruby/compare/v0.5.1...v0.5.2)
 
@@ -16,11 +24,6 @@
 
 **Merged pull requests:**
 
-- Bump nokogiri from 1.11.7 to 1.12.5 in /examples/simple\_rails\_api [\#120](https://github.com/bazelruby/rules_ruby/pull/120) ([dependabot[bot]](https://github.com/apps/dependabot))
-- Upstream changes from Selenium's fork [\#118](https://github.com/bazelruby/rules_ruby/pull/118) ([p0deje](https://github.com/p0deje))
-- Bump puma from 4.3.8 to 4.3.9 in /examples/simple\_rails\_api [\#117](https://github.com/bazelruby/rules_ruby/pull/117) ([dependabot[bot]](https://github.com/apps/dependabot))
-- Bump nokogiri from 1.11.7 to 1.12.5 in /examples/simple\_rails\_api [\#116](https://github.com/bazelruby/rules_ruby/pull/116) ([dependabot[bot]](https://github.com/apps/dependabot))
-- Bump Ruby primary to 3.0.2 & Add sdk versions: 2.5.9, 2.6.8, 2.7.3, 2.7.4, 3.0.2 [\#114](https://github.com/bazelruby/rules_ruby/pull/114) ([kigster](https://github.com/kigster))
 - Add `includes` option to `ruby_bundle` rule for per-gem load path customization [\#102](https://github.com/bazelruby/rules_ruby/pull/102) ([mmizutani](https://github.com/mmizutani))
 
 ## [v0.5.1](https://github.com/bazelruby/rules_ruby/tree/v0.5.1) (2021-07-08)
