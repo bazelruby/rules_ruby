@@ -252,12 +252,23 @@ class BundleBuildFileGenerator
     # Do not register local gems
     return if spec.source.path?
 
-    gem_path = GEM_PATH[ruby_version, spec.name, spec.version]
-    spec_path = SPEC_PATH[ruby_version, spec.name, spec.version]
-    base_dir = "lib/ruby/#{ruby_version}"
+    if spec.source.is_a?(Bundler::Source::Git)
+      stub = spec.source.specs.find { |s| s.name == spec.name }.stub
+      base_dir = "lib/ruby/#{ruby_version}"
+      gem_path = "#{base_dir}/bundler/gems/#{Pathname(stub.full_gem_path).relative_path_from(stub.base_dir)}"
+      spec_path = "#{base_dir}/bundler/gems/#{Pathname(stub.loaded_from).relative_path_from(stub.base_dir)}"
 
-    # paths to register to $LOAD_PATH
-    require_paths = Gem::StubSpecification.gemspec_stub(spec_path, base_dir, "#{base_dir}/gems").require_paths
+      # paths to register to $LOAD_PATH
+      require_paths = stub.require_paths
+    else
+      gem_path = GEM_PATH[ruby_version, spec.name, spec.version]
+      spec_path = SPEC_PATH[ruby_version, spec.name, spec.version]
+      base_dir = "lib/ruby/#{ruby_version}"
+
+      # paths to register to $LOAD_PATH
+      require_paths = Gem::StubSpecification.gemspec_stub(spec_path, base_dir, "#{base_dir}/gems").require_paths
+    end
+
     # Usually, registering the directory paths listed in the `require_paths` of gemspecs is sufficient, but
     # some gems also require additional paths to be included in the load paths.
     require_paths += include_array(spec.name)
