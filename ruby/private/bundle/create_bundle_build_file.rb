@@ -44,6 +44,15 @@ GEM_TEMPLATE = <<~GEM_TEMPLATE
   )
 GEM_TEMPLATE
 
+GEM_GROUP = <<~GEM_GROUP
+
+  ruby_library(
+    name = "{group_name}_group",
+    deps = {group_gems}
+  )
+
+GEM_GROUP
+
 ALL_GEMS = <<~ALL_GEMS
   ruby_library(
     name = "gems",
@@ -211,7 +220,14 @@ class BundleBuildFileGenerator
     bundle_lib_paths = []
     bundle_binaries  = {} # gem-name => [ gem's binaries ], ...
     gems             = bundle.specs.map(&:name)
-
+    bundle_deps      = Bundler::Definition.build(gemfile_lock.chomp('.lock'), gemfile_lock, {}).dependencies
+    groups           = bundle_deps.map{|dep| dep.groups}.flatten.uniq
+    gems_by_group    = groups.map{ |g| {g => bundle_deps
+                               .select{|dep| dep.groups.include?(g)}
+                               .reject{|dep| dep.source.path? unless dep.source.nil?}
+                               .map(&:name)}
+                              }
+                             .reduce Hash.new, :merge
     bundle.specs.each { |spec| register_gem(spec, template_out, bundle_lib_paths, bundle_binaries) }
 
     template_out.puts ALL_GEMS
@@ -222,6 +238,13 @@ class BundleBuildFileGenerator
                         .gsub('{bundler_setup}', bundler_setup_require)
                         .gsub('{bundle_deps}', gems.map { |g| ":#{g}" }.to_s)
                         .gsub('{exclude}', DEFAULT_EXCLUDES.to_s)
+
+    gems_by_group.each do |key, value|
+      template_out.puts GEM_GROUP
+                          .gsub('{group_name}', key.to_s)
+                          .gsub('{group_gems}', value.map{|s| s.prepend ':' unless s.start_with? ':'}.compact.to_s)
+    end
+
 
     ::File.open(build_file, 'w') { |f| f.puts template_out.string }
   end
@@ -300,6 +323,10 @@ class BundleBuildFileGenerator
       .compact
       .sort
       .map { |binary| "bin/#{binary}" }
+  end
+
+  def gems_in_group(gems, group_name)
+    gems
   end
 
   def include_array(gem_name)
