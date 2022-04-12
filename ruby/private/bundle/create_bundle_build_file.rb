@@ -45,12 +45,10 @@ GEM_TEMPLATE = <<~GEM_TEMPLATE
 GEM_TEMPLATE
 
 GEM_GROUP = <<~GEM_GROUP
-
   ruby_library(
-    name = "{group_name}_group",
+    name = "gems_{group_name}_group",
     deps = {group_gems}
   )
-
 GEM_GROUP
 
 ALL_GEMS = <<~ALL_GEMS
@@ -91,6 +89,10 @@ end
 # Library path differs across implementations as `lib/ruby` on MRI and `lib/jruby` on JRuby.
 SPEC_PATH = ->(ruby_version, gem_name, gem_version) do
   Dir.glob("lib/#{RbConfig::CONFIG['RUBY_INSTALL_NAME']}/#{ruby_version}/specifications/#{gem_name}-#{gem_version}*.gemspec").first
+end
+
+EXTENSIONS_PATH = ->(ruby_version, gem_name, gem_version) do
+  Dir.glob("lib/#{RbConfig::CONFIG['RUBY_INSTALL_NAME']}/#{ruby_version}/extensions/*/#{gem_name}/**/*").first
 end
 
 require 'bundler'
