@@ -28,6 +28,7 @@ def rules_ruby_select_sdk(version = "host"):
         "3.0.3",
         "3.1.0",
         "3.1.1",
+        "3.1.2",
     ]
 
     if version in supported_versions:

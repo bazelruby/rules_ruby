@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# vim: ft=bash
 # —————————————————————————————————————————————————————————————————————————————————————
 # NOTE: These setup scripts rely on an open source BASH framework BashMatic.
 #       https://github.com/kigster/bashmatic
@@ -52,15 +53,14 @@ setup.xcode-tools() {
     info: "xcode-select tools are already installed."
   fi
 
-  info "Next command requires sudo privileges to accept XCode License"
-  run.set-next show-output-on
-  run "sudo xcodebuild -license accept"
+  info "Next command may require a sudo privileges to accept XCode License"
+  bin/xcode-accept
 }
 
 setup.bazel() {
   brew.package.is-installed bazelisk && 
-    brew.uninstall.package bazelisk && 
-      run "brew unlink bazel"
+    brew.uninstall.package bazelisk 1>/dev/null 2>/dev/null && 
+      run "brew unlink bazel 2>/dev/null || true"
     
   if __setup.is-bazelisk-installed && __setup.is-bazel-installed ; then
     info: "Bazel & bazelisk are already installed."
@@ -68,8 +68,6 @@ setup.bazel() {
     brew.install.packages bazel bazelisk
     run "brew link bazel || true"
   fi
-
-  
 }
 
 setup.darwin() {

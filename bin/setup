@@ -16,6 +16,8 @@
 
 source "bin/deps"
 
+export ruby_version="$(cat .ruby-version | tr -d '\n')"
+
 #—————————————————————————————————————————————————————————————————————————————————————————————————————————————
 # Private Functions
 #—————————————————————————————————————————————————————————————————————————————————————————————————————————————
@@ -30,8 +32,19 @@ __setup.actions() {
 #—————————————————————————————————————————————————————————————————————————————————————————————————————————————
 
 setup.rbenv() {
+  command -v rbenv >/dev/null || {
+    if [[ $(uname -s) == "Darwin" ]]; then
+      command -v brew>/dev/null || /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+      brew.install.packages rbenv ruby-build
+      brew.upgrade.packages rbenv ruby-build
+    else
+      setup.local-rbenv
+    fi
+  }
+}
+
+setup.local-rbenv() {
   local rbenv_home="${HOME}/.rbenv"
-  local ruby_version="$(cat .ruby-version | tr -d '\n')"
 
   if [[ -n $(command -v ruby) ]]; then
     local installed_version="$(ruby -e 'puts RUBY_VERSION' | tr -d '\n')"
@@ -65,9 +78,10 @@ setup.rbenv() {
     error "PATH: ${PATH}"
     return 1
   }
+}
 
-  # Set our current ruby version to the desired one, even if it's not yet there.
-  # This allows the next block to auto-detect it and skip the remainder.
+setup.ruby() {
+  run "rbenv install -s ${ruby_version}"
   run "rbenv global ${ruby_version} || true"
   # see if we even need to install anything:
   local ruby_sdk_marker="$(rbenv versions | grep "${ruby_version}" | cut -d ' ' -f 1)"
@@ -171,6 +185,7 @@ setup.main() {
     set +e
     h2 "Installing required development dependencies for working with rules_ruby and Bazel."
     setup.rbenv
+    setup.ruby
     setup.gems
     [[ -z ${CI} ]] && setup.git-hook
     setup.os-specific "$@"
