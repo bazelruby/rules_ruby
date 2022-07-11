@@ -12,7 +12,7 @@ echo
 
 set -x 
 
-docker build . -t bazelruby/ruby-$RUBY_VERSION
+docker build --platform linux/x86_64 . -t bazelruby/ruby-$RUBY_VERSION
 
 docker push       bazelruby/ruby-$RUBY_VERSION
 

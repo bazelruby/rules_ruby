@@ -92,7 +92,7 @@ RUN apt-get update && apt-get upgrade
 
 RUN apt-get install -y openjdk-11-jdk python2.7 python3 golang-go
 
-RUN curl -L -o /usr/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.3.0/bazelisk-linux-amd64 \
+RUN curl -L -o /usr/bin/bazel https://github.com/bazelbuild/bazelisk/releases/download/v1.12.0/bazelisk-linux-amd64 \
     && sudo chmod +x /usr/bin/bazel
 
 RUN cd /usr/bin && ln -s python3 python
