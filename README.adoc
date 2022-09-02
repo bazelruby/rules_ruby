@@ -92,13 +92,13 @@ load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 #———————————————————————————————————————————————————————————————————————
 
 git_repository(
-    name = "bazelruby_rules_ruby",
+    name = "rules_ruby",
     remote = "https://github.com/bazelruby/rules_ruby.git",
     branch = "master"
 )
 
 load(
-    "@bazelruby_rules_ruby//ruby:deps.bzl",
+    "@rules_ruby//ruby:deps.bzl",
     "rules_ruby_dependencies",
     "rules_ruby_select_sdk",
 )
@@ -120,7 +120,7 @@ rules_ruby_select_sdk(version = "3.0.2")
 #———————————————————————————————————————————————————————————————————————
 
 load(
-    "@bazelruby_rules_ruby//ruby:defs.bzl",
+    "@rules_ruby//ruby:defs.bzl",
     "ruby_bundle",
 )
 
@@ -170,7 +170,7 @@ Add `ruby_library`, `ruby_binary`, `ruby_rspec` or `ruby_test` into your `BUILD.
 #———————————————————————————————————————————————————————————————————————
 
 load(
-    "@bazelruby_rules_ruby//ruby:defs.bzl",
+    "@rules_ruby//ruby:defs.bzl",
     "ruby_binary",
     "ruby_library",
     "ruby_test",
@@ -215,7 +215,7 @@ Use `ruby_gem` rule to package any number of ruby files or folders into a Ruby-G
 [source,python]
 ----
 load(
-    "@bazelruby_rules_ruby//ruby:defs.bzl",
+    "@rules_ruby//ruby:defs.bzl",
     "ruby_gem",
 )
 
@@ -555,7 +555,7 @@ List of glob patterns per gem to be excluded from the library. Keys are the name
 
 [source,python]
 ----
-load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
+load("@rules_ruby//ruby:defs.bzl", "ruby_bundle")
 
 ruby_bundle(
     name = "gems",
@@ -572,7 +572,7 @@ your workspace. The name should match the name of the bundle.
 
 [source,python]
 ----
-load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
+load("@rules_ruby//ruby:defs.bzl", "ruby_bundle")
 
 workspace(
     name = "my_wksp",

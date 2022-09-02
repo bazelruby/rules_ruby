@@ -1,4 +1,4 @@
-load("@bazelruby_rules_ruby//ruby/private:binary.bzl", "ruby_binary")
+load("@rules_ruby//ruby/private:binary.bzl", "ruby_binary")
 
 # This wraps an rb_binary in a script that is executed from the workspace folder
 def rubocop(name, bin, deps):
@@ -9,7 +9,7 @@ def rubocop(name, bin, deps):
         deps = deps,
     )
 
-    runner = "@bazelruby_rules_ruby//ruby/private/rubocop:runner.sh.tpl"
+    runner = "@rules_ruby//ruby/private/rubocop:runner.sh.tpl"
     native.genrule(
         name = name,
         tools = [bin_name],

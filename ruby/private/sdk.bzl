@@ -1,5 +1,5 @@
 load(
-    "@bazelruby_rules_ruby//ruby/private/toolchains:ruby_runtime.bzl",
+    "@rules_ruby//ruby/private/toolchains:ruby_runtime.bzl",
     _ruby_runtime = "ruby_runtime",
 )
 

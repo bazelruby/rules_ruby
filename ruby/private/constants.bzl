@@ -1,7 +1,7 @@
 # Ruby Constants
 load(":providers.bzl", "RubyLibraryInfo")
 
-RULES_RUBY_WORKSPACE_NAME = "@bazelruby_rules_ruby"
+RULES_RUBY_WORKSPACE_NAME = "@rules_ruby"
 TOOLCHAIN_TYPE_NAME = "%s//ruby:toolchain_type" % RULES_RUBY_WORKSPACE_NAME
 
 DEFAULT_BUNDLER_VERSION = "2.1.4"

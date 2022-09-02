@@ -1,4 +1,4 @@
-workspace(name = "bazelruby_rules_ruby")
+workspace(name = "rules_ruby")
 
 load("@//ruby:deps.bzl", "rules_ruby_dependencies", "rules_ruby_select_sdk")
 
@@ -15,12 +15,12 @@ versions.check("3.4.1")
 rules_ruby_select_sdk("3.0.2")
 
 local_repository(
-    name = "bazelruby_rules_ruby_ruby_tests_testdata_another_workspace",
+    name = "rules_ruby_ruby_tests_testdata_another_workspace",
     path = "ruby/tests/testdata/another_workspace",
 )
 
 local_repository(
-    name = "bazelruby_rules_ruby_ruby_tests_testdata_bundle_includes_workspace",
+    name = "rules_ruby_ruby_tests_testdata_bundle_includes_workspace",
     path = "ruby/tests/testdata/bundle_includes_workspace",
 )
 
@@ -95,7 +95,7 @@ container_pull(
     repository = "library/ruby",
 )
 
-load("@bazelruby_rules_ruby//ruby:defs.bzl", "ruby_bundle")
+load("@rules_ruby//ruby:defs.bzl", "ruby_bundle")
 
 ruby_bundle(
     name = "bundle",

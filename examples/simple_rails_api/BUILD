@@ -1,5 +1,5 @@
 load(
-    "@bazelruby_rules_ruby//ruby:defs.bzl",
+    "@rules_ruby//ruby:defs.bzl",
     "ruby_binary",
 )
 
