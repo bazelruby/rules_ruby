@@ -3,17 +3,19 @@ load("//ruby/private/toolchains:repository_context.bzl", "ruby_repository_contex
 
 def _install_ruby_version(ctx, version):
     ctx.download_and_extract(
-        url = "https://github.com/rbenv/ruby-build/archive/refs/tags/v20220218.tar.gz",
-        sha256 = "35c82b13b7bc3713eee5615b0145c79fbbac32873f55f2ab796620d76970d8e3",
-        stripPrefix = "ruby-build-20220218",
+        url = "https://github.com/rbenv/ruby-build/archive/refs/tags/v20220825.tar.gz",
+        sha256 = "55d9363a27486e4ec9623985d7764c5cf8e59cafe58afcf666e81fa148dea2f0",
+        stripPrefix = "ruby-build-20220825",
     )
 
     install_path = "./build"
-    ctx.execute(
+    result = ctx.execute(
         ["./bin/ruby-build", "--verbose", version, install_path],
         quiet = False,
         timeout = 1600,  # massive timeout because this does a lot and is a beast
     )
+    if result.return_code:
+        fail("Ruby build failed: %s %s" % (result.stdout, result.stderr))
 
 def _is_subpath(path, ancestors):
     """Determines if path is a subdirectory of one of the ancestors"""
@@ -107,6 +109,9 @@ def host_ruby_is_correct_version(ctx, version):
         return False
 
     ruby_version = ctx.execute(["ruby", "-e", "print RUBY_VERSION"]).stdout
+    ruby_platform = ctx.execute(["ruby", "-e", "print RUBY_PLATFORM"]).stdout
+    if ruby_platform == "java":
+        ruby_version = "jruby-" + ruby_version
 
     have_ruby_version = (version == ruby_version)
 
@@ -124,7 +129,7 @@ def _ruby_runtime_impl(ctx):
         _install_ruby_version(ctx, version)
         interpreter_path = ctx.path("./build/bin/ruby")
 
-    if not interpreter_path:
+    if not interpreter_path or not interpreter_path.exists:
         fail(
             "Command 'ruby' not found. Set $PATH or specify interpreter_path",
             "interpreter_path",

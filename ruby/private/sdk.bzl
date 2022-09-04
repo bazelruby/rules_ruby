@@ -28,15 +28,22 @@ def rules_ruby_select_sdk(version = "host"):
         "3.0.3",
         "3.1.0",
         "3.1.1",
+        "jruby-9.2.21.0",
+        "jruby-9.3.6.0",
     ]
 
-    if version in supported_versions:
-        _ruby_runtime(
-            name = "org_ruby_lang_ruby_toolchain",
-            version = version,
-        )
-    else:
+    for v in sorted(supported_versions, reverse=True):
+        if v.startswith(version):
+            supported_version = v
+            break
+
+    if not supported_version:
         fail("rules_ruby_select_sdk: unsupported ruby version '%s' not in '%s'" % (version, supported_versions))
+
+    _ruby_runtime(
+        name = "org_ruby_lang_ruby_toolchain",
+        version = supported_version,
+    )
 
     native.register_toolchains(
         "@org_ruby_lang_ruby_toolchain//:toolchain",
