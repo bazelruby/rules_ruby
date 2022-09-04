@@ -38,6 +38,10 @@ RUBY_ATTRS = {
         allow_single_file = True,
         default = "binary_wrapper.tpl",
     ),
+    "_runner_template": attr.label(
+        allow_single_file = True,
+        default = "binary_runner.tpl",
+    ),
     "_misc_deps": attr.label_list(
         allow_files = True,
         default = ["@bazel_tools//tools/bash/runfiles"],

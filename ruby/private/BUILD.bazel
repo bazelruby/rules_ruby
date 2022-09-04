@@ -1,6 +1,7 @@
 exports_files(
     [
         "binary_wrapper.tpl",
+        "binary_runner.tpl",
     ],
     visibility = ["//visibility:public"],
 )
