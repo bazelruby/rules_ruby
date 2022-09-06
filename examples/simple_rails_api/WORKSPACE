@@ -7,15 +7,11 @@ local_repository(
     path = "../..",
 )
 
-load(
-    "@rules_ruby//ruby:deps.bzl",
-    "rules_ruby_dependencies",
-    "rules_ruby_select_sdk",
-)
-
+load("@rules_ruby//ruby:deps.bzl", "rules_ruby_dependencies")
 rules_ruby_dependencies()
 
-rules_ruby_select_sdk(version = "3.0.2")
+load("@rules_ruby//ruby:defs.bzl", "register_ruby_toolchain")
+register_ruby_toolchain(name = "ruby-3.0", version = "3.0.2")
 
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 

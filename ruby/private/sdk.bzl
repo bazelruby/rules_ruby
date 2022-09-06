@@ -3,11 +3,11 @@ load(
     _ruby_runtime = "ruby_runtime",
 )
 
-def rules_ruby_select_sdk(version = "host"):
+def register_ruby_toolchain(name, version = "system"):
     """Registers ruby toolchains in the WORKSPACE file."""
 
     supported_versions = [
-        "host",
+        "system",
         "2.5.8",
         "2.5.9",
         "2.6.3",
@@ -38,13 +38,21 @@ def rules_ruby_select_sdk(version = "host"):
             break
 
     if not supported_version:
-        fail("rules_ruby_select_sdk: unsupported ruby version '%s' not in '%s'" % (version, supported_versions))
+        fail("register_ruby_toolchain: unsupported ruby version '%s' not in '%s'" % (version, supported_versions))
 
     _ruby_runtime(
-        name = "org_ruby_lang_ruby_toolchain",
+        name = name,
+        version = supported_version,
+    )
+
+    _ruby_runtime(
+        name = "rules_ruby_default_toolchain",
         version = supported_version,
     )
 
     native.register_toolchains(
-        "@org_ruby_lang_ruby_toolchain//:toolchain",
+        "@%s//:toolchain" % name,
+    )
+    native.register_toolchains(
+        "@rules_ruby_default_toolchain//:toolchain",
     )

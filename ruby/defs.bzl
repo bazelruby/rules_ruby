@@ -7,6 +7,10 @@ load(
     _library = "ruby_library",
 )
 load(
+    "@rules_ruby//ruby/private:sdk.bzl",
+    _register_ruby_toolchain = "register_ruby_toolchain"
+)
+load(
     "@rules_ruby//ruby/private:binary.bzl",
     _binary = "ruby_binary",
     _test = "ruby_test",
@@ -31,6 +35,7 @@ load(
     _gemspec = "gemspec",
 )
 
+register_ruby_toolchain = _register_ruby_toolchain
 ruby_toolchain = _toolchain
 ruby_library = _library
 ruby_binary = _binary

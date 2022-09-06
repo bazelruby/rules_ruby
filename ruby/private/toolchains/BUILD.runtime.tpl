@@ -3,6 +3,7 @@ load(
     "ruby_library",
     "ruby_toolchain",
 )
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -44,6 +45,32 @@ filegroup(
             "WORKSPACE",
         ],
     ),
+)
+
+# Provide config settings to signal the ruby platform to downstream code.
+# This should never be overridden, and is determined automatically during the
+# creation of the toolchain.
+string_flag(
+    name = "internal_ruby_platform",
+    build_setting_default = "{platform}",
+    values = [
+        "ruby",
+        "jruby",
+    ],
+)
+
+config_setting(
+    name = "platform_jruby",
+    flag_values = {
+        ":internal_ruby_platform": "jruby",
+    },
+)
+
+config_setting(
+    name = "platform_ruby",
+    flag_values = {
+        ":internal_ruby_platform": "ruby",
+    },
 )
 
 # vim: set ft=bzl :

@@ -70,11 +70,8 @@ RSPEC_ATTRS.update(RUBY_ATTRS)
 RSPEC_ATTRS.update(_RSPEC_ATTRS)
 
 BUNDLE_ATTRS = {
-    "ruby_sdk": attr.string(
-        default = "@org_ruby_lang_ruby_toolchain",
-    ),
     "ruby_interpreter": attr.label(
-        default = "@org_ruby_lang_ruby_toolchain//:ruby",
+        default = "@rules_ruby_default_toolchain//:ruby",
     ),
     "gemfile": attr.label(
         allow_single_file = True,

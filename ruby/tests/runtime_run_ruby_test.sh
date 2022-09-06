@@ -1,2 +1,2 @@
 #!/bin/sh -e
-external/org_ruby_lang_ruby_toolchain/ruby_bin $*
+external/ruby-system/ruby_bin $*

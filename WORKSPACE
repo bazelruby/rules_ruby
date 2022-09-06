@@ -1,6 +1,6 @@
 workspace(name = "rules_ruby")
 
-load("@//ruby:deps.bzl", "rules_ruby_dependencies", "rules_ruby_select_sdk")
+load("@//ruby:deps.bzl", "rules_ruby_dependencies")
 
 rules_ruby_dependencies()
 
@@ -12,7 +12,9 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 
 versions.check("3.4.1")
 
-rules_ruby_select_sdk("3.0.2")
+load("@rules_ruby//ruby:defs.bzl", "register_ruby_toolchain")
+register_ruby_toolchain(name = "ruby-system")
+register_ruby_toolchain(name = "ruby-3.0", version = "3.0.2")
 
 local_repository(
     name = "rules_ruby_ruby_tests_testdata_another_workspace",

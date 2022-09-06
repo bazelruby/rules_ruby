@@ -101,7 +101,7 @@ def _install_ruby(ctx, ruby):
         shared_library = _relativate(shared_library),
     )
 
-def host_ruby_is_correct_version(ctx, version):
+def system_ruby_is_correct_version(ctx, version):
     interpreter_path = ctx.which("ruby")
 
     if not interpreter_path:
@@ -123,7 +123,7 @@ def host_ruby_is_correct_version(ctx, version):
 def _ruby_runtime_impl(ctx):
     # If the current version of ruby is correct use that
     version = ctx.attr.version
-    if version == "host" or host_ruby_is_correct_version(ctx, version):
+    if version == "system" or system_ruby_is_correct_version(ctx, version):
         interpreter_path = ctx.which("ruby")
     else:
         _install_ruby_version(ctx, version)
@@ -139,6 +139,12 @@ def _ruby_runtime_impl(ctx):
 
     installed = _install_ruby(ctx, ruby)
 
+    ruby_platform = ctx.execute(["ruby", "-e", "print RUBY_PLATFORM"]).stdout
+    if ruby_platform == "java":
+        ruby_platform = "jruby"
+    else:
+        ruby_platform = "ruby"
+
     ctx.template(
         "BUILD.bazel",
         ctx.attr._buildfile_template,
@@ -148,6 +154,7 @@ def _ruby_runtime_impl(ctx):
             "{static_library}": repr(installed.static_library),
             "{shared_library}": repr(installed.shared_library),
             "{rules_ruby_workspace}": RULES_RUBY_WORKSPACE_NAME,
+            "{platform}": ruby_platform,
         },
         executable = False,
     )
@@ -155,7 +162,7 @@ def _ruby_runtime_impl(ctx):
 ruby_runtime = repository_rule(
     implementation = _ruby_runtime_impl,
     attrs = {
-        "version": attr.string(default = "host"),
+        "version": attr.string(default = "system"),
         "_buildfile_template": attr.label(
             default = "%s//ruby/private/toolchains:BUILD.runtime.tpl" % (
                 RULES_RUBY_WORKSPACE_NAME

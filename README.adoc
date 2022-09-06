@@ -97,12 +97,7 @@ git_repository(
     branch = "master"
 )
 
-load(
-    "@rules_ruby//ruby:deps.bzl",
-    "rules_ruby_dependencies",
-    "rules_ruby_select_sdk",
-)
-
+load("@rules_ruby//ruby:deps.bzl", "rules_ruby_dependencies")
 rules_ruby_dependencies()
 
 #———————————————————————————————————————————————————————————————————————
@@ -113,7 +108,8 @@ rules_ruby_dependencies()
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 bazel_skylib_workspace()
 
-rules_ruby_select_sdk(version = "3.0.2")
+load("@rules_ruby//ruby:defs.bzl", "register_ruby_toolchain")
+register_ruby_toolchain(name = "ruby-3.0", version = "3.0.2")
 
 #———————————————————————————————————————————————————————————————————————
 # Now, load the ruby_bundle rule & install gems specified in the Gemfile
@@ -486,8 +482,7 @@ ruby_bundle(
     excludes = {},
     srcs = [],
     vendor_cache = False,
-    ruby_sdk = "@org_ruby_lang_ruby_toolchain",
-    ruby_interpreter = "@org_ruby_lang_ruby_toolchain//:ruby",
+    ruby_interpreter = "@ruby-system//:ruby",
 )
 ----
 
