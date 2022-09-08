@@ -1,0 +1,151 @@
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+load("@rules_ruby//ruby/private:runtime_alias.bzl",
+    _ruby_headers_alias = "ruby_headers_alias",
+    _ruby_runtime_alias = "ruby_runtime_alias",
+)
+
+package(default_visibility = ["//visibility:public"])
+
+toolchain_type(name = "toolchain_type")
+
+# Alias targets corresponding to whichever toolchain was resolved based on
+# the selected version.
+
+_ruby_runtime_alias(
+    name = "runtime",
+)
+
+_ruby_headers_alias(
+    name = "headers",
+    runtime = ":runtime",
+)
+
+# Supported ruby versions, which can be selected by flags.
+# For example: --@rules_ruby//ruby/runtime:version=jruby-9.3
+string_flag(
+    name = "version",
+    build_setting_default = "system",
+    values = [
+        "system",
+        "ruby-2.5",
+        "ruby-2.6",
+        "ruby-2.7",
+        "ruby-3.0",
+        "ruby-3.1",
+        "jruby-9.2",
+        "jruby-9.3",
+    ],
+)
+
+config_setting(
+    name = "config_system",
+    flag_values = { "version" : "system" },
+)
+
+config_setting(
+    name = "config_ruby-2.5.8",
+    flag_values = { "version" : "ruby-2.5" },
+)
+
+alias(
+    name = "config_ruby_25",
+    actual = ":config_ruby-2.5.8"
+)
+
+config_setting(
+    name = "config_ruby-2.6.8",
+    flag_values = { "version" : "ruby-2.6" },
+)
+
+alias(
+    name = "config_ruby_26",
+    actual = ":config_ruby-2.6.8"
+)
+
+config_setting(
+    name = "config_ruby-2.7.5",
+    flag_values = { "version" : "ruby-2.7" },
+)
+
+alias(
+    name = "config_ruby_27",
+    actual = ":config_ruby-2.7.5"
+)
+
+config_setting(
+    name = "config_ruby-3.0.3",
+    flag_values = { "version" : "ruby-3.0" },
+)
+
+alias(
+    name = "config_ruby_30",
+    actual = ":config_ruby-3.0.3"
+)
+
+config_setting(
+    name = "config_ruby-3.1.1",
+    flag_values = { "version" : "ruby-3.1" },
+)
+
+alias(
+    name = "config_ruby_31",
+    actual = ":config_ruby-3.1.1"
+)
+
+selects.config_setting_group(
+    name = "config_system_ruby",
+    match_all = [
+        ":config_system",
+        "//external:rules_ruby_system_jruby_implementation",
+    ],
+)
+
+selects.config_setting_group(
+    name = "config_ruby",
+    match_any = [
+        ":config_system_ruby",
+        ":config_ruby_25",
+        ":config_ruby_26",
+        ":config_ruby_27",
+        ":config_ruby_30",
+        ":config_ruby_31",
+    ],
+)
+
+config_setting(
+    name = "config_jruby-9.2.21.0",
+    flag_values = { "version" : "jruby-9.2" },
+)
+
+alias(
+    name = "config_jruby_92",
+    actual = ":config_jruby-9.2.21.0"
+)
+
+config_setting(
+    name = "config_jruby-9.3.6.0",
+    flag_values = { "version" : "jruby-9.3" },
+)
+
+alias(
+    name = "config_jruby_93",
+    actual = ":config_jruby-9.3.6.0"
+)
+
+selects.config_setting_group(
+    name = "config_system_jruby",
+    match_all = [
+        ":config_system",
+        "//external:rules_ruby_system_jruby_implementation",
+    ],
+)
+
+selects.config_setting_group(
+    name = "config_jruby",
+    match_any = [
+        ":config_system_jruby",
+        ":config_jruby_92",
+        ":config_jruby_93",
+    ],
+)

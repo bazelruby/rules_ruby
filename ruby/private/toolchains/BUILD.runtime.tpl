@@ -12,6 +12,10 @@ ruby_toolchain(
     interpreter = "//:ruby_bin",
     rules_ruby_workspace = "{rules_ruby_workspace}",
     runtime = "//:runtime",
+    headers = "//:headers",
+    target_settings = [
+        "{rules_ruby_workspace}//ruby/runtime:{setting}"
+    ],
     # TODO(yugui) Extract platform info from RbConfig
     # exec_compatible_with = [],
     # target_compatible_with = [],
@@ -51,8 +55,8 @@ filegroup(
 # This should never be overridden, and is determined automatically during the
 # creation of the toolchain.
 string_flag(
-    name = "internal_ruby_platform",
-    build_setting_default = "{platform}",
+    name = "internal_ruby_implementation",
+    build_setting_default = "{implementation}",
     values = [
         "ruby",
         "jruby",
@@ -60,16 +64,16 @@ string_flag(
 )
 
 config_setting(
-    name = "platform_jruby",
+    name = "jruby_implementation",
     flag_values = {
-        ":internal_ruby_platform": "jruby",
+        ":internal_ruby_implementation": "jruby",
     },
 )
 
 config_setting(
-    name = "platform_ruby",
+    name = "ruby_implementation",
     flag_values = {
-        ":internal_ruby_platform": "ruby",
+        ":internal_ruby_implementation": "ruby",
     },
 )
 

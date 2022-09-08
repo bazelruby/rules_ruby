@@ -71,7 +71,7 @@ RSPEC_ATTRS.update(_RSPEC_ATTRS)
 
 BUNDLE_ATTRS = {
     "ruby_interpreter": attr.label(
-        default = "@rules_ruby_default_toolchain//:ruby",
+        default = "//external:rules_ruby_system_interpreter",
     ),
     "gemfile": attr.label(
         allow_single_file = True,
@@ -155,3 +155,15 @@ GEMSPEC_ATTRS = {
         default = "%s//ruby/private/gemspec:readme_template.tpl" % RULES_RUBY_WORKSPACE_NAME,
     ),
 }
+
+SUPPORTED_VERSIONS = [
+    "system",
+    "2.5.8",
+    "2.6.8",
+    "2.7.5",
+    "3.0.3",
+    "3.1.1",
+    "jruby-9.2.21.0", # Corresponded to 2.5.8
+    "jruby-9.3.6.0", # Corresponds to 2.6.8
+]
+
