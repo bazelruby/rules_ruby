@@ -71,7 +71,7 @@ RSPEC_ATTRS.update(_RSPEC_ATTRS)
 
 BUNDLE_ATTRS = {
     "ruby_interpreter": attr.label(
-        default = "//external:rules_ruby_system_interpreter",
+        default = "@local_config_ruby_system//:ruby",
     ),
     "gemfile": attr.label(
         allow_single_file = True,
