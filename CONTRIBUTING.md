@@ -4,7 +4,8 @@ This repository is currently a WIP, forked from
 [rules_ruby](https://github.com/bazelruby/rules_ruby) for use in building and
 testing Ruby [Protobuf](https://github.com/protocolbuffers/protobuf).
 
-TODO(mkruskal): Fill in automated testing procedure.
+We'd love to accept your patches and contributions to this project. There are
+just a few small guidelines you need to follow.
 
 ## Contributor License Agreement
 
