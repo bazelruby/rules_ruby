@@ -32,7 +32,7 @@ def rules_ruby_select_sdk(version = "host"):
         "jruby-9.3.6.0",
     ]
 
-    for v in sorted(supported_versions, reverse=True):
+    for v in sorted(supported_versions, reverse = True):
         if v.startswith(version):
             supported_version = v
             break

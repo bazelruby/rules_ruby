@@ -1,0 +1,25 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test-suite:
+    name: "Test Suite"
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false   # Don't cancel all jobs if one fails.
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Setup
+        run: cd ${{ github.workspace }} && bin/setup
+      - name: Run Bazel Tests
+        run: cd ${{ github.workspace }} && bin/test-suite

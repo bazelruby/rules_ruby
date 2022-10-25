@@ -116,7 +116,8 @@ def install_bundler(runtime_ctx, bundler_version):
 def bundle_install(runtime_ctx, previous_result):
     cwd = runtime_ctx.ctx.path(".")
     bundler_args = [
-        "install", "-V",
+        "install",
+        "-V",
         "--standalone",
         "--gemfile={}".format(runtime_ctx.ctx.attr.gemfile.name),
         "--jobs=10",  # run a few jobs to ensure no gem install is blocking another
@@ -136,7 +137,10 @@ def bundle_install(runtime_ctx, previous_result):
 
     # Creates a directory and place any executables from the gem there.
     result = run_bundler(runtime_ctx, [
-            "binstubs", "--all", "--path", "{}".format(BUNDLE_BIN_PATH)
+        "binstubs",
+        "--all",
+        "--path",
+        "{}".format(BUNDLE_BIN_PATH),
     ], previous_result)
     if result.return_code:
         fail("bundle binstubs failed: %s%s" % (result.stdout, result.stderr))
@@ -203,7 +207,7 @@ def _ruby_bundle_impl(ctx):
 
     # 2. Generate a Gemfile.lock file if one isn't provided
     if not runtime_ctx.ctx.attr.gemfile_lock:
-        result = set_bundler_config(runtime_ctx, result, has_lock=False)
+        result = set_bundler_config(runtime_ctx, result, has_lock = False)
         result = bundle_install(runtime_ctx, result)
 
     # 3. Set Bundler config in the .bundle/config file
