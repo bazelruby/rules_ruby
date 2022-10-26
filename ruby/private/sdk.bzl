@@ -1,50 +1,57 @@
-load(
-    "@rules_ruby//ruby/private/toolchains:ruby_runtime.bzl",
-    _ruby_runtime = "ruby_runtime",
-)
+load("@rules_ruby//ruby/private/toolchains:ruby_runtime.bzl", "ruby_runtime")
+load(":constants.bzl", "get_supported_version")
 
-def rules_ruby_select_sdk(version = "host"):
+def _register_toolchain(version):
     """Registers ruby toolchains in the WORKSPACE file."""
+    name = "local_config_ruby_%s" % version
 
-    supported_versions = [
-        "host",
-        "2.5.8",
-        "2.5.9",
-        "2.6.3",
-        "2.6.4",
-        "2.6.5",
-        "2.6.6",
-        "2.6.7",
-        "2.6.8",
-        "2.6.9",
-        "2.7.1",
-        "2.7.2",
-        "2.7.3",
-        "2.7.4",
-        "2.7.5",
-        "3.0.0",
-        "3.0.1",
-        "3.0.2",
-        "3.0.3",
-        "3.1.0",
-        "3.1.1",
-        "jruby-9.2.21.0",
-        "jruby-9.3.6.0",
-    ]
+    supported_version = get_supported_version(version)
+    if supported_version.startswith("ruby-"):
+        supported_version = supported_version[5:]
 
-    for v in sorted(supported_versions, reverse = True):
-        if v.startswith(version):
-            supported_version = v
-            break
-
-    if not supported_version:
-        fail("rules_ruby_select_sdk: unsupported ruby version '%s' not in '%s'" % (version, supported_versions))
-
-    _ruby_runtime(
-        name = "org_ruby_lang_ruby_toolchain",
+    ruby_runtime(
+        name = name,
         version = supported_version,
     )
 
     native.register_toolchains(
-        "@org_ruby_lang_ruby_toolchain//:toolchain",
+        "@%s//:toolchain" % name,
+    )
+
+def rules_ruby_register_toolchains(versions = []):
+    """Initializes ruby toolchains at different supported versions.
+
+    A special version "system" will use whatever version of ruby is installed
+    on the host system.  Besides that, this rules supports all of versions in
+    the SUPPORTED_VERSIONS list.  The most recent matching version will be
+    selected.
+
+    If the current system ruby doesn't match a given version, it will be
+    downloaded and built for use by the toolchain.  Toolchain selection occurs
+    based on the //ruby/runtime:version flag setting.
+
+    For example,
+        rules_ruby_register_toolchains(["system", ruby-2.5", "jruby-9.2"])` will
+    download and build the latest supported version of Ruby 2.5 and jruby 9.2.
+    By default, the system ruby will be used for all Bazel build and
+    tests.  However, passing a flag such as:
+        --@rules_ruby//ruby/runtime:version="ruby-2.5"
+    will select the Ruby 2.5 installation.
+
+    Args:
+      versions: a list of version identifiers
+    """
+    for version in versions:
+        _register_toolchain(version)
+
+    # Always provide a system toolchain for internal use.
+    if not "system" in version:
+        _register_toolchain("system")
+    native.bind(
+        name = "rules_ruby_system_jruby_implementation",
+        actual = "@local_config_ruby_system//:jruby_implementation",
+    )
+    native.bind(
+        name = "rules_ruby_system_interpreter",
+        actual = "@local_config_ruby_system//:ruby",
     )

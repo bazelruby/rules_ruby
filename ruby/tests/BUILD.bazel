@@ -65,7 +65,7 @@ sh_test(
     ],
     data = [
         "args_check.rb",
-        "@org_ruby_lang_ruby_toolchain//:ruby_bin",
+        "@rules_ruby//ruby/runtime:interpreter",
     ],
 )
 
@@ -74,7 +74,7 @@ genrule(
     name = "generate_genrule_run_ruby_test",
     outs = ["genrules_run_ruby_test.sh"],
     cmd = " && ".join([
-        ("$(location @org_ruby_lang_ruby_toolchain//:ruby_bin) " +
+        ("$(location @rules_ruby//ruby/runtime:interpreter) " +
          "$(location args_check.rb) foo bar baz"),
         "echo '#!/bin/sh -e' > $@",
         "echo true >> $@",
@@ -83,8 +83,8 @@ genrule(
     output_to_bindir = 1,
     tools = [
         "args_check.rb",
-        "@org_ruby_lang_ruby_toolchain//:ruby_bin",
-        "@org_ruby_lang_ruby_toolchain//:runtime",
+        "@rules_ruby//ruby/runtime",
+        "@rules_ruby//ruby/runtime:interpreter",
     ],
 )
 
@@ -188,7 +188,7 @@ cc_binary(
     testonly = True,
     srcs = ["example_ext.c"],
     linkshared = True,
-    deps = ["@org_ruby_lang_ruby_toolchain//:headers"],
+    deps = ["@rules_ruby//ruby/runtime:headers"],
 )
 
 cc_library(
@@ -197,7 +197,7 @@ cc_library(
     srcs = ["example_ext.c"],
     linkstatic = True,
     tags = ["manual"],
-    deps = ["@org_ruby_lang_ruby_toolchain//:headers"],
+    deps = ["@rules_ruby//ruby/runtime:headers"],
     alwayslink = True,
 )
 

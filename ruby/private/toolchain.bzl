@@ -1,21 +1,13 @@
 load(":constants.bzl", "RULES_RUBY_WORKSPACE_NAME")
-
-RubyRuntimeInfo = provider(
-    doc = "Information about a Ruby interpreter, related commands and libraries",
-    fields = {
-        "interpreter": "A label which points the Ruby interpreter",
-        "bundler": "A label which points bundler command",
-        "runtime": "A list of labels which points runtime libraries",
-        "rubyopt": "A list of strings which should be passed to the interpreter as command line options",
-    },
-)
+load(":providers.bzl", "RubyRuntimeToolchainInfo")
 
 def _ruby_toolchain_impl(ctx):
     return [
         platform_common.ToolchainInfo(
-            ruby_runtime = RubyRuntimeInfo(
+            ruby_runtime = RubyRuntimeToolchainInfo(
                 interpreter = ctx.attr.interpreter,
                 runtime = ctx.files.runtime,
+                headers = ctx.attr.headers,
                 rubyopt = ctx.attr.rubyopt,
             ),
         ),
@@ -35,6 +27,11 @@ _ruby_toolchain = rule(
             allow_files = True,
             cfg = "target",
         ),
+        "headers": attr.label(
+            mandatory = True,
+            allow_files = True,
+            cfg = "target",
+        ),
         "rubyopt": attr.string_list(
             default = [],
         ),
@@ -45,6 +42,7 @@ def ruby_toolchain(
         name,
         interpreter,
         runtime,
+        headers,
         rubyopt = [],
         rules_ruby_workspace = RULES_RUBY_WORKSPACE_NAME,
         **kwargs):
@@ -53,6 +51,7 @@ def ruby_toolchain(
         name = impl_name,
         interpreter = interpreter,
         runtime = runtime,
+        headers = headers,
         rubyopt = rubyopt,
     )
 

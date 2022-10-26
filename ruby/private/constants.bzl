@@ -38,6 +38,10 @@ RUBY_ATTRS = {
         allow_single_file = True,
         default = "binary_wrapper.tpl",
     ),
+    "_runner_template": attr.label(
+        allow_single_file = True,
+        default = "binary_runner.tpl",
+    ),
     "_misc_deps": attr.label_list(
         allow_files = True,
         default = ["@bazel_tools//tools/bash/runfiles"],
@@ -66,11 +70,8 @@ RSPEC_ATTRS.update(RUBY_ATTRS)
 RSPEC_ATTRS.update(_RSPEC_ATTRS)
 
 BUNDLE_ATTRS = {
-    "ruby_sdk": attr.string(
-        default = "@org_ruby_lang_ruby_toolchain",
-    ),
     "ruby_interpreter": attr.label(
-        default = "@org_ruby_lang_ruby_toolchain//:ruby",
+        default = "@local_config_ruby_system//:ruby",
     ),
     "gemfile": attr.label(
         allow_single_file = True,
@@ -154,3 +155,47 @@ GEMSPEC_ATTRS = {
         default = "%s//ruby/private/gemspec:readme_template.tpl" % RULES_RUBY_WORKSPACE_NAME,
     ),
 }
+
+# The full list of supported pinned version numbers.
+SUPPORTED_VERSIONS = [
+    "system",
+    "ruby-2.5.8",
+    "ruby-2.5.9",
+    "ruby-2.6.3",
+    "ruby-2.6.4",
+    "ruby-2.6.5",
+    "ruby-2.6.6",
+    "ruby-2.6.7",
+    "ruby-2.6.8",
+    "ruby-2.6.9",
+    "ruby-2.7.1",
+    "ruby-2.7.2",
+    "ruby-2.7.3",
+    "ruby-2.7.4",
+    "ruby-2.7.5",
+    "ruby-3.0.0",
+    "ruby-3.0.1",
+    "ruby-3.0.2",
+    "ruby-3.0.3",
+    "ruby-3.1.0",
+    "ruby-3.1.1",
+    "jruby-9.2.21.0",  # Corresponded to 2.5.8
+    "jruby-9.3.6.0",  # Corresponds to 2.6.8
+]
+
+def get_supported_version(version):
+    """Transforms a user-friendly version identifier to a full version number."""
+
+    if version[0] >= "0" and version[1] <= "9":
+        version = "ruby-" + version
+
+    supported_version = None
+    for v in sorted(SUPPORTED_VERSIONS, reverse = True):
+        if v.startswith(version):
+            supported_version = v
+            break
+
+    if not supported_version:
+        fail("rules_ruby_register_toolchains: unsupported ruby version '%s' not in '%s'" % (version, SUPPORTED_VERSIONS))
+
+    return supported_version

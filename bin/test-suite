@@ -32,11 +32,6 @@ export BashMatic__Expr="
   [[ -f ${HOME}/.bashmatic/init.sh ]] && source ${HOME}/.bashmatic/init.sh;
   set -e
 "
-export Bazel__BuildSteps="
-    bazel ${BAZEL_OPTS} info;                                                  echo; echo
-    bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //... ;                   echo; echo
-    bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //... ; echo; echo
-"
 deps.start-clock
 
 run.set-all abort-on-error show-output-on
@@ -162,9 +157,11 @@ test.buildifier() {
 test.simple-script() {
   __test.exec simple-script "
     cd examples/simple_script
-    ${Bazel__BuildSteps}  
-    echo run :bin;        bazel ${BAZEL_OPTS} run   ${BAZEL_BUILD_OPTS} :bin
-    echo run :rubocop;    bazel ${BAZEL_OPTS} run   ${BAZEL_BUILD_OPTS} :rubocop
+    bazel ${BAZEL_OPTS} info;                                                  echo; echo
+    bazel ${BAZEL_OPTS} build ${BAZEL_BASE_BUILD_OPTS} -- //... ;                   echo; echo
+    bazel ${BAZEL_OPTS} test ${BAZEL_BASE_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //... ; echo; echo
+    echo run :bin;        bazel ${BAZEL_OPTS} run ${BAZEL_BASE_BUILD_OPTS} :bin
+    echo run :rubocop;    bazel ${BAZEL_OPTS} run ${BAZEL_BASE_BUILD_OPTS} :rubocop
   "
 }
 
@@ -172,12 +169,21 @@ test.simple-script() {
 test.example-gem() {
   __test.exec example-gem "
     cd examples/example_gem
-    echo bazel ${BAZEL_OPTS} build ...:all; bazel ${BAZEL_OPTS} build ...:all
+    echo bazel ${BAZEL_OPTS} build ...:all
+    bazel ${BAZEL_OPTS} build --@rules_ruby//ruby/runtime:version=ruby-3.0 ...:all
   "
 }
 
 test.workspace() {
-  __test.exec workspace "${Bazel__BuildSteps}"
+  __test.exec workspace "
+    bazel ${BAZEL_OPTS} info;                                                  echo; echo
+    bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} -- //... ;                   echo; echo
+    bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} ${BAZEL_TEST_OPTS} -- //... ; echo; echo
+    bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} --@rules_ruby//ruby/runtime:version=ruby-3.0 -- //... ;                   echo; echo
+    bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} --@rules_ruby//ruby/runtime:version=ruby-3.0 ${BAZEL_TEST_OPTS} -- //... ; echo; echo
+    bazel ${BAZEL_OPTS} build ${BAZEL_BUILD_OPTS} --@rules_ruby//ruby/runtime:version=jruby-9.2 -- //... ;                   echo; echo
+    bazel ${BAZEL_OPTS} test ${BAZEL_BUILD_OPTS} --@rules_ruby//ruby/runtime:version=jruby-9.2 ${BAZEL_TEST_OPTS} -- //... ; echo; echo
+  "
 }
 
 # Private

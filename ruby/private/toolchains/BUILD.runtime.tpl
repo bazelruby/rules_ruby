@@ -3,6 +3,7 @@ load(
     "ruby_library",
     "ruby_toolchain",
 )
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -11,6 +12,10 @@ ruby_toolchain(
     interpreter = "//:ruby_bin",
     rules_ruby_workspace = "{rules_ruby_workspace}",
     runtime = "//:runtime",
+    headers = "//:headers",
+    target_settings = [
+        "{rules_ruby_workspace}//ruby/runtime:{setting}"
+    ],
     # TODO(yugui) Extract platform info from RbConfig
     # exec_compatible_with = [],
     # target_compatible_with = [],
@@ -44,6 +49,32 @@ filegroup(
             "WORKSPACE",
         ],
     ),
+)
+
+# Provide config settings to signal the ruby platform to downstream code.
+# This should never be overridden, and is determined automatically during the
+# creation of the toolchain.
+string_flag(
+    name = "internal_ruby_implementation",
+    build_setting_default = "{implementation}",
+    values = [
+        "ruby",
+        "jruby",
+    ],
+)
+
+config_setting(
+    name = "jruby_implementation",
+    flag_values = {
+        ":internal_ruby_implementation": "jruby",
+    },
+)
+
+config_setting(
+    name = "ruby_implementation",
+    flag_values = {
+        ":internal_ruby_implementation": "ruby",
+    },
 )
 
 # vim: set ft=bzl :

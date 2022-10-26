@@ -1,5 +1,5 @@
 workspace(name = "rules_ruby_ruby_tests_testdata_another_workspace")
 
-load("@rules_ruby//ruby:defs.bzl", "rules_ruby_select_sdk")
+load("@rules_ruby//ruby:deps.bzl", "rules_ruby_register_toolchains")
 
-rules_ruby_select_sdk()
+rules_ruby_register_toolchains()

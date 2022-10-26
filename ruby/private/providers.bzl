@@ -19,6 +19,17 @@ RubyRuntimeInfo = provider(
     ],
 )
 
+RubyRuntimeToolchainInfo = provider(
+    doc = "Information about a Ruby interpreter, related commands and libraries",
+    fields = {
+        "interpreter": "A label which points the Ruby interpreter",
+        "bundler": "A label which points bundler command",
+        "runtime": "A list of labels which points runtime libraries",
+        "headers": "A list of labels which points to the ruby headers",
+        "rubyopt": "A list of strings which should be passed to the interpreter as command line options",
+    },
+)
+
 RubyGemInfo = provider(
     doc = "Carries info required to package a ruby gem",
     fields = [

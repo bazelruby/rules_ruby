@@ -5,15 +5,11 @@ local_repository(
     path = "../../../..",
 )
 
-load(
-    "@rules_ruby//ruby:deps.bzl",
-    "rules_ruby_dependencies",
-    "rules_ruby_select_sdk",
-)
+load("@rules_ruby//ruby:deps.bzl", "rules_ruby_dependencies", "rules_ruby_register_toolchains")
 
 rules_ruby_dependencies()
 
-rules_ruby_select_sdk(version = "3.0.2")
+rules_ruby_register_toolchains(["ruby-3.0"])
 
 load("@rules_ruby//ruby:defs.bzl", "ruby_bundle")
 

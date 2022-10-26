@@ -1,0 +1,93 @@
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+load("@rules_ruby//ruby/private:constants.bzl", "get_supported_version")
+load(
+    ":version_support.bzl",
+    "ALL_JRUBY_MAJOR_MINOR_VERSIONS",
+    "ALL_RUBY_MAJOR_MINOR_VERSIONS",
+    "SUPPORTED_MAJOR_MINOR_VERSIONS",
+)
+load(
+    "@rules_ruby//ruby/private:runtime_alias.bzl",
+    _ruby_headers_alias = "ruby_headers_alias",
+    _ruby_interpreter_alias = "ruby_interpreter_alias",
+    _ruby_runtime_alias = "ruby_runtime_alias",
+)
+
+package(default_visibility = ["//visibility:public"])
+
+toolchain_type(name = "toolchain_type")
+
+# Alias targets corresponding to whichever toolchain was resolved based on
+# the selected version.
+
+_ruby_runtime_alias(
+    name = "runtime",
+)
+
+_ruby_headers_alias(
+    name = "headers",
+    runtime = ":runtime",
+)
+
+_ruby_interpreter_alias(
+    name = "interpreter",
+    runtime = ":runtime",
+)
+
+# Supported ruby versions, which can be selected by flags.
+# For example: --@rules_ruby//ruby/runtime:version=jruby-9.3
+string_flag(
+    name = "version",
+    build_setting_default = "system",
+    values = ["system"] + SUPPORTED_MAJOR_MINOR_VERSIONS,
+)
+
+config_setting(
+    name = "config_system",
+    flag_values = {"version": "system"},
+)
+
+[
+    config_setting(
+        name = "config_" + get_supported_version(version),
+        flag_values = {"version": version},
+    )
+    for version in SUPPORTED_MAJOR_MINOR_VERSIONS
+]
+
+[
+    alias(
+        name = "config_" + version,
+        actual = ":config_" + get_supported_version(version),
+    )
+    for version in SUPPORTED_MAJOR_MINOR_VERSIONS
+]
+
+selects.config_setting_group(
+    name = "config_system_ruby",
+    match_all = [
+        ":config_system",
+        "//external:rules_ruby_system_jruby_implementation",
+    ],
+)
+
+selects.config_setting_group(
+    name = "config_ruby",
+    match_any = [":config_system_ruby"] +
+                [":config_%s" % v for v in ALL_RUBY_MAJOR_MINOR_VERSIONS],
+)
+
+selects.config_setting_group(
+    name = "config_system_jruby",
+    match_all = [
+        ":config_system",
+        "//external:rules_ruby_system_jruby_implementation",
+    ],
+)
+
+selects.config_setting_group(
+    name = "config_jruby",
+    match_any = [":config_system_ruby"] +
+                [":config_%s" % v for v in ALL_JRUBY_MAJOR_MINOR_VERSIONS],
+)

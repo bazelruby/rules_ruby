@@ -29,7 +29,9 @@ def _get_gem_path(incpaths):
 # to create a rule (eg, rubocop) that does exactly the same.
 def ruby_binary_macro(ctx, main, srcs):
     sdk = ctx.toolchains[TOOLCHAIN_TYPE_NAME].ruby_runtime
-    interpreter = sdk.interpreter[DefaultInfo].files_to_run.executable
+    interpreter_info = sdk.interpreter[DefaultInfo]
+    interpreter = interpreter_info.files_to_run.executable
+    interpreter_runfiles = interpreter_info.default_runfiles.merge(interpreter_info.data_runfiles)
 
     if not main:
         expected_name = "%s.rb" % ctx.attr.name
@@ -45,10 +47,11 @@ def ruby_binary_macro(ctx, main, srcs):
         )
 
     executable = ctx.actions.declare_file(ctx.attr.name)
+    wrapper = ctx.actions.declare_file(ctx.attr.name + "_wrapper")
 
     deps = _transitive_deps(
         ctx,
-        extra_files = [executable],
+        extra_files = [executable, wrapper, interpreter],
         extra_deps = ctx.attr._misc_deps,
     )
 
@@ -60,21 +63,34 @@ def ruby_binary_macro(ctx, main, srcs):
 
     ctx.actions.expand_template(
         template = ctx.file._wrapper_template,
-        output = executable,
+        output = wrapper,
         substitutions = {
             "{loadpaths}": repr(deps.incpaths.to_list()),
             "{rubyopt}": repr(rubyopt),
             "{main}": repr(_to_manifest_path(ctx, main)),
-            "{interpreter}": _to_manifest_path(ctx, interpreter),
             "{gem_path}": gem_path,
             "{should_gem_pristine}": str(len(gems_to_pristine) > 0).lower(),
             "{gems_to_pristine}": " ".join(gems_to_pristine),
         },
     )
 
+    ctx.actions.expand_template(
+        template = ctx.file._runner_template,
+        output = executable,
+        substitutions = {
+            "{main}": wrapper.short_path,
+            "{interpreter}": interpreter.short_path,
+            "{workspace_name}": ctx.label.workspace_name or ctx.workspace_name,
+        },
+        is_executable = True,
+    )
+
     info = DefaultInfo(
         executable = executable,
-        runfiles = deps.default_files.merge(deps.data_files),
+        runfiles = deps.default_files
+            .merge(deps.data_files)
+            .merge(interpreter_runfiles)
+            .merge(ctx.runfiles(files = [wrapper])),
     )
 
     return [info]

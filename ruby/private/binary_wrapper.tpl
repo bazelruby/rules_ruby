@@ -1,5 +1,3 @@
-#!/usr/bin/env ruby
-
 # Ruby-port of the Bazel's wrapper script for Python
 
 # Copyright 2017 The Bazel Authors. All rights reserved.
