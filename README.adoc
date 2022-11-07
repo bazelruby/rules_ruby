@@ -11,9 +11,14 @@
 :license: apache
 
 
-====
-This repo is primarily maintained by https://github.com/kigster[Konstantin Gredeskoul] and https://github.com/yugui[Yuki "Yugui" Sonoda]. We are both very busy and would really love more contributors to join the core team. If you are interested in developing Ruby Rules for Bazel, please submit a couple of PRs and then lets talk!
-====
+== Contributors Wanted
+
+This repo is primarily maintained by https://github.com/kigster[Konstantin Gredeskoul] and https://github.com/yugui[Yuki "Yugui" Sonoda]. 
+
+We are both very busy and would really *love more contributors to join the core team*. 
+
+If you are interested in developing Ruby Rules for Bazel, please submit a couple of PRs and then lets talk!
+
 
 TIP: You can read or print this README in a proper PDF format by grabbing our link:README.pdf[README.pdf].
 
