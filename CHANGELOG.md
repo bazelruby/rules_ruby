@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased](https://github.com/bazelruby/rules_ruby/tree/HEAD)
+
+[Full Changelog](https://github.com/bazelruby/rules_ruby/compare/v0.6.0...HEAD)
+
+**Merged pull requests:**
+
+- Bump nokogiri from 1.13.3 to 1.13.4 in /examples/simple\_rails\_api [\#130](https://github.com/bazelruby/rules_ruby/pull/130) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump puma from 4.3.11 to 4.3.12 in /examples/simple\_rails\_api [\#126](https://github.com/bazelruby/rules_ruby/pull/126) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Add SDK versions: 2.6.9,2.7.5,3.0.3,3.1.0,3.1.0 [\#123](https://github.com/bazelruby/rules_ruby/pull/123) ([matsubara0507](https://github.com/matsubara0507))
+- Bump nokogiri from 1.12.5 to 1.13.3 in /examples/simple\_rails\_api [\#122](https://github.com/bazelruby/rules_ruby/pull/122) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump puma from 4.3.9 to 4.3.11 in /examples/simple\_rails\_api [\#121](https://github.com/bazelruby/rules_ruby/pull/121) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [v0.6.0](https://github.com/bazelruby/rules_ruby/tree/v0.6.0) (2021-11-09)
 
 [Full Changelog](https://github.com/bazelruby/rules_ruby/compare/v0.5.2...v0.6.0)
