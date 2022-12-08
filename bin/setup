@@ -37,7 +37,7 @@ setup.rbenv() {
     local installed_version="$(ruby -e 'puts RUBY_VERSION' | tr -d '\n')"
     if [[ ${installed_version} == ${ruby_version} ]]; then
       info "RUBY already installed, current version: ${bldylw}${ruby_version}"
-      return 0
+      info "Setting up rbenv anyway"
     fi
   fi
 

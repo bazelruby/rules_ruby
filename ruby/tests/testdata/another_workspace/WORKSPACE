@@ -1,5 +1,7 @@
 workspace(name = "rules_ruby_ruby_tests_testdata_another_workspace")
 
-load("@rules_ruby//ruby:deps.bzl", "rules_ruby_register_toolchains")
+load("@rules_ruby//ruby:defs.bzl", "ruby_runtime")
 
-rules_ruby_register_toolchains()
+ruby_runtime("system_ruby")
+
+register_toolchains("@system_ruby//:toolchain")

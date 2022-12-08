@@ -1,0 +1,38 @@
+load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+
+package(default_visibility = ["//ruby/private:__pkg__"])
+
+# Placeholders for cases when no system ruby is requested
+string_flag(
+    name = "internal_missing_ruby",
+    build_setting_default = "none",
+    values = [
+        "none",
+        "ruby",
+        "jruby",
+    ],
+)
+
+config_setting(
+    name = "missing_jruby_implementation",
+    flag_values = {
+        ":internal_ruby_implementation": "jruby",
+    },
+)
+
+config_setting(
+    name = "missing_ruby_implementation",
+    flag_values = {
+        ":internal_ruby_implementation": "ruby",
+    },
+)
+
+config_setting(
+    name = "missing_no_implementation",
+    flag_values = {
+        ":internal_ruby_implementation": "none",
+    },
+)
+
+# vim: set ft=bzl :

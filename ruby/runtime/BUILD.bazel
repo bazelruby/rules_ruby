@@ -39,19 +39,46 @@ _ruby_interpreter_alias(
 # For example: --@rules_ruby//ruby/runtime:version=jruby-9.3
 string_flag(
     name = "version",
-    build_setting_default = "system",
-    values = ["system"] + SUPPORTED_MAJOR_MINOR_VERSIONS,
+    build_setting_default = "auto",
+    values = [
+        "auto",
+        "system",
+    ] + SUPPORTED_MAJOR_MINOR_VERSIONS,
 )
 
 config_setting(
-    name = "config_system",
+    name = "config_auto",
+    flag_values = {"version": "auto"},
+)
+
+config_setting(
+    name = "internal_config_system",
     flag_values = {"version": "system"},
 )
 
 [
     config_setting(
-        name = "config_" + get_supported_version(version),
+        name = "internal_config_" + get_supported_version(version),
         flag_values = {"version": version},
+    )
+    for version in SUPPORTED_MAJOR_MINOR_VERSIONS
+]
+
+selects.config_setting_group(
+    name = "config_system",
+    match_any = [
+        ":config_auto",
+        ":internal_config_system",
+    ],
+)
+
+[
+    selects.config_setting_group(
+        name = "config_" + get_supported_version(version),
+        match_any = [
+            ":config_auto",
+            ":internal_config_" + get_supported_version(version),
+        ],
     )
     for version in SUPPORTED_MAJOR_MINOR_VERSIONS
 ]
@@ -68,7 +95,7 @@ selects.config_setting_group(
     name = "config_system_ruby",
     match_all = [
         ":config_system",
-        "//external:rules_ruby_system_jruby_implementation",
+        "//external:rules_ruby_system_ruby_implementation",
     ],
 )
 
@@ -88,6 +115,14 @@ selects.config_setting_group(
 
 selects.config_setting_group(
     name = "config_jruby",
-    match_any = [":config_system_ruby"] +
+    match_any = [":config_system_jruby"] +
                 [":config_%s" % v for v in ALL_JRUBY_MAJOR_MINOR_VERSIONS],
+)
+
+selects.config_setting_group(
+    name = "config_system_none",
+    match_all = [
+        ":config_system",
+        "//external:rules_ruby_system_no_implementation",
+    ],
 )

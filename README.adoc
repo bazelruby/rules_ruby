@@ -108,17 +108,14 @@ rules_ruby_dependencies()
 load("@bazel_skylib//:workspace.bzl", "bazel_skylib_workspace")
 bazel_skylib_workspace()
 
-load("@rules_ruby//ruby:deps.bzl", "rules_ruby_register_toolchains")
-rules_ruby_register_toolchains(["ruby-3.0"])
+load("@rules_ruby//ruby:deps.bzl", "register_toolchain")
+register_toolchains("ruby-3.0")
 
 #———————————————————————————————————————————————————————————————————————
 # Now, load the ruby_bundle rule & install gems specified in the Gemfile
 #———————————————————————————————————————————————————————————————————————
 
-load(
-    "@rules_ruby//ruby:defs.bzl",
-    "ruby_bundle",
-)
+load("@ruby-3.0//:bundle.bzl", "ruby_bundle")
 
 ruby_bundle(
     name = "bundle",
@@ -550,7 +547,7 @@ List of glob patterns per gem to be excluded from the library. Keys are the name
 
 [source,python]
 ----
-load("@rules_ruby//ruby:defs.bzl", "ruby_bundle")
+load("@ruby-3.0//:bundle.bzl", "ruby_bundle")
 
 ruby_bundle(
     name = "gems",
@@ -567,7 +564,7 @@ your workspace. The name should match the name of the bundle.
 
 [source,python]
 ----
-load("@rules_ruby//ruby:defs.bzl", "ruby_bundle")
+load("@ruby-3.0//:bundle.bzl", "ruby_bundle")
 
 workspace(
     name = "my_wksp",

@@ -12,12 +12,28 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 
 versions.check("3.4.1")
 
-load("@rules_ruby//ruby:deps.bzl", "rules_ruby_register_toolchains")
+load("@rules_ruby//ruby:defs.bzl", "ruby_runtime")
 
-rules_ruby_register_toolchains([
-    "ruby-3.0",
-    "jruby-9.2",
-])
+# Register the system ruby version with a custom name.
+ruby_runtime(
+    name = "system_ruby_custom",
+    version = "system",
+)
+
+register_toolchains("@system_ruby_custom//:toolchain")
+
+# Register a versioned ruby with a custom name.
+ruby_runtime(
+    name = "ruby3",
+    version = "ruby-3.0",
+)
+
+register_toolchains("@ruby3//:toolchain")
+
+# Register a versioned ruby with its default name.
+ruby_runtime("jruby-9.2")
+
+register_toolchains("@jruby-9.2//:toolchain")
 
 local_repository(
     name = "rules_ruby_ruby_tests_testdata_another_workspace",
@@ -100,7 +116,7 @@ container_pull(
     repository = "library/ruby",
 )
 
-load("@rules_ruby//ruby:defs.bzl", "ruby_bundle")
+load("@system_ruby_custom//:bundle.bzl", "ruby_bundle")
 
 ruby_bundle(
     name = "bundle",

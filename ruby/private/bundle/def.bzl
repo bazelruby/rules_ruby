@@ -173,7 +173,7 @@ def generate_bundle_build_file(runtime_ctx, previous_result):
     if result.return_code:
         fail("build file generation failed: %s%s" % (result.stdout, result.stderr))
 
-def _ruby_bundle_impl(ctx):
+def ruby_bundle_impl(ctx, ruby_interpreter):
     ctx.symlink(ctx.attr.gemfile, ctx.attr.gemfile.name)
     if ctx.attr.gemfile_lock:
         ctx.symlink(ctx.attr.gemfile_lock, ctx.attr.gemfile_lock.name)
@@ -192,7 +192,7 @@ def _ruby_bundle_impl(ctx):
     # Setup this provider that we pass around between functions for convenience
     runtime_ctx = RubyRuntimeInfo(
         ctx = ctx,
-        interpreter = ctx.path(ctx.attr.ruby_interpreter),
+        interpreter = ruby_interpreter,
         environment = {"RUBYOPT": "--enable-gems"},
     )
 
@@ -218,8 +218,3 @@ def _ruby_bundle_impl(ctx):
 
     # 5. Generate the BUILD file for the bundle
     generate_bundle_build_file(runtime_ctx, result)
-
-ruby_bundle_install = repository_rule(
-    implementation = _ruby_bundle_impl,
-    attrs = BUNDLE_ATTRS,
-)

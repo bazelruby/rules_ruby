@@ -44,7 +44,6 @@ def _ruby_interpreter_alias_impl(ctx):
     target = runtime.interpreter
     output = ctx.actions.declare_file("ruby_interpreter")
 
-    #fail(target[DefaultInfo].files_to_run.executable)
     ctx.actions.symlink(
         output = output,
         target_file = target[DefaultInfo].files_to_run.executable,

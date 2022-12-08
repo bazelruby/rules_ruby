@@ -61,3 +61,29 @@ def ruby_toolchain(
         toolchain = ":%s" % impl_name,
         **kwargs
     )
+
+def _mock_ruby_toolchain_impl(ctx):
+    return [
+        platform_common.ToolchainInfo(),
+    ]
+
+_mock_ruby_toolchain = rule(
+    implementation = _mock_ruby_toolchain_impl,
+)
+
+def mock_ruby_toolchain(
+        name,
+        rules_ruby_workspace = RULES_RUBY_WORKSPACE_NAME,
+        **kwargs):
+    impl_name = name + "_sdk"
+    _mock_ruby_toolchain(
+        name = impl_name,
+    )
+    native.toolchain(
+        name = name,
+        toolchain_type = "%s//ruby:toolchain_type" % rules_ruby_workspace,
+        toolchain = ":%s" % impl_name,
+        exec_compatible_with = ["@platforms//:incompatible"],
+        target_compatible_with = ["@platforms//:incompatible"],
+        **kwargs
+    )

@@ -70,9 +70,6 @@ RSPEC_ATTRS.update(RUBY_ATTRS)
 RSPEC_ATTRS.update(_RSPEC_ATTRS)
 
 BUNDLE_ATTRS = {
-    "ruby_interpreter": attr.label(
-        default = "@local_config_ruby_system//:ruby",
-    ),
     "gemfile": attr.label(
         allow_single_file = True,
         mandatory = True,
@@ -196,6 +193,6 @@ def get_supported_version(version):
             break
 
     if not supported_version:
-        fail("rules_ruby_register_toolchains: unsupported ruby version '%s' not in '%s'" % (version, SUPPORTED_VERSIONS))
+        fail("ruby_runtime: unsupported ruby version '%s' not in '%s'" % (version, SUPPORTED_VERSIONS))
 
     return supported_version
