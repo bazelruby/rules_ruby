@@ -272,15 +272,14 @@ class BundleBuildFileGenerator
     # some gems also require additional paths to be included in the load paths.
     require_paths += include_array(spec.name)
 
-    # Require_paths can include absolute paths to gem extensions.
-    gem_pathname = Pathname.new(gem_path)
     gem_lib_paths = require_paths.map do |require_path|
       require_pathname = Pathname.new(require_path)
+      # Require_paths can include absolute paths to gem extensions.
       if require_pathname.absolute?
         # require_pathname is absolute. Compute the relative path from gem_path.
         require_pathname = require_pathname.relative_path_from(File.absolute_path(gem_path))
       end
-      gem_pathname.join(require_pathname).cleanpath.to_s
+      Pathname.new(gem_path).join(require_pathname).cleanpath.to_s
     end
     bundle_lib_paths.push(*gem_lib_paths)
 
