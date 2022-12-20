@@ -12,22 +12,15 @@ def _to_manifest_path(ctx, file):
 
 def _get_gem_path(incpaths):
     """
-    incpaths is a list of
-    `<bundle_name>/lib/ruby/<version>/gems/<gemname>-<gemversion>/lib` or
-    `<bundle_name>/lib/ruby/<version>/bundler/gems/<gemname>-<githash>/lib` or
-    `<bundle_name>/lib/ruby/<version>/extensions/<archetecture>-<platform>/<version>/<gemname>-<gemversion>` or
-    any other ruby dependency
+    incpaths is a list of `<bundle_name>/lib/ruby/<version>/gems/<gemname>-<gemversion>/lib`
     The gem_path is `<bundle_name>/lib/ruby/<version>` so we can go from an incpath to the
     gem_path pretty easily without much additional work.
     """
     if len(incpaths) == 0:
         return ""
-    for incpath in incpaths:
-        print(incpath)
-        parts = incpath.split('/', 4)
-        if len(parts) == 5 and parts[1] == 'lib' and parts[2] == 'ruby':
-            return '/'.join(parts[:4])
-    return ""
+    incpath = incpaths[0]
+    return incpath.rsplit("/", 3)[0]
+
 # Having this function allows us to override otherwise frozen attributes
 # such as main, srcs and deps. We use this in ruby_rspec_test rule by
 # adding rspec as a main, and sources, and rspec gem as a dependency.
