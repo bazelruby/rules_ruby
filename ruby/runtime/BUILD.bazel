@@ -76,7 +76,6 @@ selects.config_setting_group(
     selects.config_setting_group(
         name = "config_" + get_supported_version(version),
         match_any = [
-            ":config_auto",
             ":internal_config_" + get_supported_version(version),
         ],
     )
