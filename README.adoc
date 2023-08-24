@@ -10,6 +10,12 @@
 :icons: font
 :license: apache
 
+== Please Donate
+
+I need to go through a long backlog of items, but my hands are tied with paid projects. Please consider donating to expedite pull request merges. You can also apply to join to become one of the primary maintainers.
+
+https://liberapay.com/kigster/donate[image:https://liberapay.com/assets/widgets/donate.svg[Donate using Liberapay,height=30]]   https://liberapay.com/kigster/donate[image:https://img.shields.io/liberapay/goal/kigster.svg?logo=liberapay[https://img.shields.io/liberapay/goal/kigster,height=30]]
+
 
 == Contributors Wanted
 
