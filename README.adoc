@@ -10,6 +10,8 @@
 :icons: font
 :license: apache
 
+CAUTION: These rules have not been actively maintained and are in the process of being replaced by the new rules, which you can find here:  https://github.com/p0deje/rules_ruby
+
 == Please Donate
 
 I need to go through a long backlog of items, but my hands are tied with paid projects. Please consider donating to expedite pull request merges. You can also apply to join to become one of the primary maintainers.
