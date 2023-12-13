@@ -10,22 +10,12 @@
 :icons: font
 :license: apache
 
-CAUTION: These rules have not been actively maintained and are in the process of being replaced by the new rules, which you can find here:  https://github.com/p0deje/rules_ruby
+== New Rules Ruby!
 
-== Please Donate
-
-I need to go through a long backlog of items, but my hands are tied with paid projects. Please consider donating to expedite pull request merges. You can also apply to join to become one of the primary maintainers.
-
-https://liberapay.com/kigster/donate[image:https://liberapay.com/assets/widgets/donate.svg[Donate using Liberapay,height=30]]   https://liberapay.com/kigster/donate[image:https://img.shields.io/liberapay/goal/kigster.svg?logo=liberapay[https://img.shields.io/liberapay/goal/kigster,height=30]]
+This repo will be retired eventually, as these rules have not been actively maintained and are in the process of being replaced by the new rules, which you can find here:  https://github.com/bazel-contrib/rules_ruby
 
 
-== Contributors Wanted
 
-This repo is primarily maintained by https://github.com/kigster[Konstantin Gredeskoul] and https://github.com/yugui[Yuki "Yugui" Sonoda]. 
-
-We are both very busy and would really *love more contributors to join the core team*. 
-
-If you are interested in developing Ruby Rules for Bazel, please submit a couple of PRs and then lets talk!
 
 
 TIP: You can read or print this README in a proper PDF format by grabbing our link:README.pdf[README.pdf].
