@@ -84,6 +84,8 @@ SPEC_PATH = ->(ruby_version, gem_name, gem_version) do
   Dir.glob("lib/#{RbConfig::CONFIG['RUBY_INSTALL_NAME']}/#{ruby_version}/specifications/#{gem_name}-#{gem_version}*.gemspec").first
 end
 
+HERE = File.absolute_path '.'
+
 require 'bundler'
 require 'json'
 require 'stringio'
@@ -271,7 +273,15 @@ class BundleBuildFileGenerator
     # Usually, registering the directory paths listed in the `require_paths` of gemspecs is sufficient, but
     # some gems also require additional paths to be included in the load paths.
     require_paths += include_array(spec.name)
-    gem_lib_paths = require_paths.map { |require_path| File.join(gem_path, require_path) }
+    gem_lib_paths = require_paths.map do |require_path|
+      # Gems with native extensions (like ffi) will sometimes have elements of
+      # require_paths that are absolute rather than gem-path relative paths.
+      # It is incorrect to prepend those paths with the gem_path and Bazel will
+      # only allow relative paths as inputs to its glob() function.
+      pathname = Pathname.new(require_path)
+      pathname.absolute? ? pathname.relative_path_from(HERE).to_s : File.join(gem_path, require_path)
+    end
+
     bundle_lib_paths.push(*gem_lib_paths)
 
     # paths to search for executables
