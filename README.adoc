@@ -208,7 +208,7 @@ ruby_rspec(
     specs = glob(["spec/**/*.rb"]),
     rspec_args = { "--format": "progress" },
     deps = [":foo"]
-}
+)
 ----
 
 ==== Package Ruby files as a Gem
